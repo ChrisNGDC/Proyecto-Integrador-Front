@@ -1,0 +1,16 @@
+.grid-container {
+  margin: .5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  place-content: center;
+  gap: .5rem;
+}
+.card {
+  transition: .5s;
+  backface-visibility: hidden;
+}
+
+.card:hover {
+  cursor: pointer;
+  transform: scale(1.02);
+}

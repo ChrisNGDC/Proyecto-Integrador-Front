@@ -1,1 +1,15 @@
-<p>noticias-user works!</p>
+<div class="grid-container">
+  @for (evento of eventos; track $index) {
+    <div class="col">
+      <div class="card text-center" #eventCard (click)="open(eventCard, evento)">
+        <h5 class="card-header">{{evento.tipo}}</h5>
+        <img [src]="evento.s3key" class="card-img-top"/>
+        <div class="card-body">
+          <h5 class="card-title">{{evento.titulo}}</h5>
+          <p class="card-text">{{evento.resumen}}</p>
+        </div>
+        <small class="card-footer text-muted">Publicado {{evento.fecha}}</small>
+      </div>
+    </div>
+  }
+</div>

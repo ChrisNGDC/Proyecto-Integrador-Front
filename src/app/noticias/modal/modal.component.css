@@ -1,0 +1,14 @@
+.card {
+  border-color: transparent;
+}
+
+.card-text {
+  max-height: 31vh;
+  overflow-y: auto!important;
+}
+
+.imagen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
