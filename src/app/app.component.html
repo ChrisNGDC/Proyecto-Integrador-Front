@@ -1,13 +1,1 @@
-<input type="text" [(ngModel)]="filenameToLoad" placeholder="nombre.extension">
-<button (click)="getimage()">Get Image</button>
-<img [src]="'data:image/png;base64,' + image" alt="" srcset="" />
-<br>
-<input
-  type="file"
-  class="file-input"
-  (change)="onFileSelected($event)"
-  #fileUpload
-/>
-<input type="text" [(ngModel)]="filenameToUpload" placeholder="nombre.extension">
-<button (click)="saveImage()">Save Image</button>
 <router-outlet />
