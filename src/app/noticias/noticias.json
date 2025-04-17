@@ -1,0 +1,139 @@
+{
+  "datos": [
+    {
+      "descripcion": "Charla sobre inteligencia artificial aplicada al desarrollo web.",
+      "fecha": "2025-03-12",
+      "id": "1",
+      "resumen": "El Ing. Carlos Méndez compartió casos prácticos del uso de IA en aplicaciones reales.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Evento",
+      "titulo": "IA en Desarrollo Web"
+    },
+    {
+      "descripcion": "Se firmó convenio con empresa líder en tecnología para prácticas profesionales.",
+      "fecha": "2025-02-20",
+      "id": "2",
+      "resumen": "Los estudiantes podrán realizar pasantías en proyectos reales de software.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Noticia",
+      "titulo": "Nuevo Convenio con TechGlobal"
+    },
+    {
+      "descripcion": "Hackathon interno para estudiantes de segundo y tercer año.",
+      "fecha": "2025-04-05",
+      "id": "3",
+      "resumen": "Competencia de 12 horas para desarrollar una app desde cero en equipos.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Evento",
+      "titulo": "Hackathon 2025"
+    },
+    {
+      "descripcion": "Actualización del plan de estudios en carreras de software.",
+      "fecha": "2025-01-15",
+      "id": "4",
+      "resumen": "Se incorporan materias de DevOps, ciberseguridad y frameworks modernos.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Noticia",
+      "titulo": "Nuevo Plan de Estudios"
+    },
+    {
+      "descripcion": "Workshop de testing automatizado con Selenium.",
+      "fecha": "2025-03-28",
+      "id": "5",
+      "resumen": "Actividad práctica dirigida por docentes especializados en QA.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Evento",
+      "titulo": "Testing Automatizado"
+    },
+    {
+      "descripcion": "Visita de exalumnos que trabajan en empresas del exterior.",
+      "fecha": "2025-03-08",
+      "id": "6",
+      "resumen": "Conversatorio sobre oportunidades laborales en el extranjero.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Evento",
+      "titulo": "Historias que Inspiran"
+    },
+    {
+      "descripcion": "La institución fue reconocida como centro de formación tecnológica regional.",
+      "fecha": "2025-02-10",
+      "id": "7",
+      "resumen": "Distinción otorgada por el Ministerio de Educación y Tecnología.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Noticia",
+      "titulo": "Reconocimiento Oficial"
+    },
+    {
+      "descripcion": "Torneo de programación competitiva entre instituciones.",
+      "fecha": "2025-04-20",
+      "id": "8",
+      "resumen": "Equipos representarán a la institución en desafíos de algoritmos y lógica.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Evento",
+      "titulo": "Torneo de Programación"
+    },
+    {
+      "descripcion": "Se lanzó el nuevo portal de alumnos con integración a GitHub y Discord.",
+      "fecha": "2025-01-28",
+      "id": "9",
+      "resumen": "Mejora en la comunicación y acceso a recursos para estudiantes.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Noticia",
+      "titulo": "Portal Alumnos 2.0"
+    },
+    {
+      "descripcion": "Seminario sobre ciberseguridad para desarrolladores.",
+      "fecha": "2025-03-21",
+      "id": "10",
+      "resumen": "Se abordaron prácticas seguras en el desarrollo de software.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Evento",
+      "titulo": "Ciberseguridad Dev"
+    },
+    {
+      "descripcion": "Estudiantes ganan premio nacional por desarrollo de app inclusiva.",
+      "fecha": "2025-02-15",
+      "id": "11",
+      "resumen": "Aplicación ayuda a personas con discapacidad visual a orientarse en espacios cerrados.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Noticia",
+      "titulo": "Premio Innovación Social"
+    },
+    {
+      "descripcion": "Capacitación docente en herramientas ágiles de gestión de proyectos.",
+      "fecha": "2025-04-02",
+      "id": "12",
+      "resumen": "Docentes participaron en curso intensivo sobre metodologías ágiles.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Noticia",
+      "titulo": "Formación Docente Ágil"
+    },
+    {
+      "descripcion": "Mesa redonda sobre el futuro del software en la educación.",
+      "fecha": "2025-03-30",
+      "id": "13",
+      "resumen": "Participaron referentes de empresas tecnológicas y del sector educativo.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Evento",
+      "titulo": "El Futuro del Software"
+    },
+    {
+      "descripcion": "Nueva sala de innovación con equipos de última generación.",
+      "fecha": "2025-01-18",
+      "id": "14",
+      "resumen": "Espacio destinado a proyectos colaborativos e investigación aplicada.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Noticia",
+      "titulo": "Inauguración Sala TechLab"
+    },
+    {
+      "descripcion": "Clase abierta sobre diseño UX/UI en productos digitales.",
+      "fecha": "2025-04-10",
+      "id": "15",
+      "resumen": "Invitado especial del sector privado mostró casos reales de diseño centrado en el usuario.",
+      "s3key": "ProfilePictures/default.png",
+      "tipo": "Evento",
+      "titulo": "Diseño UX/UI en la Práctica"
+    }
+  ]
+}

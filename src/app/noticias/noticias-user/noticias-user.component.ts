@@ -3,6 +3,8 @@ import { BbddService } from '../../../bbdd.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from '../modal/modal.component';
 
+import * as noticias from '../noticias.json'
+
 @Component({
   selector: 'app-noticias-user',
   imports: [],
@@ -16,10 +18,11 @@ export class NoticiasUserComponent {
     this.getEventos();
   }
   async getEventos() {
-    this.bbddservice.getDatabase('noticiasYeventos').subscribe((data) => {
-      this.eventos = data;
-      this.getImages();
-    });
+    this.eventos = noticias.datos
+    // this.bbddservice.getDatabase('noticiasYeventos').subscribe((data) => {
+    //   this.eventos = data;
+    //   this.getImages();
+    // });
   }
   async getImages() {
     this.eventos.forEach((evento: any) => {
