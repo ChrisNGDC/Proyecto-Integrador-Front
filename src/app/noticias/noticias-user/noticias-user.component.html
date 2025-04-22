@@ -1,7 +1,11 @@
+<div id="buscador">
+  <label for="busqueda">Buscar:</label>
+  <input type="text" name="busqueda" (input)="filtrar($event)">
+</div>
 <div class="grid-container">
-  @for (evento of eventos; track $index) {
+  @for (evento of eventosFiltrados; track $index) {
     <div class="col">
-      <div class="card text-center" #eventCard (click)="open(eventCard, evento)">
+      <div class="card text-center" (click)="open(evento)">
         <h5 class="card-header">{{evento.tipo}}</h5>
         <img src="noimage.jpg" class="card-img-top"/>
         <div class="card-body">

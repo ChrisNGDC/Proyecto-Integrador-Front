@@ -14,11 +14,13 @@ import * as noticias from '../noticias.json'
 export class NoticiasUserComponent {
   private modalService = inject(NgbModal);
   eventos: any;
+  eventosFiltrados: any;
   constructor(private bbddservice: BbddService) {
     this.getEventos();
   }
   async getEventos() {
     this.eventos = noticias.datos
+    this.eventosFiltrados = this.eventos
     // this.bbddservice.getDatabase('noticiasYeventos').subscribe((data) => {
     //   this.eventos = data;
     //   this.getImages();
@@ -34,12 +36,24 @@ export class NoticiasUserComponent {
         });
     });
   }
-  open(eventCard: HTMLElement, evento: any) {
-    eventCard.scrollIntoView({ behavior: 'smooth' });
+  open(evento: any) {
     const modalRef = this.modalService.open(ModalComponent, {
       size: 'xl',
       centered: true,
     });
     modalRef.componentInstance.evento = evento;
+  }
+  filtrar(event: any) {
+    let busqueda = event.target.value.toLowerCase()
+    if (busqueda == '') {
+      this.eventosFiltrados = this.eventos;
+    } else {
+      this.eventosFiltrados = []
+      this.eventos.forEach((evento: any) => {
+        if (evento['titulo'].toLowerCase().includes(busqueda) || evento['resumen'].toLowerCase().includes(busqueda) || evento['descripcion'].toLowerCase().includes(busqueda)) {
+          this.eventosFiltrados.push(evento)
+        }
+      })
+    }
   }
 }

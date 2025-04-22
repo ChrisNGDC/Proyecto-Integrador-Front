@@ -1,0 +1,33 @@
+<div class="modal-body">
+  <div class="card mb-3">
+    <div class="row g-0">
+      <div class="col-md-5 imagen">
+        <img [src]="eventoModal.s3key" class="card-img" />
+        <input
+          type="file"
+          class="file-input"
+          (change)="onFileSelected($event)"
+          #fileUpload
+        />
+        <button id="btn-image" (click)="fileUpload.click()">↺</button>
+      </div>
+      <div class="col-md-7">
+        <div class="card-body">
+          <input type="text" [(ngModel)]="eventoModal.titulo" />
+          <textarea name="resumen" [(ngModel)]="eventoModal.resumen"></textarea>
+          <textarea
+            name="descripcion"
+            [(ngModel)]="eventoModal.descripcion"
+          ></textarea>
+          <div class="card-text">
+            <small class="text-muted">Publicado {{ eventoModal.fecha }}</small>
+            <div class="btns">
+              <button (click)="save()">Save</button>
+              <button (click)="cancel()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

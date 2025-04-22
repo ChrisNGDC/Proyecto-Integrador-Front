@@ -2,11 +2,12 @@
   <div class="card mb-3">
     <div class="row g-0">
       <div class="col-md-5 imagen">
-        <img [src]="evento.s3key" class="card-img" />
+        <img src="noimage.jpg" class="card-img" />
       </div>
       <div class="col-md-7">
         <div class="card-body">
           <h5 class="card-title">{{ evento.titulo }}</h5>
+          <p class="card-text">{{ evento.resumen }}</p>
           <p class="card-text">{{ evento.descripcion }}</p>
           <p class="card-text">
             <small class="text-muted"

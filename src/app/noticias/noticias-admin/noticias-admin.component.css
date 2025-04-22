@@ -1,0 +1,74 @@
+#sub-nav {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  width: 100%;
+}
+
+#buscador {
+  display: flex;
+  place-content: center;
+
+  label {
+    margin-right: .5rem;
+    text-align: center;
+    vertical-align: middle;
+  }
+}
+
+.grid-container {
+  margin: .5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  place-content: center;
+  gap: .5rem;
+}
+
+.card {
+  transition: .5s;
+  backface-visibility: hidden;
+}
+
+.card:hover {
+  cursor: pointer;
+  transform: scale(1.02);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  padding: .25rem .5rem;
+}
+
+img {
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  width: 100%;
+}
+
+#btn-agregar {
+  position: absolute;
+  right: 0;
+  border: .1rem solid #000000;
+  background: none;
+  margin-right: .5rem;
+  transition: .5s;
+  &:hover {
+    transform: scale(1.02);
+    background-color: #00FF00;
+  }
+}
+
+#btn-eliminar {
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 1.2rem;
+}
+
+#btn-editar {
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 1.2rem;
+}

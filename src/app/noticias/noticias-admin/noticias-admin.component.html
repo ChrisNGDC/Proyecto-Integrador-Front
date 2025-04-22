@@ -1,1 +1,28 @@
-<p>noticias-admin works!</p>
+<div id="sub-nav">
+  <div id="buscador">
+    <label for="busqueda">Buscar:</label>
+    <input type="text" name="busqueda" (input)="filtrar($event)" />
+  </div>
+  <button id="btn-agregar" (click)="agregarEvento()">➕</button>
+</div>
+<div class="grid-container">
+  @for (evento of eventosFiltrados; track $index) {
+  <div class="col">
+    <div class="card text-center">
+      <h5 class="card-header">
+        <button id="btn-editar" (click)="editarEvento(evento)">📝</button>
+        {{ evento.tipo }}
+        <button id="btn-eliminar" (click)="eliminarEvento(evento)">❌</button>
+      </h5>
+      <div (click)="open(evento)">
+        <img [src]="evento.s3key" class="card-img-top" />
+        <div class="card-body">
+          <h5 class="card-title">{{ evento.titulo }}</h5>
+          <p class="card-text">{{ evento.resumen }}</p>
+        </div>
+      </div>
+      <small class="card-footer text-muted">Publicado {{ evento.fecha }}</small>
+    </div>
+  </div>
+  }
+</div>
