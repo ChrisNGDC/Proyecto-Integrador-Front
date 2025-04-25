@@ -1,15 +1,27 @@
 import { Routes } from '@angular/router';
-import { EgresadosComponent } from './components/egresados/egresados.component';
+import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
+import { UserDashboardComponent } from './pages/user-dashboard/user-dashboard.component';
+import { LoginComponent } from './pages/login/login.component';
+import { AdminGuard } from './guards/admin.guard';
+import { UserGuard } from './guards/user.guard';
+
 
 export const routes: Routes = [
-  { 
-    path: 'egresados', 
-    component: EgresadosComponent 
-  },
-  { 
-    path: 'perfil', 
-    loadComponent: () => import('./components/perfil/perfil.component').then(m => m.PerfilComponent)
-  },
-  { path: '', redirectTo: 'egresados', pathMatch: 'full' },
-  { path: '**', redirectTo: 'egresados' }
-];
+    { path: '', component: LoginComponent },
+    {
+      path: 'admin-dashboard',
+      component: AdminDashboardComponent,
+      canActivate: [AdminGuard],
+    },
+    {
+      path: 'user-dashboard',
+      component: UserDashboardComponent,
+      canActivate: [UserGuard],
+    },
+    {
+      path: 'login',
+      component: LoginComponent,
+    },   
+    { path: '**', redirectTo: '/login' }
+  ];
+

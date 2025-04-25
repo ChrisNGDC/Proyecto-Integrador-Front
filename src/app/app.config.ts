@@ -8,6 +8,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { MatCommonModule } from '@angular/material/core';
 
 export const appConfig: ApplicationConfig = {
+
   providers: [
     importProvidersFrom(
       BrowserModule,
@@ -19,3 +20,4 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient()
   ]
 };
+

@@ -1,0 +1,182 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  
+  <!-- Fondo -->
+  <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#e8f4f8" />
+    <stop offset="100%" stop-color="#d1e3f6" />
+  </linearGradient>
+  <rect x="0" y="0" width="800" height="600" fill="url(#bgGradient)" />
+  
+  <!-- Red de conexiones -->
+  <g stroke="#3498db" stroke-width="1.5" opacity="0.6" class="network-lines">
+    <line x1="100" y1="100" x2="300" y2="150" />
+    <line x1="300" y1="150" x2="500" y2="120" />
+    <line x1="500" y1="120" x2="700" y2="180" />
+    <line x1="100" y1="100" x2="150" y2="300" />
+    <line x1="300" y1="150" x2="250" y2="320" />
+    <line x1="500" y1="120" x2="550" y2="280" />
+    <line x1="700" y1="180" x2="650" y2="350" />
+    <line x1="150" y1="300" x2="250" y2="320" />
+    <line x1="250" y1="320" x2="400" y2="380" />
+    <line x1="400" y1="380" x2="550" y2="280" />
+    <line x1="550" y1="280" x2="650" y2="350" />
+    <line x1="400" y1="380" x2="300" y2="420" />
+    <line x1="400" y1="380" x2="500" y2="420" />
+    <!-- Líneas extendidas para dispositivos más altos -->
+    <line x1="300" y1="420" x2="250" y2="500" class="extended-line" />
+    <line x1="500" y1="420" x2="550" y2="500" class="extended-line" />
+  </g>
+  
+  <!-- Nodos de la red -->
+  <g class="network-nodes">
+    <!-- Nodos principales -->
+    <circle cx="100" cy="100" r="15" fill="#3498db" class="node main-node" />
+    <circle cx="300" cy="150" r="18" fill="#2980b9" class="node main-node" />
+    <circle cx="500" cy="120" r="15" fill="#3498db" class="node main-node" />
+    <circle cx="700" cy="180" r="12" fill="#3498db" class="node main-node" />
+    
+    <!-- Nodos secundarios -->
+    <circle cx="150" cy="300" r="10" fill="#2980b9" class="node secondary-node" />
+    <circle cx="250" cy="320" r="12" fill="#3498db" class="node secondary-node" />
+    <circle cx="400" cy="380" r="20" fill="#2980b9" class="node secondary-node" />
+    <circle cx="550" cy="280" r="14" fill="#3498db" class="node secondary-node" />
+    <circle cx="650" cy="350" r="10" fill="#2980b9" class="node secondary-node" />
+    <circle cx="300" cy="420" r="8" fill="#3498db" class="node small-node" />
+    <circle cx="500" cy="420" r="8" fill="#2980b9" class="node small-node" />
+    
+    <!-- Nodos extendidos para dispositivos más altos -->
+    <circle cx="250" cy="500" r="6" fill="#3498db" class="extended-node" />
+    <circle cx="550" cy="500" r="6" fill="#2980b9" class="extended-node" />
+  </g>
+  
+  <!-- Iconos -->
+  <!-- Libro -->
+  <g transform="translate(300, 150) scale(0.6)" class="icon book-icon">
+    <rect x="-20" y="-15" width="40" height="30" rx="2" fill="#ffffff" stroke="#2c3e50" stroke-width="2" />
+    <rect x="-18" y="-13" width="36" height="26" rx="1" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="1" />
+    <line x1="-10" y1="-5" x2="10" y2="-5" stroke="#7f8c8d" stroke-width="2" />
+    <line x1="-10" y1="0" x2="5" y2="0" stroke="#7f8c8d" stroke-width="2" />
+    <line x1="-10" y1="5" x2="8" y2="5" stroke="#7f8c8d" stroke-width="2" />
+  </g>
+  
+  <!-- Gorra de graduación -->
+  <g transform="translate(500, 120) scale(0.6)" class="icon grad-icon">
+    <path d="M-20,-5 L20,-5 L0,-20 Z" fill="#2c3e50" />
+    <rect x="-15" y="-5" width="30" height="10" fill="#2c3e50" />
+    <rect x="-2" y="5" width="4" height="15" fill="#2c3e50" />
+    <circle cx="0" cy="20" r="4" fill="#3498db" />
+  </g>
+  
+  <!-- Lupa -->
+  <g transform="translate(400, 380) scale(0.7)" class="icon search-icon">
+    <circle cx="-5" cy="-5" r="14" fill="none" stroke="#2c3e50" stroke-width="3" />
+    <line x1="7" y1="5" x2="18" y2="14" stroke="#2c3e50" stroke-width="4" stroke-linecap="round" />
+  </g>
+  
+  <!-- Personas -->
+  <g transform="translate(100, 100) scale(0.5)" class="icon person-icon">
+    <circle cx="0" cy="-10" r="10" fill="#2c3e50" />
+    <path d="M-10,5 Q0,-5 10,5 L10,20 Q0,25 -10,20 Z" fill="#2c3e50" />
+  </g>
+  
+  <g transform="translate(700, 180) scale(0.5)" class="icon person-icon">
+    <circle cx="0" cy="-10" r="10" fill="#2c3e50" />
+    <path d="M-10,5 Q0,-5 10,5 L10,20 Q0,25 -10,20 Z" fill="#2c3e50" />
+  </g>
+  
+  <!-- Texto principal - Versiones optimizadas para diferentes tamaños de pantalla -->
+  <g font-family="Arial, sans-serif" text-anchor="middle" class="text-container">
+    <!-- Texto para pantallas grandes -->
+    <text x="400" y="520" font-size="28" fill="#2c3e50" font-weight="bold" class="large-text">
+      <tspan>Bienvenido a la red de tu IFTS</tspan>
+    </text>
+    
+    <!-- Texto para pantallas medianas -->
+    <text x="400" y="520" font-size="24" fill="#2c3e50" font-weight="bold" class="medium-text" display="none">
+      <tspan x="400" y="510">Bienvenido a</tspan>
+      <tspan x="400" y="540">la red de tu IFTS</tspan>
+    </text>
+    
+    <!-- Texto para iPhone XR y dispositivos similares -->
+    <text x="400" y="520" font-size="22" fill="#2c3e50" font-weight="bold" class="iphone-text" display="none">
+      <tspan x="400" y="490">Bienvenido a la</tspan>
+      <tspan x="400" y="520">red de tu IFTS</tspan>
+    </text>
+    
+    <!-- Texto para pantallas pequeñas (iPhone SE) -->
+    <text x="400" y="520" font-size="20" fill="#2c3e50" font-weight="bold" class="small-text" display="none">
+      <tspan x="400" y="480">Bienvenido</tspan>
+      <tspan x="400" y="510">a la red</tspan>
+      <tspan x="400" y="540">de tu IFTS</tspan>
+    </text>
+    
+    <!-- Grupo 1 texto -->
+    <text x="400" y="560" font-size="14" fill="#7f8c8d" class="group-text">Grupo 1 - 2025</text>
+    <text x="400" y="570" font-size="12" fill="#7f8c8d" class="group-text-small" display="none">Grupo 1 - 2025</text>
+  </g>
+  
+  <!-- Estilos responsivos mediante CSS inline -->
+  <style>
+    /* Por defecto ocultar elementos extendidos */
+    .extended-line, .extended-node {
+      display: none;
+    }
+    
+    /* Estilos para pantallas normales (por defecto) */
+    .large-text { display: inline; }
+    .medium-text, .iphone-text, .small-text { display: none; }
+    .group-text { display: inline; }
+    .group-text-small { display: none; }
+    
+    /* Pantallas medianas (tablets) */
+    @media (max-width: 768px) {
+      .large-text { display: none; }
+      .medium-text { display: inline; }
+      .iphone-text, .small-text { display: none; }
+      .extended-line, .extended-node { display: inline; }
+    }
+    
+    /* Pantallas tipo iPhone XR (414px) */
+    @media (max-width: 480px) and (min-height: 700px) {
+      .large-text, .medium-text, .small-text { display: none; }
+      .iphone-text { display: inline; }
+      .group-text { display: none; }
+      .group-text-small { display: inline; }
+      .small-node { display: none; }
+      .network-lines { opacity: 0.4; stroke-width: 1.2; }
+      .extended-line, .extended-node { display: inline; }
+    }
+    
+    /* Pantallas pequeñas (smartphones estándar) */
+    @media (max-width: 480px) {
+      .large-text, .medium-text { display: none; }
+      .iphone-text { display: inline; }
+      .small-text { display: none; }
+      .group-text { display: none; }
+      .group-text-small { display: inline; }
+      .small-node { display: none; }
+      .network-lines { opacity: 0.4; stroke-width: 1.2; }
+      .extended-line, .extended-node { display: inline; }
+    }
+    
+    /* iPhone más pequeños y pantallas muy pequeñas */
+    @media (max-width: 375px) {
+      .secondary-node { r: 8; }
+      .main-node { r: 10; }
+      .icon { transform: scale(0.8); }
+      .book-icon, .grad-icon { transform: scale(0.5); }
+      .network-lines { opacity: 0.3; stroke-width: 1; }
+      .iphone-text { display: none; }
+      .small-text { display: inline; }
+    }
+    
+    /* iPhone SE o pantallas extremadamente pequeñas */
+    @media (max-width: 320px) {
+      .secondary-node { r: 6; }
+      .main-node { r: 8; }
+      .icon { transform: scale(0.7); }
+      .small-text { font-size: 18px; }
+      .group-text-small { font-size: 10px; }
+    }
+  </style>
+</svg>
