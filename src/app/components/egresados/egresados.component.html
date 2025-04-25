@@ -1,0 +1,121 @@
+<div class="container">
+    <!-- Navegación interna -->
+    <nav class="tabs">
+      <button 
+        [class.active]="activeTab() === 'lista'" 
+        (click)="setActiveTab('lista')">
+        Lista de Egresados
+      </button>
+      <button 
+        [class.active]="activeTab() === 'agregar'" 
+        (click)="setActiveTab('agregar')">
+        {{ editMode() ? 'Editar Egresado' : 'Agregar Egresado' }}
+      </button>
+    </nav>
+  
+    <!-- Contenido de la pestaña Lista -->
+    @if (activeTab() === 'lista') {
+      <div class="list-container">
+        <div class="search-bar">
+          <input 
+            type="text" 
+            placeholder="Buscar egresados..." 
+            [(ngModel)]="searchQuery"
+            (input)="searchQuery.set($any($event.target).value)">
+        </div>
+  
+        <div class="egresados-grid">
+          @for (egresado of filteredEgresados(); track egresado.id) {
+            <div class="egresado-card">
+              <div class="card-header">
+                <h3>{{ egresado.nombre }} {{ egresado.apellido }}</h3>
+                <span class="nro-alumno">N° {{ egresado.nroAlumno }}</span>
+              </div>
+              
+              <div class="card-body">
+                <p><strong>Carrera:</strong> {{ egresado.carrera }}</p>
+                <p><strong>Año de egreso:</strong> {{ egresado.anioEgreso }}</p>
+                <p><strong>Contacto:</strong> {{ egresado.mail }} | {{ egresado.telefono }}</p>
+              </div>
+              
+              <div class="card-actions">
+                <button class="btn-edit" (click)="editarEgresado(egresado)">Editar</button>
+                <button class="btn-deactivate" (click)="desactivarEgresado(egresado.id)">Desactivar</button>
+              </div>
+            </div>
+          } @empty {
+            <div class="no-results">
+              No se encontraron egresados activos
+            </div>
+          }
+        </div>
+      </div>
+    }
+  
+    <!-- Contenido de la pestaña Agregar/Editar -->
+    @if (activeTab() === 'agregar') {
+      <div class="form-container">
+        <form [formGroup]="egresadoForm" class="egresado-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nroAlumno">Nro Alumno:</label>
+              <input type="text" id="nroAlumno" formControlName="nroAlumno">
+            </div>
+          </div>
+  
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nombre">Nombre:</label>
+              <input type="text" id="nombre" formControlName="nombre">
+            </div>
+            <div class="form-group">
+              <label for="apellido">Apellido:</label>
+              <input type="text" id="apellido" formControlName="apellido">
+            </div>
+          </div>
+  
+          <div class="form-row">
+            <div class="form-group">
+              <label for="carrera">Carrera:</label>
+              <input type="text" id="carrera" formControlName="carrera">
+            </div>
+            <div class="form-group">
+              <label for="anioEgreso">Año de egreso:</label>
+              <input type="number" id="anioEgreso" formControlName="anioEgreso">
+            </div>
+          </div>
+  
+          <div class="form-row">
+            <div class="form-group">
+              <label for="fechaNacimiento">Fecha de nacimiento:</label>
+              <input type="date" id="fechaNacimiento" formControlName="fechaNacimiento">
+            </div>
+            <div class="form-group">
+              <label for="direccion">Dirección:</label>
+              <input type="text" id="direccion" formControlName="direccion">
+            </div>
+          </div>
+  
+          <div class="form-row">
+            <div class="form-group">
+              <label for="mail">Mail:</label>
+              <input type="email" id="mail" formControlName="mail">
+            </div>
+            <div class="form-group">
+              <label for="telefono">Teléfono:</label>
+              <input type="tel" id="telefono" formControlName="telefono">
+            </div>
+          </div>
+  
+          <div class="form-actions">
+            <button type="button" class="btn-save" (click)="guardarEgresado()">
+              {{ editMode() ? 'Actualizar' : 'Guardar' }}
+            </button>
+            <button type="button" class="btn-cancel" (click)="setActiveTab('lista')">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+  </div>

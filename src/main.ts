@@ -6,6 +6,7 @@ import { authConfig } from './app/auth/auth.config';
 import { provideAuth } from 'angular-auth-oidc-client';
 import { provideHttpClient } from '@angular/common/http';
 
+
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
@@ -13,3 +14,4 @@ bootstrapApplication(AppComponent, {
     provideAuth(authConfig),
   ],
 });
+

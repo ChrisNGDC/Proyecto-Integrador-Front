@@ -1,0 +1,203 @@
+/* Estilos generales */
+.perfil-card {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Sección de imagen */
+.imagen-section {
+  text-align: center;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #fafafa;
+  border: 1px solid #ddd;
+}
+
+.avatar-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.avatar-wrapper {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: #f5f5f5;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  border: 3px solid #e0e0e0;
+  transition: all 0.3s;
+}
+
+.avatar-wrapper:hover {
+  border-color: #2196F3;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #eeeeee;
+}
+
+.avatar-icon {
+  font-size: 80px;
+  width: 80px;
+  height: 80px;
+  color: #bdbdbd;
+}
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.avatar-wrapper:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+/* Secciones de datos */
+.datos-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.datos-personales, 
+.datos-academicos,
+.descripcion-section {
+  padding: 15px;
+  border-radius: 8px;
+  background-color: white;
+  border: 1px solid #ddd;
+}
+
+.datos-personales p, 
+.datos-academicos p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Sección de descripción */
+.descripcion-texto {
+  line-height: 1.6;
+  color: #555;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.section-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Formularios y botones */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-edit, .btn-save, .btn-cancel {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.btn-edit {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-edit:hover {
+  background-color: #45a049;
+}
+
+.btn-save {
+  background-color: #2196F3;
+  color: white;
+}
+
+.btn-save:hover {
+  background-color: #0b7dda;
+}
+
+.btn-cancel {
+  background-color: #ff9800;
+  color: white;
+}
+
+.btn-cancel:hover {
+  background-color: #e68a00;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
+}
