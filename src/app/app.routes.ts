@@ -1,8 +1,27 @@
 import { Routes } from '@angular/router';
-import { NoticiasUserComponent } from './pages/noticias/noticias-user/noticias-user.component';
-import { NoticiasAdminComponent } from './pages/noticias/noticias-admin/noticias-admin.component';
+import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
+import { UserDashboardComponent } from './pages/user-dashboard/user-dashboard.component';
+import { LoginComponent } from './pages/login/login.component';
+import { AdminGuard } from './guards/admin.guard';
+import { UserGuard } from './guards/user.guard';
+
 
 export const routes: Routes = [
-  { path: 'noticias-users', component: NoticiasUserComponent },
-  { path: 'noticias-admin', component: NoticiasAdminComponent },
-];
+    { path: '', component: LoginComponent },
+    {
+      path: 'admin-dashboard',
+      component: AdminDashboardComponent,
+      canActivate: [AdminGuard],
+    },
+    {
+      path: 'user-dashboard',
+      component: UserDashboardComponent,
+      canActivate: [UserGuard],
+    },
+    {
+      path: 'login',
+      component: LoginComponent,
+    },   
+    { path: '**', redirectTo: '/login' }
+  ];
+
