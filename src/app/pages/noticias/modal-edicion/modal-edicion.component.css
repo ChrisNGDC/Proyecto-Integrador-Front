@@ -1,0 +1,47 @@
+.card {
+  border-color: transparent;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  > * {
+    margin: .2rem 0;
+  }
+}
+
+.card-text {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.imagen {
+  position: relative;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.file-input {
+  display: none;
+}
+
+#btn-image {
+  position: absolute;
+  top: 0.1rem;
+  right: 0.1rem;
+  border: none;
+  background: none;
+  width: fit-content;
+  font-size: 1.2rem;
+}
+
+.btns {
+  display: flex;
+  flex-direction: row;
+  > button {
+    margin: auto .1rem;
+  }
+}
