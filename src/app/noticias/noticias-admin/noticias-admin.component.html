@@ -9,19 +9,17 @@
   @for (evento of eventosFiltrados; track $index) {
   <div class="col">
     <div class="card text-center">
-      <h5 class="card-header">
-        <button id="btn-editar" (click)="editarEvento(evento)">📝</button>
-        {{ evento.tipo }}
-        <button id="btn-eliminar" (click)="eliminarEvento(evento)">❌</button>
-      </h5>
-      <div (click)="open(evento)">
+      <div (click)="editarEvento(evento)">
         <img [src]="evento.s3key" class="card-img-top" />
         <div class="card-body">
           <h5 class="card-title">{{ evento.titulo }}</h5>
           <p class="card-text">{{ evento.resumen }}</p>
         </div>
       </div>
-      <small class="card-footer text-muted">Publicado {{ evento.fecha }}</small>
+      <div class="card-footer">
+        <small class="text-muted">Publicado {{ evento.fecha }}</small>
+        <button id="btn-eliminar" (click)="eliminarEvento(evento)">❌</button>
+      </div>
     </div>
   </div>
   }

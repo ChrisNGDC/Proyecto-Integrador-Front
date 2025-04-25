@@ -87,7 +87,6 @@ export class NoticiasAdminComponent {
       id: "",
       resumen: "",
       s3key: "",
-      tipo: "",
       titulo: ""
     };
     const modalRef = this.modalService.open(ModalEdicionComponent, {
@@ -97,7 +96,7 @@ export class NoticiasAdminComponent {
     modalRef.componentInstance.evento = eventoNuevo;
     modalRef.result.then((data: any) => {
       // Eliminar esto y hacer lo de despues ↓
-      if (data['Titulo'] != ''){
+      if (data['titulo'] != ''){
         this.eventos.unshift(data);
         this.eventosFiltrados = this.eventos;
       }

@@ -19,7 +19,7 @@
 .grid-container {
   margin: .5rem;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   place-content: center;
   gap: .5rem;
 }
@@ -34,14 +34,8 @@
   transform: scale(1.02);
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  padding: .25rem .5rem;
-}
-
 img {
-  aspect-ratio: 1/1;
+  aspect-ratio: 16/9;
   object-fit: cover;
   width: 100%;
 }
@@ -60,15 +54,18 @@ img {
 }
 
 #btn-eliminar {
+  position: absolute;
+  bottom: .3rem;
+  right: .3rem;
   padding: 0;
   border: none;
   background: none;
   font-size: 1.2rem;
 }
 
-#btn-editar {
-  padding: 0;
-  border: none;
-  background: none;
-  font-size: 1.2rem;
+.card-footer {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }

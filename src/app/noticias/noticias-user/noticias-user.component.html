@@ -6,7 +6,6 @@
   @for (evento of eventosFiltrados; track $index) {
     <div class="col">
       <div class="card text-center" (click)="open(evento)">
-        <h5 class="card-header">{{evento.tipo}}</h5>
         <img src="noimage.jpg" class="card-img-top"/>
         <div class="card-body">
           <h5 class="card-title">{{evento.titulo}}</h5>
