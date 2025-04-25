@@ -1,7 +1,12 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
 #buscador {
   display: flex;
   place-content: center;
-
   label {
     margin-right: .5rem;
     text-align: center;
@@ -31,4 +36,24 @@ img {
   aspect-ratio: 16/9;
   object-fit: cover;
   width: 100%;
+}
+
+@media only screen and (max-width: 720px) {
+  .grid-container {
+    margin: .5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-content: center;
+    gap: .5rem;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .grid-container {
+    margin: .5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    place-content: center;
+    gap: .5rem;
+  }
 }
