@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { BbddService } from '../../../bbdd.service';
+import { BbddService } from '../../../services/bbdd.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from '../modal/modal.component';
 
