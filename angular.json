@@ -108,7 +108,8 @@
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               {
-                "glob": "**/*"
+                "glob": "**/*",
+                "input": "public"
               }
             ],
             "styles": [

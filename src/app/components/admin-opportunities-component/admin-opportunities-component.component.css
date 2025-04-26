@@ -1,0 +1,76 @@
+/* Estilos para las notificaciones */
+.notification-fade {
+    transition: opacity 0.5s ease-in-out;
+  }
+  
+  .notification-fade.opacity-0 {
+    opacity: 0;
+  }
+  
+  /* Animaciones para transiciones */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  /* Mejoras de accesibilidad */
+  :focus {
+    outline: 2px solid #4299e1;
+    outline-offset: 2px;
+  }
+  
+  /* Truncar texto largo */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Mejoras para dispositivos móviles */
+  @media (max-width: 640px) {
+    .overflow-x-auto {
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+  
+  /* Estilos para formularios con errores */
+  input.ng-invalid.ng-touched,
+  select.ng-invalid.ng-touched,
+  textarea.ng-invalid.ng-touched {
+    border-color: #f56565;
+  }
+  
+  .text-red-500 {
+    color: #f56565;
+  }
+  
+  /* Estilos para etiquetas de tipo */
+  .type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .type-badge-vacante {
+    background-color: #ebf8ff;
+    color: #2b6cb0;
+  }
+  
+  .type-badge-servicio {
+    background-color: #f3e8ff;
+    color: #6b46c1;
+  }
+  
