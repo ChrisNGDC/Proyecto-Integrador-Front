@@ -1,27 +1,16 @@
-import { Routes } from '@angular/router';
-import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
-import { UserDashboardComponent } from './pages/user-dashboard/user-dashboard.component';
-import { LoginComponent } from './pages/login/login.component';
-import { AdminGuard } from './guards/admin.guard';
-import { UserGuard } from './guards/user.guard';
+import { Routes } from "@angular/router";
+import { OpportunitiesComponent } from "./components/opportunities/opportunities.component";
+import { ProfileComponent } from "./components/profile/profile.component";
+import { NewsComponent } from "./components/news/news.component";
+import { SurveysComponent } from "./components/surveys/surveys.component";
+import { AdminOpportunitiesComponent } from "./components/admin-opportunities-component/admin-opportunities-component.component";
 
 
 export const routes: Routes = [
-    { path: '', component: LoginComponent },
-    {
-      path: 'admin-dashboard',
-      component: AdminDashboardComponent,
-      canActivate: [AdminGuard],
-    },
-    {
-      path: 'user-dashboard',
-      component: UserDashboardComponent,
-      canActivate: [UserGuard],
-    },
-    {
-      path: 'login',
-      component: LoginComponent,
-    },   
-    { path: '**', redirectTo: '/login' }
-  ];
-
+  { path: "", redirectTo: "oportunidades", pathMatch: "full" },
+  { path: "perfil", component: ProfileComponent },
+  { path: "oportunidades", component: OpportunitiesComponent },
+  { path: "noticias", component: NewsComponent },
+  { path: "encuestas", component: SurveysComponent },
+  { path: "admin/oportunidades", component: AdminOpportunitiesComponent }
+];
