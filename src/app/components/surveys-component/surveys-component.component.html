@@ -1,0 +1,282 @@
+<div class="py-6">
+  <!-- Notificaciones -->
+  <div *ngIf="notifications().length > 0" class="mb-6">
+    <div *ngFor="let notification of notifications()" 
+         class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-2 rounded-r flex justify-between items-center">
+      <div>
+        <div class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+          <span class="font-medium">{{ notification.message }}</span>
+        </div>
+        <div class="text-sm text-gray-500 mt-1">{{ notification.date | date:'dd/MM/yyyy HH:mm' }}</div>
+      </div>
+      <button 
+        (click)="dismissNotification(notification.id)" 
+        class="text-gray-400 hover:text-gray-600"
+        aria-label="Cerrar notificación">
+        &times;
+      </button>
+    </div>
+  </div>
+  
+  <!-- Lista de encuestas disponibles -->
+  <div *ngIf="!currentSurvey()">
+    <h2 class="text-2xl font-bold mb-6">Encuestas Disponibles</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div *ngFor="let survey of availableSurveys()" 
+           class="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow"
+           [class.border-blue-300]="survey.theme === 'blue'"
+           [class.border-green-300]="survey.theme === 'green'"
+           [class.border-purple-300]="survey.theme === 'purple'"
+           [class.border-gray-800]="survey.theme === 'dark'"
+           [class.bg-gray-900]="survey.theme === 'dark'"
+           [class.text-white]="survey.theme === 'dark'">
+        <div class="p-5">
+          <div class="flex justify-between items-start">
+            <h3 class="text-xl font-semibold mb-2">{{ survey.title }}</h3>
+            <span *ngIf="isCompleted(survey.id)" 
+                  class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+              Completada
+            </span>
+          </div>
+          
+          <p [class.text-gray-400]="survey.theme === 'dark'" 
+             [class.text-gray-600]="survey.theme !== 'dark'" 
+             class="mb-4">{{ survey.description }}</p>
+          
+          <div class="flex justify-between text-sm text-gray-500 mb-4">
+            <span>{{ survey.questions.length }} preguntas</span>
+            <span>Tiempo estimado: {{ getEstimatedTime(survey) }} min</span>
+          </div>
+          
+          <!-- Progreso guardado -->
+          <div *ngIf="hasSavedResponses(survey.id)" class="mb-4">
+            <div class="text-sm font-medium text-gray-700 mb-1">Progreso guardado: {{ getSavedProgress(survey.id) }}%</div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+              <div class="bg-blue-600 h-2.5 rounded-full" [style.width]="getSavedProgress(survey.id) + '%'"></div>
+            </div>
+          </div>
+          
+          <!-- Etiquetas de categoría -->
+          <div class="mb-4">
+            <span 
+              [class.bg-blue-100]="survey.category === 'finalizacion' && survey.theme !== 'dark'"
+              [class.text-blue-800]="survey.category === 'finalizacion' && survey.theme !== 'dark'"
+              [class.bg-green-100]="survey.category === 'empleabilidad' && survey.theme !== 'dark'"
+              [class.text-green-800]="survey.category === 'empleabilidad' && survey.theme !== 'dark'"
+              [class.bg-purple-100]="survey.category === 'satisfaccion' && survey.theme !== 'dark'"
+              [class.text-purple-800]="survey.category === 'satisfaccion' && survey.theme !== 'dark'"
+              [class.bg-gray-700]="survey.theme === 'dark'"
+              [class.text-gray-300]="survey.theme === 'dark'"
+              class="text-xs px-2 py-1 rounded">
+              <span *ngIf="survey.category === 'finalizacion'">Finalización de Carrera</span>
+              <span *ngIf="survey.category === 'empleabilidad'">Empleabilidad</span>
+              <span *ngIf="survey.category === 'satisfaccion'">Satisfacción</span>
+              <span *ngIf="survey.category === 'otro'">Otro</span>
+            </span>
+          </div>
+          
+          <div class="flex justify-end">
+            <button 
+              (click)="startSurvey(survey)" 
+              [disabled]="isCompleted(survey.id)"
+              [class.opacity-50]="isCompleted(survey.id)"
+              class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+              {{ hasSavedResponses(survey.id) ? 'Continuar' : isCompleted(survey.id) ? 'Completada' : 'Comenzar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Mensaje si no hay encuestas -->
+    <div *ngIf="availableSurveys().length === 0" class="text-center py-8 bg-gray-50 rounded-lg">
+      <p class="text-gray-500">No hay encuestas disponibles en este momento.</p>
+    </div>
+  </div>
+  
+  <!-- Formulario de encuesta -->
+  <div *ngIf="currentSurvey()" 
+       class="bg-white p-6 rounded-lg shadow-sm border"
+       [ngClass]="{
+         'border-blue-200 bg-blue-50': currentSurvey()?.theme === 'blue',
+         'border-green-200 bg-green-50': currentSurvey()?.theme === 'green',
+         'border-purple-200 bg-purple-50': currentSurvey()?.theme === 'purple',
+         'border-gray-800 bg-gray-900 text-white': currentSurvey()?.theme === 'dark'
+       }"
+       (keydown)="handleKeyboardNavigation($event)"
+       tabindex="0">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h2 class="text-xl font-semibold">{{ currentSurvey()?.title }}</h2>
+        <p [class.text-gray-400]="currentSurvey()?.theme === 'dark'" 
+           [class.text-gray-600]="currentSurvey()?.theme !== 'dark'" 
+           class="mt-1">{{ currentSurvey()?.description }}</p>
+      </div>
+      <button 
+        (click)="saveProgress(); currentSurvey.set(null)" 
+        class="text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+        aria-label="Volver a la lista de encuestas">
+        Volver a la lista
+      </button>
+    </div>
+    
+    <!-- Barra de progreso -->
+    <div class="mb-6">
+      <div class="flex justify-between text-sm text-gray-600 mb-1">
+        <span>Progreso: {{ progress() }}%</span>
+        <span>Paso {{ currentStep() + 1 }} de {{ getTotalSteps() }}</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2.5">
+        <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" [style.width]="progress() + '%'"></div>
+      </div>
+    </div>
+    
+    <!-- Preguntas del paso actual -->
+    <div class="space-y-6 mb-8">
+      <div *ngFor="let question of getCurrentQuestions(); let i = index" 
+           class="p-4 bg-white rounded-lg shadow-sm border survey-question"
+           [class.bg-gray-800]="currentSurvey()?.theme === 'dark'"
+           [class.border-gray-700]="currentSurvey()?.theme === 'dark'">
+        <div class="mb-2 flex items-start">
+          <span class="font-medium">{{ question.text }}</span>
+          <span *ngIf="question.required" class="text-red-500 ml-1" aria-label="Obligatorio">*</span>
+        </div>
+        
+        <div *ngIf="question.description" class="mb-3 text-sm text-gray-500 italic">
+          {{ question.description }}
+        </div>
+        
+        <!-- Checkbox (Sí/No) -->
+        <div *ngIf="question.type === 'checkbox'" class="mt-3">
+          <div class="flex items-center space-x-4">
+            <label class="inline-flex items-center">
+              <input 
+                type="radio" 
+                name="question_{{ question.id }}" 
+                [value]="true"
+                [(ngModel)]="responses[question.id]"
+                class="mr-2 focus:ring-2 focus:ring-blue-500">
+              <span>Sí</span>
+            </label>
+            <label class="inline-flex items-center">
+              <input 
+                type="radio" 
+                name="question_{{ question.id }}" 
+                [value]="false"
+                [(ngModel)]="responses[question.id]"
+                class="mr-2 focus:ring-2 focus:ring-blue-500">
+              <span>No</span>
+            </label>
+          </div>
+        </div>
+        
+        <!-- Opción múltiple -->
+        <div *ngIf="question.type === 'radio' && question.options" class="mt-3">
+          <div class="space-y-2">
+            <div *ngFor="let option of question.options; let j = index" class="flex items-center">
+              <input 
+                type="radio" 
+                name="question_{{ question.id }}" 
+                [id]="'question_' + question.id + '_option_' + j"
+                [value]="option"
+                [(ngModel)]="responses[question.id]"
+                class="mr-2 focus:ring-2 focus:ring-blue-500">
+              <label [for]="'question_' + question.id + '_option_' + j">{{ option }}</label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Lista desplegable -->
+        <div *ngIf="question.type === 'select' && question.options" class="mt-3">
+          <select 
+            [(ngModel)]="responses[question.id]"
+            class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            [class.bg-gray-800]="currentSurvey()?.theme === 'dark'"
+            [class.text-white]="currentSurvey()?.theme === 'dark'"
+            [class.border-gray-700]="currentSurvey()?.theme === 'dark'">
+            <option value="">Seleccione una opción</option>
+            <option *ngFor="let option of question.options" [value]="option">{{ option }}</option>
+          </select>
+        </div>
+        
+        <!-- Texto libre -->
+        <div *ngIf="question.type === 'text'" class="mt-3">
+          <textarea 
+            [(ngModel)]="responses[question.id]"
+            class="w-full p-2 border rounded h-24 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            [class.bg-gray-800]="currentSurvey()?.theme === 'dark'"
+            [class.text-white]="currentSurvey()?.theme === 'dark'"
+            [class.border-gray-700]="currentSurvey()?.theme === 'dark'"
+            placeholder="Escribe tu respuesta aquí..."></textarea>
+        </div>
+        
+        <!-- Calificación -->
+        <div *ngIf="question.type === 'rating'" class="mt-3">
+          <div class="flex items-center space-x-4 justify-center">
+            <div *ngFor="let rating of [1, 2, 3, 4, 5]" class="text-center">
+              <input 
+                type="radio" 
+                name="question_{{ question.id }}" 
+                [value]="rating"
+                [(ngModel)]="responses[question.id]"
+                class="sr-only" 
+                [id]="'rating_' + question.id + '_' + rating">
+              <label 
+                [for]="'rating_' + question.id + '_' + rating"
+                class="flex flex-col items-center cursor-pointer focus:outline-none"
+                tabindex="0"
+                (keydown.space)="responses[question.id] = rating">
+                <span class="text-2xl" 
+                      [class.text-yellow-500]="responses[question.id] >= rating && currentSurvey()?.theme !== 'dark'"
+                      [class.text-yellow-300]="responses[question.id] >= rating && currentSurvey()?.theme === 'dark'">★</span>
+                <span class="text-xs mt-1">{{ rating }}</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Fecha -->
+        <div *ngIf="question.type === 'date'" class="mt-3">
+          <input 
+            type="date" 
+            [(ngModel)]="responses[question.id]"
+            class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            [class.bg-gray-800]="currentSurvey()?.theme === 'dark'"
+            [class.text-white]="currentSurvey()?.theme === 'dark'"
+            [class.border-gray-700]="currentSurvey()?.theme === 'dark'">
+        </div>
+      </div>
+    </div>
+    
+    <!-- Botones de navegación -->
+    <div class="flex justify-between mt-6 pt-4 border-t">
+      <div>
+        <button 
+          *ngIf="currentStep() > 0"
+          (click)="prevStep()" 
+          class="bg-gray-300 text-gray-800 py-2 px-4 rounded mr-2 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+          aria-label="Ir al paso anterior">
+          <span aria-hidden="true">←</span> Anterior
+        </button>
+        <button 
+          (click)="saveProgress()" 
+          class="bg-blue-100 text-blue-800 py-2 px-4 rounded hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+          Guardar Progreso
+        </button>
+      </div>
+      <button 
+        (click)="nextStep()" 
+        class="bg-blue-500 text-white py-2 px-6 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+        aria-label="Ir al siguiente paso o finalizar">
+        {{ currentStep() < getTotalSteps() - 1 ? 'Siguiente →' : 'Finalizar' }}
+      </button>
+    </div>
+    
+    <!-- Atajos de teclado -->
+   <!--  <div class="mt-4 text-sm text-gray-500 text-center">
+      <p>Atajos de teclado: <span class="font-medium">←</span> Anterior | <span class="font-medium">→</span> o <span class="font-medium">Finalizar</span>
+s -->
