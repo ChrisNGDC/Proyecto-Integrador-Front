@@ -1,4 +1,6 @@
+
 <div class="py-6 px-20">
+
   <!-- Notificaciones -->
   <div *ngIf="notifications().length > 0" class="mb-6">
     <div *ngFor="let notification of notifications()" 
@@ -28,6 +30,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div *ngFor="let survey of availableSurveys()" 
            class="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full"
+
            [class.border-blue-300]="survey.theme === 'blue'"
            [class.border-green-300]="survey.theme === 'green'"
            [class.border-purple-300]="survey.theme === 'purple'"
@@ -55,6 +58,7 @@
           
           <!-- Etiquetas de categoría -->
           <div class="mb-2">
+
             <span 
               [class.bg-blue-100]="survey.category === 'finalizacion' && survey.theme !== 'dark'"
               [class.text-blue-800]="survey.category === 'finalizacion' && survey.theme !== 'dark'"
@@ -64,7 +68,9 @@
               [class.text-purple-800]="survey.category === 'satisfaccion' && survey.theme !== 'dark'"
               [class.bg-gray-700]="survey.theme === 'dark'"
               [class.text-gray-300]="survey.theme === 'dark'"
+
               class=" tag">
+
               <span *ngIf="survey.category === 'finalizacion'">Finalización de Carrera</span>
               <span *ngIf="survey.category === 'empleabilidad'">Empleabilidad</span>
               <span *ngIf="survey.category === 'satisfaccion'">Satisfacción</span>
@@ -80,11 +86,13 @@
           </div>
           
           <div class="flex justify-end mt-auto pt-4">
+
             <button 
               (click)="startSurvey(survey)" 
               [disabled]="isCompleted(survey.id)"
               [class.opacity-50]="isCompleted(survey.id)"
               class="btn btn-primary">
+
               {{ hasSavedResponses(survey.id) ? 'Continuar' : isCompleted(survey.id) ? 'Completada' : 'Comenzar' }}
             </button>
           </div>

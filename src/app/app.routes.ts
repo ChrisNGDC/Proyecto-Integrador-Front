@@ -73,3 +73,4 @@ export const routes: Routes = [
   },
   { path: '**', redirectTo: '/login', outlet: 'primary' },
 ];
+

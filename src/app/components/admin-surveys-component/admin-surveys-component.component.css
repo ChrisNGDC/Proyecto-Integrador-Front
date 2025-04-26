@@ -1,3 +1,4 @@
+/* Estilos de tu rama 'encuestas' */
 .py-6 {
   padding: 1.5rem 0;
 }
@@ -101,9 +102,10 @@
   }
 }
 
-.bg-white {
+/* Nota: .bg-white estaba duplicado, lo dejo una vez */
+/* .bg-white {
   background-color: #FFFFFF;
-}
+} */
 
 .rounded-lg {
   border-radius: 12px;
@@ -165,11 +167,12 @@
   color: #424242;
 }
 
-.flex-wrap {
+/* Nota: .flex-wrap estaba duplicado, lo dejo una vez */
+/* .flex-wrap {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-}
+} */
 
 .bg-yellow-500 {
   background-color: #FFC107;
@@ -217,9 +220,10 @@
   padding-right: 0.75rem;
 }
 
-.rounded {
+/* Nota: .rounded estaba duplicado, lo dejo una vez */
+/* .rounded {
   border-radius: 6px;
-}
+} */
 
 .bg-gray-50 {
   background-color: #FAFAFA;
@@ -254,10 +258,13 @@
   background-color: #616161;
 }
 
+/* Combinación de cdk-drag-preview: priorizamos tu versión pero añadimos box-sizing */
 .cdk-drag-preview {
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 
-              0 8px 10px 1px rgba(0, 0, 0, 0.14), 
+  box-sizing: border-box; /* Añadido de develop */
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+              0 8px 10px 1px rgba(0, 0, 0, 0.14),
               0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  border-radius: 4px; /* Aseguramos que el border-radius de develop esté presente */
 }
 
 .cdk-drag-placeholder {
@@ -268,6 +275,7 @@
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
+/* Estilos de temas de tu rama */
 .theme-blue {
   background-color: #E8F0FE;
   border-color: #2D6CDF;
@@ -288,6 +296,7 @@
   color: white;
 }
 
+/* Estilos de botones de tu rama */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -329,7 +338,7 @@
 }
 
 .btn-tertiary:hover {
-  background-color: #efefef; 
+  background-color: #efefef;
 }
 
 .btn-danger {
@@ -339,7 +348,7 @@
 }
 
 .btn-danger:hover {
-  background-color: #C0392B;  
+  background-color: #C0392B;
 }
 
 .btn-success {
@@ -403,19 +412,19 @@
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .w-48 {
     width: 100%;
   }
-  
+
   .grid-cols-1 {
     grid-template-columns: 1fr;
   }
-  
+
   .md\:grid-cols-2 {
     grid-template-columns: 1fr;
   }
-  
+
   .lg\:grid-cols-3 {
     grid-template-columns: 1fr;
   }
@@ -430,7 +439,59 @@
   animation: fadeIn 0.3s ease-out;
 }
 
+/* Combinación de :focus - priorizamos tu versión */
 :focus {
-  outline: 2px solid #2D6CDF;
+  outline: 2px solid #2D6CDF; /* Tu color */
   outline-offset: 2px;
+}
+
+/* Estilos de 'develop' que no estaban en tu rama o eran únicos */
+/* Estilos para las notificaciones */
+.notification-fade {
+  transition: opacity 0.5s ease-in-out;
+}
+
+.notification-fade.opacity-0 {
+  opacity: 0;
+}
+
+.cdk-drop-list-dragging .cdk-drag {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Estilos para temas de develop (si no están ya cubiertos o son diferentes) */
+.theme-dark input,
+.theme-dark select,
+.theme-dark textarea {
+  background-color: #2d3748;
+  color: white;
+  border-color: #4a5568;
+}
+
+.theme-dark input[type="checkbox"],
+.theme-dark input[type="radio"] {
+  background-color: #2d3748;
+}
+
+/* Animaciones para gráficos */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-container {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Mejoras para dispositivos móviles */
+@media (max-width: 640px) {
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
 }

@@ -1,16 +1,18 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+
+import { Component } from "@angular/core";
+import { RouterModule } from "@angular/router";
+import { CommonModule } from "@angular/common";
+import { NavbarComponent } from "./components/navbar-component/navbar-component.component";
 
 
 @Component({
-    selector: 'app-root',
+  selector: "app-root",
   standalone: true,
-    imports: [CommonModule, RouterOutlet],
-    templateUrl: './app.component.html',
-    styleUrl: './app.component.css'
+  imports: [CommonModule, RouterModule, NavbarComponent],
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.css"]
 })
 export class AppComponent {
-  title = 'Frontend';
-
+  title = "Red-IFTS";
 }
+
