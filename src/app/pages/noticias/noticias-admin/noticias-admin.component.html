@@ -1,0 +1,26 @@
+<div id="sub-nav">
+  <div id="buscador">
+    <label for="busqueda">Buscar:</label>
+    <input type="text" name="busqueda" (input)="filtrar($event)" />
+  </div>
+  <button id="btn-agregar" (click)="agregarEvento()">➕</button>
+</div>
+<div class="grid-container">
+  @for (evento of eventosFiltrados; track $index) {
+  <div class="col">
+    <div class="card text-center">
+      <div (click)="editarEvento(evento)">
+        <img [src]="evento.s3key" class="card-img-top" />
+        <div class="card-body">
+          <h5 class="card-title">{{ evento.titulo }}</h5>
+          <p class="card-text">{{ evento.resumen }}</p>
+        </div>
+      </div>
+      <div class="card-footer">
+        <small class="text-muted">Publicado {{ evento.fecha }}</small>
+        <button id="btn-eliminar" (click)="eliminarEvento(evento)">❌</button>
+      </div>
+    </div>
+  </div>
+  }
+</div>

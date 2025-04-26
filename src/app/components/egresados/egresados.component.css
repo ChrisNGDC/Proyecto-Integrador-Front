@@ -1,0 +1,188 @@
+/* Estilos generales */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* Pestañas de navegación */
+  .tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .tabs button {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+  }
+  
+  .tabs button.active {
+    border-bottom-color: #2196F3;
+    color: #2196F3;
+    font-weight: bold;
+  }
+  
+  .tabs button:hover:not(.active) {
+    background-color: #f5f5f5;
+  }
+  
+  /* Lista de egresados */
+  .search-bar {
+    margin-bottom: 20px;
+  }
+  
+  .search-bar input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  .egresados-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .egresado-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .card-header h3 {
+    margin: 0;
+    color: #333;
+  }
+  
+  .nro-alumno {
+    background-color: #f0f0f0;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .card-body p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .btn-edit, .btn-deactivate, .btn-save, .btn-cancel {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+  }
+  
+  .btn-edit {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .btn-edit:hover {
+    background-color: #45a049;
+  }
+  
+  .btn-deactivate {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .btn-deactivate:hover {
+    background-color: #d32f2f;
+  }
+  
+  /* Formulario */
+  .form-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .egresado-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .form-group input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .btn-save {
+    background-color: #2196F3;
+    color: white;
+  }
+  
+  .btn-save:hover {
+    background-color: #0b7dda;
+  }
+  
+  .btn-cancel {
+    background-color: #ff9800;
+    color: white;
+  }
+  
+  .btn-cancel:hover {
+    background-color: #e68a00;
+  }
+  
+  .no-results {
+    text-align: center;
+    padding: 20px;
+    color: #777;
+    grid-column: 1 / -1;
+  }
