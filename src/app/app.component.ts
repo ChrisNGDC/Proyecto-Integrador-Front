@@ -12,5 +12,6 @@ import { NavbarComponent } from "./components/navbar/navbar.component";
   styleUrls: ["./app.component.css"]
 })
 export class AppComponent {
-  title = "Oportunidades";
+  title = 'Frontend';
+  
 }

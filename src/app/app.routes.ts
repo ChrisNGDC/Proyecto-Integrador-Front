@@ -7,10 +7,20 @@ import { AdminOpportunitiesComponent } from "./components/admin-opportunities-co
 
 
 export const routes: Routes = [
-  { path: "", redirectTo: "oportunidades", pathMatch: "full" },
-  { path: "perfil", component: ProfileComponent },
-  { path: "oportunidades", component: OpportunitiesComponent },
-  { path: "noticias", component: NewsComponent },
-  { path: "encuestas", component: SurveysComponent },
-  { path: "admin/oportunidades", component: AdminOpportunitiesComponent }
-];
+    { path: '', component: LoginComponent },
+    {
+      path: 'admin-dashboard',
+      component: AdminDashboardComponent,
+      canActivate: [AdminGuard],
+    },
+    {
+      path: 'user-dashboard',
+      component: UserDashboardComponent,
+      canActivate: [UserGuard],
+    },
+    {
+      path: 'login',
+      component: LoginComponent,
+    },   
+    { path: '**', redirectTo: '/login' }
+  ];
