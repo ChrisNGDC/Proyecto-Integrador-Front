@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
+import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
+import { UserDashboardComponent } from './pages/user-dashboard/user-dashboard.component';
+import { LoginComponent } from './pages/login/login.component';
 import { AdminGuard } from './guards/admin.guard';
 import { UserGuard } from './guards/user.guard';
-import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
-import { LoginComponent } from './pages/login/login.component';
-import { UserDashboardComponent } from './pages/user-dashboard/user-dashboard.component';
+
 
 export const routes: Routes = [
   { path: '', component: LoginComponent },
@@ -21,5 +22,5 @@ export const routes: Routes = [
     path: 'login',
     component: LoginComponent,
   },
-  { path: '**', redirectTo: '/login' },
+    { path: '**', redirectTo: '/login' }
 ];
