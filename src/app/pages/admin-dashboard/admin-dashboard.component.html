@@ -3,10 +3,11 @@
         <img src="assets/logo.jpg" alt="">
     </div>
     <ul class="nav-links">
-      <li><a routerLink="/noticias">Noticias</a></li>
-      <li><a routerLink="/oportunidades">Oportunidades</a></li>
-      <li><a routerLink="/encuestas">Encuestas</a></li>
-      <li><a routerLink="/egresados">Egresados</a></li>
+      <li><a routerLink="/admin-dashboard/noticias">Noticias</a></li>
+      <li><a routerLink="/admin-dashboard/oportunidades">Oportunidades</a></li>
+      <li><a routerLink="/admin-dashboard/encuestas">Encuestas</a></li>
+      <li><a routerLink="/admin-dashboard/egresados">Egresados</a></li>
       <li><a (click)="logout()">Logout</a></li>
     </ul>
   </nav>
+  <router-outlet></router-outlet>
