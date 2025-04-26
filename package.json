@@ -2,9 +2,6 @@
   "name": "frontend",
   "version": "0.0.0",
   "scripts": {
-    "clean": "if exist node_modules\\.cache rmdir /s /q node_modules\\.cache & if exist .angular rmdir /s /q .angular || exit 0",
-    "clean:full": "if exist node_modules rmdir /s /q node_modules & if exist package-lock.json del package-lock.json & if exist .angular rmdir /s /q .angular & if exist dist rmdir /s /q dist || exit 0",
-    "postinstall": "exit 0",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
@@ -14,12 +11,10 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^19.2.5",
-    "@angular/cdk": "^19.2.10",
     "@angular/common": "^19.2.5",
     "@angular/compiler": "^19.2.5",
     "@angular/core": "^19.2.5",
     "@angular/forms": "^19.2.5",
-    "@angular/material": "^19.2.10",
     "@angular/platform-browser": "^19.2.5",
     "@angular/platform-browser-dynamic": "^19.2.5",
     "@angular/router": "^19.2.5",
@@ -41,12 +36,16 @@
     "@types/chart.js": "^2.9.41",
     "@angular/localize": "^19.2.5",
     "@types/jasmine": "~5.1.0",
-    "jasmine-core": "~5.2.0",
+    "@types/node": "^18.18.0",
+    "autoprefixer": "^10.4.21",
+    "jasmine-core": "~5.6.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.5.2"
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.4",
+    "typescript": "~5.7.2"
   }
 }
