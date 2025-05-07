@@ -3,15 +3,15 @@
     <section class="imagen-section">
       <div class="avatar-controls">
         <div class="avatar-wrapper" (click)="fileInput.click()">
-          @if (imagenPerfil) {
-            <img [src]="imagenPerfil" class="avatar-image" alt="Foto de perfil">
+          @if (usuario.fotoPerfil) {
+            <img [src]="usuario.fotoPerfil" class="avatar-image" alt="Foto de perfil">
           } @else {
-            <div class="avatar-placeholder">
-              <mat-icon class="avatar-icon"></mat-icon>
+            <div class="avatar-default">
+              {{ getIniciales(usuario.datos.nombreCompleto) }}
             </div>
           }
           <div class="avatar-overlay">
-            <span>{{ imagenPerfil ? 'Cambiar foto' : 'Agregar foto' }}</span>
+            <span>{{ usuario.fotoPerfil ? 'Cambiar foto' : 'Agregar foto' }}</span>
           </div>
         </div>
         
@@ -24,10 +24,10 @@
         
         @if (archivoSeleccionado) {
           <div class="file-actions">
-            <button class="btn-success" (click)="confirmarCambio()">
+            <button class="btn-save" (click)="confirmarCambio()">
               Confirmar
             </button>
-            <button class="btn-warning" (click)="cancelarCambio()">
+            <button class="btn-cancel" (click)="cancelarCambio()">
               Cancelar
             </button>
           </div>
@@ -36,9 +36,9 @@
     </section>
 
     <section class="datos-section">
-      <div class="datos-personales">
+      <div class="datos-personales form-container">
         <div class="section-header">
-          <h3>Datos Personales</h3>
+          <strong><h3>Datos Personales</h3></strong>
           @if (!editandoDatosPersonales) {
             <button class="btn-edit" (click)="editarDatosPersonales()">
               Editar
@@ -47,43 +47,39 @@
         </div>
 
         @if (editandoDatosPersonales) {
-          <form [formGroup]="datosForm">
-            <mat-form-field appearance="outline">
-              <mat-label>Nombre completo</mat-label>
-              <input matInput formControlName="nombreCompleto">
-            </mat-form-field>
+          <form [formGroup]="datosForm" class="egresado-form">
+            <div class="form-group">
+              <strong><label for="telefono">Teléfono: </label></strong>
+              <input type="tel" id="telefono" formControlName="telefono">
+            </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Teléfono</mat-label>
-              <input matInput formControlName="telefono">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Ubicación</mat-label>
-              <input matInput formControlName="ubicacion">
-            </mat-form-field>
+            <div class="form-group">
+              <strong><label for="ubicacion">Ubicación: </label></strong>
+              <input type="text" id="ubicacion" formControlName="ubicacion">
+            </div>
 
             <div class="form-actions">
-              <button class="btn-warning btn-cancel" (click)="cancelarEdicionDatosPersonales()">
+              <button type="button" class="btn-cancel" (click)="cancelarEdicionDatosPersonales()">
                 Cancelar
               </button>
-              <button class="btn-success btn-save" (click)="guardarDatosPersonales()">
+              <button type="button" class="btn-save" (click)="guardarCambios()">
                 Actualizar
               </button>
             </div>
           </form>
         } @else {
-          <p><strong>{{usuario.datos.nombreCompleto}}</strong></p>
-          <p>{{usuario.datos.telefono}}</p>
-          <p>{{usuario.datos.ubicacion}}</p>
-          <p><strong>Email:</strong> {{usuario.datos.email}}</p>
+          <div class="card-body">
+            <p><strong>Nombre: </strong> {{usuario.datos.nombreCompleto}}</p>
+            <p><strong>Teléfono: </strong> {{usuario.datos.telefono}}</p>
+            <p><strong>Ubicación: </strong> {{usuario.datos.ubicacion}}</p>
+            <p><strong>Email: </strong> {{usuario.datos.email}}</p>
+          </div>
         }
       </div>
 
-      <!-- Sección de Datos Profesionales -->
-      <div class="datos-academicos">
+      <div class="datos-academicos form-container">
         <div class="section-header">
-          <h3>Datos Profesionales</h3>
+          <strong><h3>Datos Profesionales</h3></strong>
           @if (!editandoDatosProfesionales) {
             <button class="btn-edit" (click)="editarDatosProfesionales()">
               Editar
@@ -92,69 +88,32 @@
         </div>
 
         @if (editandoDatosProfesionales) {
-          <form [formGroup]="datosForm">
-            <mat-form-field appearance="outline">
-              <mat-label>Título</mat-label>
-              <input matInput formControlName="titulo">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Año recibido:</mat-label>
-              <input matInput formControlName="anioRecibido">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Experiencia laboral</mat-label>
-              <input matInput formControlName="poseeExperienciaLaboral">
-            </mat-form-field>
+          <form [formGroup]="datosForm" class="egresado-form">
+            <div class="form-group">
+              <strong><label for="poseeExperienciaLaboral">Experiencia laboral: </label></strong>
+              <select id="poseeExperienciaLaboral" formControlName="poseeExperienciaLaboral">
+                <option value="Sí">Sí</option>
+                <option value="No">No</option>
+              </select>
+            </div>
 
             <div class="form-actions">
-              <button class="btn-warning btn-cancel" (click)="cancelarEdicionDatosProfesionales()">
+              <button type="button" class="btn-cancel" (click)="cancelarEdicionDatosProfesionales()">
                 Cancelar
               </button>
-              <button class="btn-success btn-save" (click)="guardarDatosProfesionales()">
+              <button type="button" class="btn-save" (click)="guardarCambios()">
                 Actualizar
               </button>
             </div>
           </form>
         } @else {
-          <p><strong>Título:</strong> {{usuario.datos.titulo}}</p>
-          <p><strong>Año recibido:</strong> {{usuario.datos.anioRecibido}}</p>
-          <p><strong>Experiencia laboral:</strong> {{usuario.datos.poseeExperienciaLaboral}}</p>
+          <div class="card-body">
+            <p><strong>Título: </strong> {{usuario.datos.titulo}}</p>
+            <p><strong>Año recibido: </strong> {{usuario.datos.anioRecibido}}</p>
+            <p><strong>Experiencia laboral: </strong> {{usuario.datos.poseeExperienciaLaboral}}</p>
+          </div>
         }
       </div>
     </section>
-
-    <!-- Sección de Descripción Editable (opcional) -->
-    <!-- <section class="descripcion-section">
-      <div class="section-header">
-        <h3>Descripción</h3>
-        @if (!editandoDescripcion) {
-          <button class="btn btn-edit" (click)="editarDescripcion()">
-            Editar
-          </button>
-        }
-      </div>
-    
-      @if (editandoDescripcion) {
-        <form [formGroup]="descripcionForm">
-          <mat-form-field appearance="outline" class="full-width">
-            <textarea matInput formControlName="descripcion" rows="4"></textarea>
-          </mat-form-field>
-          <div class="form-actions">
-            <button class="btn btn-warning" (click)="cancelarEdicionDescripcion()">
-              Cancelar
-            </button>
-            <button class="btn btn-success" (click)="guardarDescripcion()">
-              Guardar
-            </button>
-          </div>
-        </form>
-      } @else {
-        <p class="descripcion-texto">
-          {{usuario.descripcion || 'No hay descripción disponible'}}
-        </p>
-      }
-    </section> -->
   </div>
 </div>

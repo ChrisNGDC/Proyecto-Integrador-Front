@@ -25,20 +25,20 @@ import { MatInputModule } from '@angular/material/input';
 export class PerfilComponent {
   usuario = {
     nombre: 'Abatar',
-    fotoPerfil: 'assets/estadosHTTP.PNG',
+    fotoPerfil: '',
     datos: {
       nombreCompleto: 'Pedro Gomez',
       telefono: '11-12345678',
       email: 'pedro_gomez@gmail.com',
       titulo: 'Técnico superior en desarrollo de software',
       anioRecibido: '2023',
-      poseeExperienciaLaboral: 'no',
+      poseeExperienciaLaboral: 'No',
       ubicacion: 'CABA - Buenos Aires'
     },
     descripcion: 'Descripción de recursos e valores objetivos'
   };
 
-  imagenPerfil: string | null = null;
+  imagenPerfil: string | null = this.usuario.fotoPerfil;
   archivoSeleccionado: File | null = null;
   editandoFoto = false;
   editandoDatosPersonales = false;
@@ -65,11 +65,19 @@ export class PerfilComponent {
       anioRecibido: [this.usuario.datos.anioRecibido],
       poseeExperienciaLaboral: [this.usuario.datos.poseeExperienciaLaboral]
     });
-
-    
+  
     this.descripcionForm = this.fb.group({
       descripcion: [this.usuario.descripcion]
     });
+  }
+
+  getIniciales(nombreCompleto: string): string {
+    if (!nombreCompleto) return 'US';
+    
+    const nombres = nombreCompleto.split(' ');
+    if (nombres.length === 1) return nombres[0].charAt(0).toUpperCase();
+    
+    return `${nombres[0].charAt(0)}${nombres[nombres.length - 1].charAt(0)}`.toUpperCase();
   }
 
   editarFoto(): void {
@@ -92,6 +100,7 @@ export class PerfilComponent {
       const reader = new FileReader();
       reader.onload = (e) => {
         this.imagenPerfil = e.target?.result as string;
+        this.usuario.fotoPerfil = this.imagenPerfil;
       };
       reader.readAsDataURL(file);
     }
@@ -99,15 +108,12 @@ export class PerfilComponent {
 
   guardarFoto(): void {
     if (this.imagenPerfil && this.archivoSeleccionado) {
-      // Aquí deberías llamar a tu servicio para subir la imagen al backend
-      // this.usuarioService.subirFoto(this.archivoSeleccionado).subscribe(...);
-      
-      // Mientras tanto, actualizamos la foto localmente
       this.usuario.fotoPerfil = this.imagenPerfil;
       this.mostrarExito('Foto de perfil actualizada correctamente');
       this.cancelarEdicionFoto();
     }
   }
+   
 
   cancelarEdicionFoto(): void {
     this.editandoFoto = false;
@@ -126,31 +132,23 @@ export class PerfilComponent {
     }
   }
 
-  guardarDatosPersonales(): void {
+  guardarCambios(): void {
     if (this.datosForm.valid) {
       this.usuario.datos = {
         ...this.usuario.datos,
         ...this.datosForm.value
       };
-      this.editandoDatosPersonales = false;
-      this.mostrarExito('Datos personales actualizados correctamente');
       
-      // Aquí iría la llamada al servicio para guardar en el backend
-      // this.perfilService.actualizarDatos(this.usuario.datos).subscribe(...);
-    }
-  }
-
-  guardarDatosProfesionales(): void {
-    if (this.datosForm.valid) {
-      this.usuario.datos = {
-        ...this.usuario.datos,
-        ...this.datosForm.value
-      };
-      this.editandoDatosProfesionales = false;
-      this.mostrarExito('Datos profesionales actualizados correctamente');
+      if (this.editandoDatosPersonales) {
+        this.editandoDatosPersonales = false;
+        this.mostrarExito('Datos personales actualizados correctamente');
+      } else if (this.editandoDatosProfesionales) {
+        this.editandoDatosProfesionales = false;
+        this.mostrarExito('Datos profesionales actualizados correctamente');
+      }
       
-      // Aquí iría la llamada al servicio para guardar en el backend
-      // this.perfilService.actualizarDatos(this.usuario.datos).subscribe(...);
+      // Llamada al servicio para guardar en el backend
+      // this.perfilService.actualizarDatos(this.usuario).subscribe(...);
     }
   }
 
@@ -250,13 +248,12 @@ export class PerfilComponent {
     });
   }
 
-  cancelarEdicionDatosProfesionales() {
+  cancelarEdicionDatosProfesionales(): void {
     this.editandoDatosProfesionales = false;
-    // Opcional: resetear el formulario al valor original
     this.datosForm.patchValue({
       titulo: this.usuario.datos.titulo,
       anioRecibido: this.usuario.datos.anioRecibido,
-      experienciaLaboral: this.usuario.datos.anioRecibido
+      poseeExperienciaLaboral: this.usuario.datos.poseeExperienciaLaboral
     });
   }
 }
