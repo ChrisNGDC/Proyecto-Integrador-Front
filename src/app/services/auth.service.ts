@@ -19,11 +19,22 @@ export class AuthService {
   }
 
   private initAuth(): void {
+    this.oidcSecurityService.userData$.subscribe((userData) => {
+      if (userData?.userData) {
+        // Almacena el email en sessionStorage cuando se obtienen los datos del usuario
+        const email = userData.userData.email || userData.userData.preferred_username;
+        if (email) {
+          sessionStorage.setItem('userEmail', email);
+        }
+      }
+    });
+
     this.oidcSecurityService.isAuthenticated$.subscribe(({ isAuthenticated }) => {
       this._isAuthenticated$.next(isAuthenticated);
-      console.log('AuthService: isAuthenticated:', isAuthenticated);      
+      console.log('AuthService: isAuthenticated:', isAuthenticated);
     });
   }
+
   checkAuth(): void {
     this.oidcSecurityService.checkAuth().subscribe(({ isAuthenticated, idToken }) => {
       if (isAuthenticated && idToken) {
@@ -72,6 +83,10 @@ export class AuthService {
   logout(): void {
     sessionStorage.clear();
     window.location.href = `https://us-east-1irahhdiiv.auth.us-east-1.amazoncognito.com/logout?client_id=4l266lkv7t1pvsd9fochnljcdq&logout_uri=http://localhost:4200/login`;
+  }
+
+  getStoredEmail(): string | null {
+    return sessionStorage.getItem('userEmail');
   }
 }
 

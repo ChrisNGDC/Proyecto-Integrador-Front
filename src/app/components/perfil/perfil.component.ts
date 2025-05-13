@@ -1,44 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule  } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { PerfilService } from '../../services/perfil.service';
+import { Usuario } from '../../models/usuario';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
-    MatIconModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule
+    CommonModule,
+    ReactiveFormsModule
   ],
   templateUrl: './perfil.component.html',
   styleUrls: ['./perfil.component.css']
 })
-
-export class PerfilComponent {
-  usuario = {
-    nombre: 'Abatar',
-    fotoPerfil: '',
-    datos: {
-      nombreCompleto: 'Pedro Gomez',
-      telefono: '11-12345678',
-      email: 'pedro_gomez@gmail.com',
-      titulo: 'Técnico superior en desarrollo de software',
-      anioRecibido: '2023',
-      poseeExperienciaLaboral: 'No',
-      ubicacion: 'CABA - Buenos Aires'
-    },
-    descripcion: 'Descripción de recursos e valores objetivos'
-  };
-
-  imagenPerfil: string | null = this.usuario.fotoPerfil;
+export class PerfilComponent implements OnInit {
+  usuario!: Usuario;
+  imagenPerfil: string | null = null;
   archivoSeleccionado: File | null = null;
   editandoFoto = false;
   editandoDatosPersonales = false;
@@ -46,29 +25,110 @@ export class PerfilComponent {
   editandoDescripcion = false;
   datosForm!: FormGroup;
   descripcionForm!: FormGroup;
+  usuarioEmail: string | null = null;
+  cargando = true;
 
   constructor(
     private fb: FormBuilder,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private perfilService: PerfilService,
   ) {}
 
   ngOnInit(): void {
-    this.inicializarFormularios();
+    this.inicializarFormulariosVacios();
+    this.cargarDatosPerfil();
   }
 
-  inicializarFormularios(): void {
+  inicializarFormulariosVacios(): void {
     this.datosForm = this.fb.group({
-      nombreCompleto: [this.usuario.datos.nombreCompleto, Validators.required],
-      telefono: [this.usuario.datos.telefono],
-      ubicacion: [this.usuario.datos.ubicacion],
-      titulo: [this.usuario.datos.titulo],
-      anioRecibido: [this.usuario.datos.anioRecibido],
-      poseeExperienciaLaboral: [this.usuario.datos.poseeExperienciaLaboral]
+      nombreCompleto: ['', Validators.required],
+      telefono: [''],
+      ubicacion: [''],
+      titulo: [''],
+      anioRecibido: [''],
+      poseeExperienciaLaboral: ['']
     });
   
     this.descripcionForm = this.fb.group({
-      descripcion: [this.usuario.descripcion]
+      descripcion: ['']
     });
+  }
+
+  cargarDatosPerfil(): void {
+    this.cargando = true;
+    this.perfilService.obtenerPerfil().subscribe({
+      next: (usuario: Usuario) => {
+        this.usuario = usuario;
+        this.imagenPerfil = usuario.fotoPerfil;
+        this.inicializarFormulariosConDatos();
+        this.cargando = false;
+      },
+      error: (err: Error) => {
+        this.mostrarError('Error al cargar el perfil');
+        console.error(err);
+        this.cargando = false;
+      }
+    });
+  }
+
+  inicializarFormulariosConDatos(): void {
+    if (!this.usuario) return;
+    
+    this.datosForm.patchValue({
+      nombreCompleto: this.usuario.datos.nombreCompleto,
+      telefono: this.usuario.datos.telefono,
+      ubicacion: this.usuario.datos.ubicacion,
+      titulo: this.usuario.datos.titulo,
+      anioRecibido: this.usuario.datos.anioRecibido,
+      poseeExperienciaLaboral: this.usuario.datos.poseeExperienciaLaboral
+    });
+  
+    this.descripcionForm.patchValue({
+      descripcion: this.usuario.descripcion
+    });
+  }
+
+  guardarFoto(): void {
+    if (this.imagenPerfil && this.archivoSeleccionado) {
+      this.perfilService.subirFotoPerfil(this.archivoSeleccionado).subscribe({
+        next: (response: {fotoPerfil: string}) => {
+          this.usuario.fotoPerfil = response.fotoPerfil;
+          this.mostrarExito('Foto de perfil actualizada correctamente');
+          this.cancelarEdicionFoto();
+        },
+        error: (err: Error) => {
+          this.mostrarError('Error al subir la foto de perfil');
+          console.error(err);
+        }
+      });
+    }
+  }
+
+  guardarCambios(): void {
+    if (this.datosForm.valid) {
+      const datosActualizados = this.datosForm.value;
+      
+      const servicio$ = this.editandoDatosPersonales 
+        ? this.perfilService.actualizarDatosPersonales(datosActualizados)
+        : this.perfilService.actualizarDatosProfesionales(datosActualizados);
+
+      servicio$.subscribe({
+        next: (usuarioActualizado: Usuario) => {
+          this.usuario = usuarioActualizado;
+          if (this.editandoDatosPersonales) {
+            this.editandoDatosPersonales = false;
+            this.mostrarExito('Datos personales actualizados correctamente');
+          } else {
+            this.editandoDatosProfesionales = false;
+            this.mostrarExito('Datos profesionales actualizados correctamente');
+          }
+        },
+        error: (err: Error) => {
+          this.mostrarError('Error al actualizar los datos');
+          console.error(err);
+        }
+      });
+    }
   }
 
   getIniciales(nombreCompleto: string): string {
@@ -106,15 +166,6 @@ export class PerfilComponent {
     }
   }
 
-  guardarFoto(): void {
-    if (this.imagenPerfil && this.archivoSeleccionado) {
-      this.usuario.fotoPerfil = this.imagenPerfil;
-      this.mostrarExito('Foto de perfil actualizada correctamente');
-      this.cancelarEdicionFoto();
-    }
-  }
-   
-
   cancelarEdicionFoto(): void {
     this.editandoFoto = false;
     this.archivoSeleccionado = null;
@@ -132,26 +183,6 @@ export class PerfilComponent {
     }
   }
 
-  guardarCambios(): void {
-    if (this.datosForm.valid) {
-      this.usuario.datos = {
-        ...this.usuario.datos,
-        ...this.datosForm.value
-      };
-      
-      if (this.editandoDatosPersonales) {
-        this.editandoDatosPersonales = false;
-        this.mostrarExito('Datos personales actualizados correctamente');
-      } else if (this.editandoDatosProfesionales) {
-        this.editandoDatosProfesionales = false;
-        this.mostrarExito('Datos profesionales actualizados correctamente');
-      }
-      
-      // Llamada al servicio para guardar en el backend
-      // this.perfilService.actualizarDatos(this.usuario).subscribe(...);
-    }
-  }
-
   editarDatosProfesionales(): void {
     this.editandoDatosProfesionales = !this.editandoDatosProfesionales;
     if (this.editandoDatosProfesionales) {
@@ -165,14 +196,6 @@ export class PerfilComponent {
 
   editarDescripcion(): void {
     this.editandoDescripcion = !this.editandoDescripcion;
-  }
-
-  guardarDescripcion(): void {
-    if (this.descripcionForm.valid) {
-      this.usuario.descripcion = this.descripcionForm.value.descripcion;
-      this.editandoDescripcion = false;
-      this.mostrarExito('Descripción actualizada correctamente');
-    }
   }
 
   validarArchivo(file: File): boolean {
@@ -215,20 +238,6 @@ export class PerfilComponent {
     if (fileInput) fileInput.value = '';
   }
 
-  private mostrarError(mensaje: string): void {
-    this.snackBar.open(mensaje, 'Cerrar', {
-      duration: 5000,
-      panelClass: ['error-snackbar']
-    });
-  }
-
-  private mostrarExito(mensaje: string): void {
-    this.snackBar.open(mensaje, 'Cerrar', {
-      duration: 3000,
-      panelClass: ['success-snackbar']
-    });
-  }
-
   cancelarEdicionDescripcion() {
     this.editandoDescripcion = false;
     // Opcional: resetear el formulario al valor original
@@ -254,6 +263,20 @@ export class PerfilComponent {
       titulo: this.usuario.datos.titulo,
       anioRecibido: this.usuario.datos.anioRecibido,
       poseeExperienciaLaboral: this.usuario.datos.poseeExperienciaLaboral
+    });
+  }
+
+  private mostrarError(mensaje: string): void {
+    this.snackBar.open(mensaje, 'Cerrar', {
+      duration: 5000,
+      panelClass: ['error-snackbar']
+    });
+  }
+
+  private mostrarExito(mensaje: string): void {
+    this.snackBar.open(mensaje, 'Cerrar', {
+      duration: 3000,
+      panelClass: ['success-snackbar']
     });
   }
 }
