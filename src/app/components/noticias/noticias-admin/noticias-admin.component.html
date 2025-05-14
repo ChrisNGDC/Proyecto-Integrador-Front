@@ -5,22 +5,26 @@
   </div>
   <button id="btn-agregar" (click)="agregarEvento()">➕</button>
 </div>
-<div class="grid-container">
-  @for (evento of eventosFiltrados; track $index) {
-  <div class="col">
-    <div class="card text-center">
-      <div (click)="editarEvento(evento)">
-        <img [src]="evento.s3key" class="card-img-top" />
-        <div class="card-body">
-          <h5 class="card-title">{{ evento.titulo }}</h5>
-          <p class="card-text">{{ evento.resumen }}</p>
+@if (loading) {
+<h1 style="color: black; text-align: center; font-size: 5rem;">Loading</h1>
+} @else {
+  <div class="grid-container">
+    @for (evento of eventosFiltrados; track $index) {
+    <div class="col">
+      <div class="card text-center">
+        <div (click)="editarEvento(evento)">
+          <img src="noimage.jpg" class="card-img-top" />
+          <div class="card-body">
+            <h5 class="card-title">{{ evento.titulo }}</h5>
+            <p class="card-text">{{ evento.resumen }}</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <small class="text-muted">Publicado {{ evento.fecha }}</small>
+          <button id="btn-eliminar" (click)="eliminarEvento(evento)">❌</button>
         </div>
       </div>
-      <div class="card-footer">
-        <small class="text-muted">Publicado {{ evento.fecha }}</small>
-        <button id="btn-eliminar" (click)="eliminarEvento(evento)">❌</button>
-      </div>
     </div>
+    }
   </div>
-  }
-</div>
+}

@@ -7,10 +7,15 @@
 #buscador {
   display: flex;
   place-content: center;
+
   label {
     margin-right: .5rem;
     text-align: center;
     vertical-align: middle;
+  }
+
+  input {
+    border: .1rem solid #000000;
   }
 }
 
@@ -18,13 +23,19 @@
   margin: .5rem;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
+  grid-auto-rows: 1fr;
   place-content: center;
   gap: .5rem;
+}
+
+.col {
+  display: flex;
 }
 
 .card {
   transition: .5s;
   backface-visibility: hidden;
+  height: 100%;
 }
 
 .card:hover {
@@ -36,6 +47,16 @@ img {
   aspect-ratio: 16/9;
   object-fit: cover;
   width: 100%;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: .1rem;
+}
+
+.card-text {
+  margin-bottom: .5rem;
 }
 
 @media only screen and (max-width: 720px) {

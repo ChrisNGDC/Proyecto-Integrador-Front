@@ -20,6 +20,10 @@
     text-align: center;
     vertical-align: middle;
   }
+
+  input {
+    border: .1rem solid #000000;
+  }
 }
 
 .grid-container {
@@ -30,9 +34,14 @@
   gap: .5rem;
 }
 
+.col {
+  display: flex;
+}
+
 .card {
   transition: .5s;
   backface-visibility: hidden;
+  height: 100%;
 }
 
 .card:hover {
@@ -44,6 +53,12 @@ img {
   aspect-ratio: 16/9;
   object-fit: cover;
   width: 100%;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: .1rem;
 }
 
 #btn-agregar {

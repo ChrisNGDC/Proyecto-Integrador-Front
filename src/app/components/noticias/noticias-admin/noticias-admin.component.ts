@@ -1,40 +1,39 @@
 import { Component, inject } from '@angular/core';
-import { BbddService } from '../../../services/bbdd.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from '../modal/modal.component';
 import { ModalEdicionComponent } from '../modal-edicion/modal-edicion.component';
-
-import * as noticias from '../noticias.json';
+import { NewsEventsService } from '../../../services/news-events.service';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-noticias-admin',
-  imports: [],
+  imports: [MatProgressSpinnerModule],
   templateUrl: './noticias-admin.component.html',
   styleUrl: './noticias-admin.component.css',
 })
 export class NoticiasAdminComponent {
   private modalService = inject(NgbModal);
+  loading = true;
   eventos: any;
   eventosFiltrados: any;
-  constructor(private bbddservice: BbddService) {
-    this.getEventos();
+  constructor(private neService: NewsEventsService) {
+    this.getEventos().then(() => {setTimeout(() => this.loading = false, 2000)});
   }
   async getEventos() {
-    this.eventos = noticias.datos;
-    this.eventosFiltrados = this.eventos;
-    // this.bbddservice.getDatabase('noticiasYeventos').subscribe((data) => {
-    //   this.eventos = data;
-    //   this.getImages();
-    // });
-  }
-  async getImages() {
-    this.eventos.forEach((evento: any) => {
-      this.bbddservice.getImage(evento.s3key).subscribe((data) => {
-        evento['s3key'] =
-          'data:image/png;base64,' + data['data' as keyof typeof data];
-      });
+    this.neService.getNewsAndEvents().subscribe((data) => {
+      this.eventos = data;
+      // this.getImages();
+      this.eventosFiltrados = this.eventos;
     });
   }
+  // async getImages() {
+  //   this.eventos.forEach((evento: any) => {
+  //     this.neService.getImage(evento.s3key).subscribe((data) => {
+  //       evento['s3key'] =
+  //         'data:image/png;base64,' + data['data' as keyof typeof data];
+  //     });
+  //   });
+  // }
   open(evento: any) {
     const modalRef = this.modalService.open(ModalComponent, {
       size: 'xl',
@@ -60,10 +59,7 @@ export class NoticiasAdminComponent {
     }
   }
   eliminarEvento(eventoAEliminar: any) {
-    this.eventos = this.eventos.filter(
-      (evento: any) => evento.id !== eventoAEliminar.id
-    );
-    this.eventosFiltrados = this.eventos;
+    this.neService.deleteNewsAndEvents(eventoAEliminar.id).subscribe(() => this.getEventos())
   }
   editarEvento(evento: any) {
     const modalRef = this.modalService.open(ModalEdicionComponent, {
@@ -72,19 +68,13 @@ export class NoticiasAdminComponent {
     });
     modalRef.componentInstance.evento = evento;
     modalRef.result.then((data: any) => {
-      // Eliminar esto y hacer lo de despues ↓
-      let posicion = this.eventos.indexOf(evento);
-      this.eventos = this.eventos.filter((elem: any) => elem.id !== evento.id);
-      this.eventos.splice(posicion, 0, data);
-      this.eventosFiltrados = this.eventos;
-      // TODO: update server data
+      this.neService.patchNewsAndEvents(data.id, data).subscribe(() => this.getEventos())
     }).catch((error: any) => console.log(error));
   }
   agregarEvento() {
     let eventoNuevo = {
       descripcion: "",
       fecha: "",
-      id: "",
       resumen: "",
       s3key: "",
       titulo: ""
@@ -95,12 +85,9 @@ export class NoticiasAdminComponent {
     });
     modalRef.componentInstance.evento = eventoNuevo;
     modalRef.result.then((data: any) => {
-      // Eliminar esto y hacer lo de despues ↓
-      if (data['titulo'] != ''){
-        this.eventos.unshift(data);
-        this.eventosFiltrados = this.eventos;
+      if (data.titulo != "" && data.resumen != "" && data.descripcion != "" && data.fecha != "") {
+        this.neService.putNewsAndEvents(data).subscribe(() => this.getEventos())
       }
-      // TODO: update server data
     }).catch((error: any) => console.log(error));
   }
 }

@@ -22,6 +22,11 @@
 
 textarea {
   resize: vertical;
+  border: .1rem solid #000000;
+}
+
+input {
+    border: .1rem solid #000000;
 }
 
 .file-input {

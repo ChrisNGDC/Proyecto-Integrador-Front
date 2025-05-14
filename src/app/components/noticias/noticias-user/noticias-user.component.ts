@@ -1,13 +1,12 @@
 import { Component, inject } from '@angular/core';
-import { BbddService } from '../../../services/bbdd.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from '../modal/modal.component';
-
-import * as noticias from '../noticias.json'
+import { NewsEventsService } from '../../../services/news-events.service';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-noticias-user',
-  imports: [],
+  imports: [MatProgressSpinnerModule],
   templateUrl: './noticias-user.component.html',
   styleUrl: './noticias-user.component.css',
 })
@@ -15,20 +14,20 @@ export class NoticiasUserComponent {
   private modalService = inject(NgbModal);
   eventos: any;
   eventosFiltrados: any;
-  constructor(private bbddservice: BbddService) {
-    this.getEventos();
+  loading = true;
+  constructor(private neService: NewsEventsService) {
+    this.getEventos().then(() => {setTimeout(() => this.loading = false, 2000)});
   }
   async getEventos() {
-    this.eventos = noticias.datos
-    this.eventosFiltrados = this.eventos
-    // this.bbddservice.getDatabase('noticiasYeventos').subscribe((data) => {
-    //   this.eventos = data;
-    //   this.getImages();
-    // });
+    this.neService.getNewsAndEvents().subscribe((data) => {
+      this.eventos = data;
+      // this.getImages();
+      this.eventosFiltrados = this.eventos
+    });
   }
   async getImages() {
     this.eventos.forEach((evento: any) => {
-      this.bbddservice
+      this.neService
         .getImage(evento.s3key)
         .subscribe((data) => {
           evento['s3key'] =
