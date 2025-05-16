@@ -68,8 +68,9 @@ export class NoticiasAdminComponent {
     });
     modalRef.componentInstance.evento = evento;
     modalRef.result.then((data: any) => {
+      let id = data.id;
       delete data.id;
-      this.neService.patchNewsAndEvents(data.id, JSON.stringify(data)).subscribe(() => this.getEventos())
+      this.neService.patchNewsAndEvents(id, JSON.stringify(data)).subscribe(() => this.getEventos())
     }).catch((error: any) => console.log(error));
   }
   agregarEvento() {
