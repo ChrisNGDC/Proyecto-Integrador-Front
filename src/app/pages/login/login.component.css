@@ -4,140 +4,182 @@
   box-sizing: border-box;
 }
 
+body, html {
+  height: 100%;
+  font-family: 'Segoe UI', sans-serif;
+}
+
 .splash-container {
-  width: 100%;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center; 
+  justify-content: center;
   align-items: center;
+  min-height: 100vh;
   background-image: url(../../../../public/assets/background.svg);
-  background-position: center;
   background-repeat: no-repeat;
+  background-position: center;
   background-size: contain;
-  padding: 1rem;
-  padding-bottom: 10%;
-  overflow: hidden;
+  padding: 2rem;
   position: relative;
 }
 
-h1 {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  font-size: clamp(2.5rem, 8vw, 5rem);
-  color: #2c3e50;
-  margin-bottom: 2rem;
+.login-card {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 100%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin: 3%;
 }
 
-button {
-  font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+.login-card label {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.login-card input {
+  padding: 0.6rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.login-card button {
+  margin-top: 1rem;
+  font-size: 1rem;
   padding: 0.8rem 1.5rem;
   border-radius: 10px;
   border: none;
   background-color: #2c3e50;
   color: #fff;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  z-index: 10;
+  transition: transform 0.2s ease, background-color 0.3s ease;
 }
 
-button:hover {
-  background-color: #5499c7;
+.login-card button:hover {
+  background-color: #1a5276;
+  transform: scale(1.03);
 }
 
+h1 {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  text-align: center;
+}
 
+/* Responsive */
 @media screen and (max-width: 768px) {
   .splash-container {
-    background-size: 120% auto;
-    background-position: center 40%;
-    justify-content: flex-start; 
+    background-size: 140% auto;
   }
-  
-  h1 {
-    margin-top: 10vh;
-    margin-bottom: 1.5rem;
-  }
-  
-  button {
-    position: absolute;
-    bottom: 15vh;
-  }
-}
 
-
-@media screen and (max-width: 414px) and (min-height: 700px) {
-  .splash-container {
-    background-size: 150% auto;
-    background-position: center 30%;
-  }
-  
-  h1 {
-    margin-top: 8vh;
-  }
-  
-  button {
-    bottom: 10vh;
+  .login-card {
+    padding: 1.5rem;
   }
 }
 
 @media screen and (max-width: 480px) {
-  .splash-container {
-    padding: 0.8rem;
-    background-size: 140% auto;
-    background-position: center 30%;
+  .login-card {
+    padding: 1rem;
   }
-  
+
+  .login-card input,
+  .login-card button {
+    font-size: 0.95rem;
+  }
+
   h1 {
-    font-size: clamp(2rem, 7vw, 3rem);
-    margin-top: 7vh;
-    margin-bottom: 1.2rem;
-  }
-  
-  button {
-    width: 80%;
-    max-width: 250px;
-    padding: 0.7rem 1.2rem;
-    bottom: 8vh;
+    font-size: 2rem;
   }
 }
 
-@media screen and (max-width: 375px) {
-  .splash-container {
-    padding: 0.5rem;
-    background-size: 160% auto;
-    background-position: center 25%;
+.hero-text-container {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #2c3e50;
+  font-family: Arial, sans-serif;
+  margin-top: 3%;
+}
+
+/* Estilo principal */
+.hero-title {
+  font-weight: bold;
+  font-size: 2rem; /* base */
+  margin-bottom: 0.5rem;
+}
+
+/* Subtítulo */
+.hero-subtitle {
+  font-size: 1rem;
+  color: #7f8c8d;
+}
+
+/* Pantallas medianas */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 1.6rem;
+    line-height: 1.3;
   }
-  
-  h1 {
-    font-size: clamp(1.8rem, 6vw, 2.5rem);
-    margin-top: 5vh;
-    margin-bottom: 1rem;
-  }
-  
-  button {
-    width: 90%;
-    max-width: 220px;
-    padding: 0.6rem 1rem;
+  .hero-subtitle {
     font-size: 0.9rem;
-    bottom: 7vh;
   }
 }
 
-@media screen and (max-width: 320px) {
-  .splash-container {
-    background-size: 180% auto;
-    background-position: center 20%;
+/* Pantallas pequeñas (teléfonos) */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.2rem;
+    line-height: 1.4;
   }
-  
-  h1 {
-    font-size: clamp(1.5rem, 5vw, 2rem);
-    margin-top: 3vh;
+  .hero-subtitle {
+    font-size: 0.8rem;
   }
-  
-  button {
-    width: 95%;
-    font-size: 0.85rem;
-    padding: 0.5rem 0.8rem;
-    bottom: 5vh;
-  }
+}
+.error-message {
+  color: #ff4444;
+  margin-top: 10px;
+  text-align: center;
+}
+
+button[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.login-card {
+  position: relative;
+}
+.activation-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.activation-card h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+.resend-button {
+  background-color: #6c757d;
+  margin-top: 10px;
+}
+
+.success-message {
+  color: #28a745;
+  margin-top: 15px;
 }

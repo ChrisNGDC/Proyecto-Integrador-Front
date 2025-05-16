@@ -6,7 +6,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatCardModule } from '@angular/material/card';
+import { ChangePasswordComponent } from '../change-password/change-password.component';
 @Component({
   selector: 'app-perfil',
   standalone: true,
@@ -16,7 +18,10 @@ import { MatInputModule } from '@angular/material/input';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    MatExpansionModule,
+    MatCardModule,
+    ChangePasswordComponent
   ],
   templateUrl: './perfil.component.html',
   styleUrls: ['./perfil.component.css']
@@ -46,6 +51,7 @@ export class PerfilComponent {
   editandoDescripcion = false;
   datosForm!: FormGroup;
   descripcionForm!: FormGroup;
+  passwordExpanded = false;
 
   constructor(
     private fb: FormBuilder,

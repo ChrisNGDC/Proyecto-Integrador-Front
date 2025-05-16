@@ -12,14 +12,17 @@ import { NoticiasAdminComponent } from './components/noticias/noticias-admin/not
 import { EgresadosComponent } from './components/egresados/egresados.component';
 import { AdminSurveysComponent } from './components/admin-surveys-component/admin-surveys-component.component';
 import { AdminOpportunitiesComponent } from './components/admin-opportunities-component/admin-opportunities-component.component';
+import { ChangePasswordComponent } from './components/change-password/change-password.component';
 
 export const routes: Routes = [
+  
   { path: '', component: LoginComponent, outlet: 'primary' },
   {
     path: 'admin-dashboard',
     component: AdminDashboardComponent,
     canActivate: [AdminGuard],
     children: [
+      { path: '', redirectTo: 'noticias', pathMatch: 'full' },
       {
         path: 'noticias',
         component: NoticiasAdminComponent,
@@ -36,6 +39,7 @@ export const routes: Routes = [
         path: 'oportunidades',
         component: AdminOpportunitiesComponent,
       },
+      
     ]
   },
   {
@@ -43,6 +47,7 @@ export const routes: Routes = [
     component: UserDashboardComponent,
     canActivate: [UserGuard],
     children: [
+      { path: '', redirectTo: 'noticias', pathMatch: 'full' },
       {
         path: 'noticias',
         component: NoticiasUserComponent,
@@ -59,6 +64,7 @@ export const routes: Routes = [
         path: 'oportunidades',
         component: OpportunitiesComponent,
       },
+      { path: 'cambiar-contrasena', component: ChangePasswordComponent },
     ]
   },
   {

@@ -1,80 +1,87 @@
-import { Injectable, inject } from '@angular/core';
-import { OidcSecurityService } from 'angular-auth-oidc-client';
-import { BehaviorSubject, Observable, map } from 'rxjs';
-import { Router } from '@angular/router';
-import {jwtDecode} from 'jwt-decode';
+import { Injectable } from '@angular/core';
+import { 
+  signIn,
+  signUp, 
+  getCurrentUser,
+  signOut,
+  fetchAuthSession,
+  updatePassword 
+ 
+} from 'aws-amplify/auth';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AuthService {
-  private readonly router = inject(Router);
-  private readonly oidcSecurityService = inject(OidcSecurityService);
-  private _isAuthenticated$ = new BehaviorSubject<boolean>(false);
-  isAuthenticated$ = this._isAuthenticated$.asObservable();
-  userData$ = this.oidcSecurityService.userData$;
+  constructor() {  }
 
-  constructor() {
-    this.initAuth();
+  async login(username: string, password: string): Promise<any> {
+    try {
+      return await signIn({ 
+        username, 
+        password,
+        options: {
+          authFlowType: 'USER_PASSWORD_AUTH'
+        }
+      });
+    } catch (error: any) {
+      // Cognito a veces usa __type en lugar de name
+      const errorType = error.__type || error.name;
+      const cognitoError = new Error(error.message);
+      cognitoError.name = errorType;
+      throw cognitoError;
+    }
   }
 
-  private initAuth(): void {
-    this.oidcSecurityService.isAuthenticated$.subscribe(({ isAuthenticated }) => {
-      this._isAuthenticated$.next(isAuthenticated);
-      console.log('AuthService: isAuthenticated:', isAuthenticated);      
-    });
-  }
-  checkAuth(): void {
-    this.oidcSecurityService.checkAuth().subscribe(({ isAuthenticated, idToken }) => {
-      if (isAuthenticated && idToken) {
-        const decodedToken: any = jwtDecode(idToken);
-        const isAdmin = decodedToken['cognito:groups']?.includes('Admin');
-        const route = isAdmin ? '/admin-dashboard' : '/user-dashboard';
-        this.router.navigate([route]);        
+  async signUp(username: string, password: string, nroAlumno: string): Promise<any> {
+    return signUp({
+      username,
+      password,
+      options: {
+        userAttributes: {
+          'custom:nroAlumno': nroAlumno,
+        }
       }
     });
-  }  
-    
-  isAdmin(): Observable<boolean> {
-    return this.oidcSecurityService.getIdToken().pipe(
-      map((token) => {
-        if (!token) return false;
-        const decodedToken: any = jwtDecode(token);
-        console.log(decodedToken)
-        return decodedToken['cognito:groups']?.includes('Admin') ?? false;
-      })
-    );
-  }
-  
-  isAuthenticated(): Observable<boolean> {
-    return this.oidcSecurityService.isAuthenticated$.pipe(
-      map(({ isAuthenticated }) => isAuthenticated)
-    );
-  }
-  
-
-  getCurrentUser(){
-    return this.oidcSecurityService.userData$.pipe(
-      map((data) => data?.userData)
-    );
-  }
-  
-  getUserRole(): Observable<string | null> {
-    return this.oidcSecurityService.userData$.pipe(
-      map((data) => data?.userData?.['custom:role'] ?? null)
-    );    
   }
 
-  login(): void {
-    this.oidcSecurityService.authorize(); 
+  async getCurrentUser() {
+    return getCurrentUser();
   }
 
-  logout(): void {
-    sessionStorage.clear();
-    window.location.href = `https://us-east-1irahhdiiv.auth.us-east-1.amazoncognito.com/logout?client_id=4l266lkv7t1pvsd9fochnljcdq&logout_uri=http://localhost:4200/login`;
+  async logout() {
+    return signOut();
+  }
+
+  async isAuthenticated(): Promise<boolean> {
+    try {
+      await this.getCurrentUser();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async isAdmin(): Promise<boolean> {
+    try {
+      const { tokens } = await fetchAuthSession();
+      const groups = tokens?.accessToken?.payload['cognito:groups'] || [];
+      
+      // Verifica si groups es un array antes de usar includes
+      if (Array.isArray(groups)) {
+        return groups.includes('Admin');
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }
+  async changePassword( oldPassword: string, newPassword: string ): Promise<void> {
+    try {   
+      await updatePassword({ oldPassword, newPassword });
+    } catch (error) {
+      console.error('Error changing password:', error);
+      throw error;
+    }
   }
 }
-
-
-
-

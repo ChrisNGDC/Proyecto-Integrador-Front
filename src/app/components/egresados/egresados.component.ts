@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-egresados',
@@ -50,7 +51,7 @@ export class EgresadosComponent {
   // Formulario
   egresadoForm: FormGroup;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private authService: AuthService,) {
     this.egresadoForm = this.fb.group({
       nroAlumno: ['', Validators.required],
       nombre: ['', Validators.required],
@@ -102,9 +103,12 @@ export class EgresadosComponent {
 
   // Guardar cambios
   guardarEgresado() {
-    if (this.egresadoForm.valid) {
+    this.authService.signUp(this.egresadoForm.value.mail, "Ifts2025_", this.egresadoForm.value.nroAlumno);
+    console.log("se registró el egresado: ", this.egresadoForm.value.mail);
+    this.egresadoForm.reset();
+   /* if (this.egresadoForm.valid) {
       const formData = this.egresadoForm.value;
-
+"prueba@prueba.com.ar","Pass123_", "prueba@prueba.com.ar"
       if (this.editMode()) {
         // Actualizar existente
         this.egresados.update(egresados => 
@@ -126,6 +130,6 @@ export class EgresadosComponent {
       }
 
       this.setActiveTab('lista');
-    }
+    }*/
   }
 }
