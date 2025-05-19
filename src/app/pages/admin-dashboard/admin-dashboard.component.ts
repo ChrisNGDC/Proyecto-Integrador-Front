@@ -11,10 +11,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./admin-dashboard.component.css']
 })
 export class AdminDashboardComponent {
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+   constructor(private authService: AuthService, private router: Router) {}
 
   async ngOnInit() {
     try {

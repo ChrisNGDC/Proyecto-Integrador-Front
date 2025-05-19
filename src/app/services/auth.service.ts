@@ -5,9 +5,12 @@ import {
   getCurrentUser,
   signOut,
   fetchAuthSession,
-  updatePassword 
- 
+  updatePassword,
+  resetPassword,
+  confirmResetPassword
 } from 'aws-amplify/auth';
+
+
 
 @Injectable({
   providedIn: 'root'
@@ -82,6 +85,52 @@ export class AuthService {
     } catch (error) {
       console.error('Error changing password:', error);
       throw error;
+    }
+  }
+
+
+  async forgotPassword(username: string): Promise<void> {
+    try {
+      await resetPassword({ username });
+    } catch (error: any) {
+      console.error('Error en forgotPassword:', error);
+      throw new Error(this.getFriendlyErrorMessage(error));
+    }
+  }
+  
+  async confirmPasswordReset(
+    username: string,
+    confirmationCode: string,
+    newPassword: string
+  ): Promise<void> {
+    try {
+      await confirmResetPassword({ 
+        username, 
+        confirmationCode, 
+        newPassword 
+      });
+    } catch (error: any) {
+      console.error('Error en confirmPasswordReset:', error);
+      throw new Error(this.getFriendlyErrorMessage(error));
+    }
+  }
+  
+  private getFriendlyErrorMessage(error: any): string {
+    const errorType = error.__type || error.name;
+    
+    switch (errorType) {
+      case 'UserNotFoundException':
+        return 'El usuario no existe en el sistema';
+      case 'InvalidParameterException':
+        return 'El código de verificación es inválido o ha expirado';
+      case 'CodeMismatchException':
+        return 'El código de verificación no coincide';
+      case 'LimitExceededException':
+        return 'Has excedido el número máximo de intentos. Por favor intenta más tarde';
+      case 'InvalidPasswordException':
+        return 'La contraseña no cumple con los requisitos de complejidad';
+      default:
+        return error.message || 'Ocurrió un error inesperado';
     }
   }
 }

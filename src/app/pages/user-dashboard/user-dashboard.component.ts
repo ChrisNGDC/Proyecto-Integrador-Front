@@ -11,10 +11,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./user-dashboard.component.css']
 })
 export class UserDashboardComponent {
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+    constructor(private authService: AuthService,private router: Router ) {}
 
   async ngOnInit() {
     try {
@@ -25,7 +22,7 @@ export class UserDashboardComponent {
       this.router.navigate(['/login']);
     }
   }
-
+  
   async logout() {
     try {
       await this.authService.logout();
