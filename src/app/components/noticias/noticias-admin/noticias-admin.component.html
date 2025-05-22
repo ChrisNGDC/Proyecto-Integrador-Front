@@ -1,30 +1,59 @@
 <div id="sub-nav">
   <div id="buscador">
-    <label for="busqueda">Buscar:</label>
-    <input type="text" name="busqueda" (input)="filtrar($event)" />
+    <label id="buscar" for="busqueda">Buscar:</label>
+    <input
+      id="buscado"
+      type="text"
+      name="busqueda"
+      [(ngModel)]="this.busqueda"
+      (input)="filtrar()"
+    />
+    <div id="filtroFechas">
+      <div id="fecha">
+        <label>Inicio: </label>
+        <input
+          type="date"
+          max="{{ this.fechas.fin }}"
+          [(ngModel)]="fechas.inicio"
+          (keydown)="$event.preventDefault()"
+          (input)="filtrar()"
+        />
+      </div>
+      <div id="fecha">
+        <label>Fin: </label>
+        <input
+          type="date"
+          max="{{ this.fechas.fin }}"
+          [ngModel]="fechas.fin | date : 'yyyy-MM-dd' : 'UTC'"
+          (ngModelChange)="fechas.fin = $event"
+          (keydown)="$event.preventDefault()"
+          (input)="filtrar()"
+        />
+      </div>
+    </div>
   </div>
   <button id="btn-agregar" (click)="agregarEvento()">➕</button>
 </div>
 @if (loading) {
-<h1 style="color: black; text-align: center; font-size: 5rem;">Loading</h1>
+<h1 style="color: black; text-align: center; font-size: 5rem">Loading</h1>
 } @else {
-  <div class="grid-container">
-    @for (evento of eventosFiltrados; track $index) {
-    <div class="col">
-      <div class="card text-center">
-        <div (click)="editarEvento(evento)">
-          <img src="noimage.jpg" class="card-img-top" />
-          <div class="card-body">
-            <h5 class="card-title">{{ evento.titulo }}</h5>
-            <p class="card-text">{{ evento.resumen }}</p>
-          </div>
-        </div>
-        <div class="card-footer">
-          <small class="text-muted">Publicado {{ evento.fecha }}</small>
-          <button id="btn-eliminar" (click)="eliminarEvento(evento)">❌</button>
+<div class="grid-container">
+  @for (evento of eventosFiltrados; track $index) {
+  <div class="col">
+    <div class="card text-center">
+      <div (click)="editarEvento(evento)">
+        <img src="noimage.jpg" class="card-img-top" />
+        <div class="card-body">
+          <h5 class="card-title">{{ evento.titulo }}</h5>
+          <p class="card-text">{{ evento.resumen }}</p>
         </div>
       </div>
+      <div class="card-footer">
+        <small class="text-muted">Publicado {{ evento.fecha }}</small>
+        <button id="btn-eliminar" (click)="eliminarEvento(evento)">❌</button>
+      </div>
     </div>
-    }
   </div>
+  }
+</div>
 }

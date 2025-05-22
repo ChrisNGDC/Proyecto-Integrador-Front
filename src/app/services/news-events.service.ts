@@ -25,7 +25,7 @@ export class NewsEventsService {
   }
   // s3key se conforma por la ruta completa de la imagen en el s3: carpeta/nombre-imagen.extencion
   getImage(s3key: string) {
-    return this.http.post(`${this.url}/getphoto?s3key=${s3key}`, {})
+    return this.http.get(`${this.url}/getphoto?s3key=${s3key}`)
   }
   // Retorna el codigo de la imagen en formato base64
   saveImage(foldername: string, filename: string, imageData: string) {

@@ -4,10 +4,12 @@ import { ModalComponent } from '../modal/modal.component';
 import { ModalEdicionComponent } from '../modal-edicion/modal-edicion.component';
 import { NewsEventsService } from '../../../services/news-events.service';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-noticias-admin',
-  imports: [MatProgressSpinnerModule],
+  imports: [MatProgressSpinnerModule, FormsModule, CommonModule],
   templateUrl: './noticias-admin.component.html',
   styleUrl: './noticias-admin.component.css',
 })
@@ -16,6 +18,11 @@ export class NoticiasAdminComponent {
   loading = true;
   eventos: any;
   eventosFiltrados: any;
+  fechas = {
+    inicio: null,
+    fin: new Date(Date.now()),
+  };
+  busqueda = '';
   constructor(private neService: NewsEventsService) {
     this.getEventos().then(() => {setTimeout(() => this.loading = false, 2000)});
   }
@@ -24,6 +31,7 @@ export class NoticiasAdminComponent {
       this.eventos = data;
       // this.getImages();
       this.eventosFiltrados = this.eventos;
+      this.eventosFiltrados.sort((a: any, b: any) =>  new Date(b.fecha).getTime()- new Date(a.fecha).getTime());
     });
   }
   // async getImages() {
@@ -41,22 +49,48 @@ export class NoticiasAdminComponent {
     });
     modalRef.componentInstance.evento = evento;
   }
-  filtrar(event: any) {
-    let busqueda = event.target.value.toLowerCase();
-    if (busqueda == '') {
-      this.eventosFiltrados = this.eventos;
-    } else {
-      this.eventosFiltrados = [];
+  filtrar() {
+    let buscadosPalabras: any[] = [];
+    let buscadosFechas: any[] = [];
+    if (this.busqueda != '') {
       this.eventos.forEach((evento: any) => {
         if (
-          evento['titulo'].toLowerCase().includes(busqueda) ||
-          evento['resumen'].toLowerCase().includes(busqueda) ||
-          evento['descripcion'].toLowerCase().includes(busqueda)
+          evento['titulo']
+            .toLowerCase()
+            .includes(this.busqueda.toLowerCase()) ||
+          evento['resumen']
+            .toLowerCase()
+            .includes(this.busqueda.toLowerCase()) ||
+          evento['descripcion']
+            .toLowerCase()
+            .includes(this.busqueda.toLowerCase())
         ) {
-          this.eventosFiltrados.push(evento);
+          buscadosPalabras.push(evento);
+        }
+      });
+    } else {
+      this.eventosFiltrados = this.eventos;
+    }
+    if (this.fechas.inicio != null) {
+      this.eventos.forEach((evento: any) => {
+        if (
+          evento['fecha'] >= this.fechas.inicio! &&
+          evento['fecha'] <= this.fechas.fin.getFullYear() + '-' + this.fechas.fin.getMonth() + '-' + this.fechas.fin.getDate()
+        ) {
+          buscadosFechas.push(evento);
         }
       });
     }
+    if (buscadosPalabras.length > 0) {
+      if (buscadosFechas.length > 0) {
+        this.eventosFiltrados = buscadosPalabras.filter((item) =>buscadosFechas.includes(item));
+      } else {
+        this.eventosFiltrados = buscadosPalabras;
+      }
+    } else if(buscadosFechas.length > 0)  {
+      this.eventosFiltrados = buscadosFechas;
+    }
+    this.eventosFiltrados.sort((a: any, b: any) =>  new Date(b.fecha).getTime()- new Date(a.fecha).getTime());
   }
   eliminarEvento(eventoAEliminar: any) {
     this.neService.deleteNewsAndEvents(eventoAEliminar.id).subscribe(() => this.getEventos())

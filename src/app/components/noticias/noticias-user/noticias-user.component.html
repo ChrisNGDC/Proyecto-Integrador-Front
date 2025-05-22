@@ -1,6 +1,29 @@
 <div id="buscador">
-  <label for="busqueda">Buscar:</label>
-  <input type="text" name="busqueda" (input)="filtrar($event)" />
+  <label id="buscar" for="busqueda">Buscar:</label>
+  <input id="buscado" type="text" name="busqueda" [(ngModel)] = "this.busqueda" (input)="filtrar()"/>
+  <div id="filtroFechas">
+    <div id="fecha">
+      <label>Inicio: </label>
+      <input
+        type="date"
+        max="{{this.fechas.fin}}"
+        [(ngModel)] = "fechas.inicio"
+        (keydown)="$event.preventDefault()"
+        (input)="filtrar()"
+      />
+    </div>
+    <div id="fecha">
+      <label>Fin: </label>
+      <input
+        type="date"
+        max="{{this.fechas.fin}}"
+        [ngModel]="fechas.fin | date:'yyyy-MM-dd' : 'UTC'"
+        (ngModelChange)="fechas.fin = $event"
+        (keydown)="$event.preventDefault()"
+        (input)="filtrar()"
+      />
+    </div>
+  </div>
 </div>
 @if (loading) {
 <h1 style="color: black; text-align: center; font-size: 5rem">Loading</h1>

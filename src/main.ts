@@ -8,6 +8,7 @@ import { routes } from './app/app.routes';
 import { authConfig } from './app/auth/auth.config';
 import { provideAuth } from 'angular-auth-oidc-client';
 import { provideHttpClient } from '@angular/common/http';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 
 bootstrapApplication(AppComponent, {
@@ -15,6 +16,7 @@ bootstrapApplication(AppComponent, {
     provideRouter(routes),
     provideHttpClient(),
     provideAuth(authConfig),
+    provideNativeDateAdapter()
   ],
 });
 
