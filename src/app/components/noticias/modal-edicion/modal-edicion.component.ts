@@ -18,15 +18,22 @@ export class ModalEdicionComponent implements OnInit {
     type: '',
     content: ''
   }
-  maxAllowedSize = 15 * 1024; // 15KB
+  maxAllowedSize = 100 * 1024; // KB
 
   ngOnInit() {
     this.eventoModal = JSON.parse(JSON.stringify(this.evento));
     this.filedata.content = this.evento.s3key;
+    if (this.evento.s3key.includes('png')) {
+      this.filedata.type = 'png';
+    } else if (this.evento.s3key.includes('jpg')) {
+      this.filedata.type = 'jpg';
+    } else if (this.evento.s3key.includes('jpeg')) {
+      this.filedata.type = 'jpeg';
+    }
   }
   validEvent(evento: any) {
     for (let key in evento) {
-      if (evento[key] == '') {
+      if (evento[key] == '' && key != 's3key') {
         return false;
       }
     }
@@ -57,7 +64,6 @@ export class ModalEdicionComponent implements OnInit {
         const fileContent = fileReader.result as string;
         this.filedata.type = file.type.split('/')[1];
         this.filedata.content = fileContent;
-        this.eventoModal.s3key = `noticiasYeventos/${this.evento.id}.${this.filedata.type}`;
       };
       fileReader.readAsDataURL(file);
     } else {

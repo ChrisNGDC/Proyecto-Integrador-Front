@@ -27,6 +27,8 @@ export class NoticiasAdminComponent {
     this.getEventos();
   }
   async getEventos() {
+    this.eventos = [];
+    this.eventosFiltrados = [];
     this.loading = true;
     this.neService.getNewsAndEvents().subscribe((data) => {
       this.eventos = data;
@@ -45,6 +47,7 @@ export class NoticiasAdminComponent {
   async getImages() {
     this.eventos.forEach((evento: any) => {
       this.neService.getImage(evento.s3key).subscribe((data) => {
+        console.log(data)
         evento['s3key'] = data['data' as keyof typeof data];
       });
     });
@@ -126,18 +129,18 @@ export class NoticiasAdminComponent {
         const filedata = data[1];
         let id = evento.id;
         delete evento.id;
+        evento.s3key = `noticiasYeventos/${id}.${filedata.type}`;
         this.neService
           .saveImage(
             'noticiasYeventos',
             `${id}.${filedata.type}`,
             filedata.content
           )
-          .subscribe((data) => {
-            console.log(data);
+          .subscribe(() => {
+            this.neService
+              .patchNewsAndEvents(id, JSON.stringify(evento))
+              .subscribe(() => this.getEventos());
           });
-        this.neService
-          .patchNewsAndEvents(id, JSON.stringify(evento))
-          .subscribe(() => this.getEventos());
       })
       .catch((error: any) => console.log(error));
   }
@@ -158,17 +161,17 @@ export class NoticiasAdminComponent {
       .then((data: any[]) => {
         const evento = data[0];
         const filedata = data[1];
-        this.neService
+        evento.s3key = `${filedata.type}`;
+        this.neService.putNewsAndEvents(evento).subscribe((id) => {
+          this.neService
           .saveImage(
             'noticiasYeventos',
-            `${evento.id}.${filedata.type}`,
+            `${id}.${filedata.type}`,
             filedata.content
           )
-          .subscribe((data) => {
-            console.log(data);
+          .subscribe(() => {
+            this.getEventos();
           });
-        this.neService.putNewsAndEvents(evento).subscribe(() => {
-          this.getEventos();
         });
       })
       .catch((error: any) => console.log(error));
