@@ -93,15 +93,15 @@ export class NoticiasUserComponent {
         }
       });
     }
-    if (buscadosPalabras.length > 0) {
-      if (buscadosFechas.length > 0) {
+    if (this.busqueda != '') {
+      if (this.fechas.inicio != null) {
         this.eventosFiltrados = buscadosPalabras.filter((item) =>
           buscadosFechas.includes(item)
         );
       } else {
         this.eventosFiltrados = buscadosPalabras;
       }
-    } else if (buscadosFechas.length > 0) {
+    } else if (this.fechas.inicio != null) {
       this.eventosFiltrados = buscadosFechas;
     }
     this.eventosFiltrados.sort(
