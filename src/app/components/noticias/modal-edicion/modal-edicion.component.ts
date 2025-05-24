@@ -18,7 +18,7 @@ export class ModalEdicionComponent implements OnInit {
     type: '',
     content: ''
   }
-  maxAllowedSize = 100 * 1024; // KB
+  maxAllowedSize = 200 * 1024; // KB
 
   ngOnInit() {
     this.eventoModal = JSON.parse(JSON.stringify(this.evento));
