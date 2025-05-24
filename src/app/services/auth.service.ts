@@ -7,10 +7,8 @@ import {
   fetchAuthSession,
   updatePassword,
   resetPassword,
-  confirmResetPassword,
+  confirmResetPassword
 } from 'aws-amplify/auth';
-
-
 
 @Injectable({
   providedIn: 'root'

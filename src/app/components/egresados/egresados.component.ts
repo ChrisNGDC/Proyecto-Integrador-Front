@@ -97,7 +97,9 @@ export class EgresadosComponent {
   guardarEgresado() {
     if (this.egresadoForm.valid) {
 
-      this.authService.signUp(this.egresadoForm.value.mail, this.egresadoForm.value.dni);
+      const pass = "Ifts11_" + this.egresadoForm.value.dni
+      console.log("La contraseña es: "+pass)
+      this.authService.signUp(this.egresadoForm.value.mail, pass);
       console.log("se registró el egresado: ", this.egresadoForm.value.mail);
       //this.egresadoForm.reset();
 
