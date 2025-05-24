@@ -24,26 +24,31 @@ export class NoticiasUserComponent {
   };
   busqueda = '';
   constructor(private neService: NewsEventsService) {
-    this.getEventos().then(() => {
-      setTimeout(() => (this.loading = false), 2000);
-    });
+    this.getEventos();
   }
   async getEventos() {
+    this.loading = true;
     this.neService.getNewsAndEvents().subscribe((data) => {
       this.eventos = data;
-      // this.getImages();
-      this.eventosFiltrados = this.eventos;
-      this.eventosFiltrados.sort((a: any, b: any) =>  new Date(b.fecha).getTime()- new Date(a.fecha).getTime());
+      this.getImages().then(() => {
+        this.eventosFiltrados = this.eventos;
+        this.eventosFiltrados.sort(
+          (a: any, b: any) =>
+            new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+        );
+        setTimeout(() => {
+          this.loading = false;
+        }, 2000);
+      });
     });
   }
-  // async getImages() {
-  //   this.eventos.forEach((evento: any) => {
-  //     this.neService.getImage(evento.s3key).subscribe((data) => {
-  //       evento['s3key'] =
-  //         'data:image/png;base64,' + data['data' as keyof typeof data];
-  //     });
-  //   });
-  // }
+  async getImages() {
+    this.eventos.forEach((evento: any) => {
+      this.neService.getImage(evento.s3key).subscribe((data) => {
+        evento['s3key'] = data['data' as keyof typeof data];
+      });
+    });
+  }
   open(evento: any) {
     const modalRef = this.modalService.open(ModalComponent, {
       size: 'xl',
@@ -77,7 +82,12 @@ export class NoticiasUserComponent {
       this.eventos.forEach((evento: any) => {
         if (
           evento['fecha'] >= this.fechas.inicio! &&
-          evento['fecha'] <= this.fechas.fin.getFullYear() + '-' + this.fechas.fin.getMonth() + '-' + this.fechas.fin.getDate()
+          evento['fecha'] <=
+            this.fechas.fin.getFullYear() +
+              '-' +
+              this.fechas.fin.getMonth() +
+              '-' +
+              this.fechas.fin.getDate()
         ) {
           buscadosFechas.push(evento);
         }
@@ -85,13 +95,18 @@ export class NoticiasUserComponent {
     }
     if (buscadosPalabras.length > 0) {
       if (buscadosFechas.length > 0) {
-        this.eventosFiltrados = buscadosPalabras.filter((item) =>buscadosFechas.includes(item));
+        this.eventosFiltrados = buscadosPalabras.filter((item) =>
+          buscadosFechas.includes(item)
+        );
       } else {
         this.eventosFiltrados = buscadosPalabras;
       }
-    } else if(buscadosFechas.length > 0)  {
+    } else if (buscadosFechas.length > 0) {
       this.eventosFiltrados = buscadosFechas;
     }
-    this.eventosFiltrados.sort((a: any, b: any) =>  new Date(b.fecha).getTime()- new Date(a.fecha).getTime());
+    this.eventosFiltrados.sort(
+      (a: any, b: any) =>
+        new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+    );
   }
 }
