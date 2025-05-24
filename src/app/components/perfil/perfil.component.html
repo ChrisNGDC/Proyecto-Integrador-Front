@@ -3,15 +3,15 @@
     <section class="imagen-section">
       <div class="avatar-controls">
         <div class="avatar-wrapper" (click)="fileInput.click()">
-          @if (usuario.fotoPerfil) {
-            <img [src]="usuario.fotoPerfil" class="avatar-image" alt="Foto de perfil">
+          @if (egresado.fotoPerfil) {
+            <img [src]="egresado.fotoPerfil" class="avatar-image" alt="Foto de perfil">
           } @else {
             <div class="avatar-default">
-              {{ getIniciales(usuario.datos.nombreCompleto) }}
+              {{ getIniciales() }}
             </div>
           }
           <div class="avatar-overlay">
-            <span>{{ usuario.fotoPerfil ? 'Cambiar foto' : 'Agregar foto' }}</span>
+            <span>{{ egresado.fotoPerfil ? 'Cambiar foto' : 'Agregar foto' }}</span>
           </div>
         </div>
         
@@ -24,10 +24,10 @@
         
         @if (archivoSeleccionado) {
           <div class="file-actions">
-            <button class="btn-save" (click)="confirmarCambio()">
+            <button class="btn-save" (click)="guardarFoto()">
               Confirmar
             </button>
-            <button class="btn-cancel" (click)="cancelarCambio()">
+            <button class="btn-cancel" (click)="cancelarEdicionFoto()">
               Cancelar
             </button>
           </div>
@@ -40,14 +40,14 @@
         <div class="section-header">
           <strong><h3>Datos Personales</h3></strong>
           @if (!editandoDatosPersonales) {
-            <button class="btn-edit" (click)="editarDatosPersonales()">
+            <button class="btn-edit" (click)="editandoDatosPersonales = true">
               Editar
             </button>
           }
         </div>
 
         @if (editandoDatosPersonales) {
-          <form [formGroup]="datosForm" class="egresado-form">
+          <form [formGroup]="perfilForm" class="egresado-form">
             <div class="form-group">
               <strong><label for="telefono">Teléfono: </label></strong>
               <input type="tel" id="telefono" formControlName="telefono">
@@ -59,7 +59,7 @@
             </div>
 
             <div class="form-actions">
-              <button type="button" class="btn-cancel" (click)="cancelarEdicionDatosPersonales()">
+              <button type="button" class="btn-cancel" (click)="editandoDatosPersonales = false">
                 Cancelar
               </button>
               <button type="button" class="btn-save" (click)="guardarCambios()">
@@ -69,10 +69,11 @@
           </form>
         } @else {
           <div class="card-body">
-            <p><strong>Nombre: </strong> {{usuario.datos.nombreCompleto}}</p>
-            <p><strong>Teléfono: </strong> {{usuario.datos.telefono}}</p>
-            <p><strong>Ubicación: </strong> {{usuario.datos.ubicacion}}</p>
-            <p><strong>Email: </strong> {{usuario.datos.email}}</p>
+            <p><strong>Nombre: </strong> {{egresado.nombre}} {{egresado.apellido}}</p>
+            <p><strong>Teléfono: </strong> {{egresado.telefono}}</p>
+            <p><strong>Ubicación: </strong> {{egresado.ubicacion}}</p>
+            <p><strong>Email:</strong> {{egresado.mail}}</p>
+            <p><strong>Género:</strong> {{egresado.genero}}</p>
           </div>
         }
       </div>
@@ -81,24 +82,39 @@
         <div class="section-header">
           <strong><h3>Datos Profesionales</h3></strong>
           @if (!editandoDatosProfesionales) {
-            <button class="btn-edit" (click)="editarDatosProfesionales()">
+            <button class="btn-edit" (click)="editandoDatosProfesionales = true">
               Editar
             </button>
           }
         </div>
 
         @if (editandoDatosProfesionales) {
-          <form [formGroup]="datosForm" class="egresado-form">
+          <form [formGroup]="perfilForm" class="egresado-form">
             <div class="form-group">
-              <strong><label for="poseeExperienciaLaboral">Experiencia laboral: </label></strong>
-              <select id="poseeExperienciaLaboral" formControlName="poseeExperienciaLaboral">
+              <strong><label for="experienciaLaboral">Experiencia laboral: </label></strong>
+              <select id="experienciaLaboral" formControlName="experienciaLaboral">
                 <option value="Sí">Sí</option>
                 <option value="No">No</option>
               </select>
             </div>
 
+            <div class="form-group">
+              <strong><label for="situacionLaboral">Situación laboral:</label></strong>
+              <input type="text" id="situacionLaboral" formControlName="situacionLaboral">
+            </div>
+
+            <div class="form-group">
+              <strong><label for="perfilLinkedin">LinkedIn:</label></strong>
+              <input type="url" id="perfilLinkedin" formControlName="perfilLinkedin">
+            </div>
+
+            <div class="form-group">
+              <strong><label for="urlRepositorio">Repositorio:</label></strong>
+              <input type="url" id="urlRepositorio" formControlName="urlRepositorio">
+            </div>
+
             <div class="form-actions">
-              <button type="button" class="btn-cancel" (click)="cancelarEdicionDatosProfesionales()">
+              <button type="button" class="btn-cancel" (click)="editandoDatosProfesionales = false">
                 Cancelar
               </button>
               <button type="button" class="btn-save" (click)="guardarCambios()">
@@ -108,12 +124,16 @@
           </form>
         } @else {
           <div class="card-body">
-            <p><strong>Título: </strong> {{usuario.datos.titulo}}</p>
-            <p><strong>Año recibido: </strong> {{usuario.datos.anioRecibido}}</p>
-            <p><strong>Experiencia laboral: </strong> {{usuario.datos.poseeExperienciaLaboral}}</p>
+            <p><strong>Título: </strong> {{egresado.carrera}}</p>
+            <p><strong>Año egreso: </strong> {{egresado.anioEgreso}}</p>
+            <p><strong>LinkedIn:</strong> <a [href]="egresado.perfilLinkedin" target="_blank">{{egresado.perfilLinkedin}}</a></p>
+            <p><strong>Repositorio:</strong> <a [href]="egresado.urlRepositorio" target="_blank">{{egresado.urlRepositorio}}</a></p>
+            <p><strong>Experiencia laboral: </strong> {{egresado.experienciaLaboral}}</p>
+            <p><strong>Situación laboral:</strong> {{egresado.situacionLaboral}}</p>
           </div>
         }
       </div>
     </section>
   </div>
+  <app-password-change></app-password-change>
 </div>

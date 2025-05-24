@@ -4,140 +4,294 @@
   box-sizing: border-box;
 }
 
+body, html {
+  height: 100%;
+  font-family: 'Segoe UI', sans-serif;
+}
+
 .splash-container {
-  width: 100%;
+  display: grid;
   min-height: 100vh;
+  grid-template-rows: auto 1fr auto;
+  align-items:baseline;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  background-image: url(../../../../public/assets/background.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+.card-container {
+  width: 100%;
+  position: relative;
+  margin: 0 auto; 
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  justify-content: center; 
-  align-items: center;
-  background-image: url(../../../../public/assets/background.svg);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  padding: 1rem;
-  padding-bottom: 10%;
-  overflow: hidden;
+  align-items: center; 
+}
+.form-container {
   position: relative;
+  width: 100%;
+  min-height: 420px;
+  display: flex;
+  justify-content: center;
 }
 
 h1 {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-size: clamp(2.5rem, 6vw, 4rem);
   color: #2c3e50;
-  margin-bottom: 2rem;
+  text-align: center;
+  z-index: 2;
+  margin-bottom: 8%;
 }
 
-button {
-  font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+.login-card,
+.recovery-card,
+.activation-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 100%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin: 1rem 0;
+}
+
+.login-card {
+  position: absolute;
+  top: 0;
+}
+
+.login-card label,
+.recovery-card label {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;  
+}
+
+.login-card input,
+.recovery-card input {
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
+}
+
+.login-card input:focus,
+.recovery-card input:focus {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.login-card button,
+.recovery-card button,
+.primary-button {
+  margin-top: 1rem;
+  font-size: 1rem;
   padding: 0.8rem 1.5rem;
   border-radius: 10px;
   border: none;
   background-color: #2c3e50;
   color: #fff;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  z-index: 10;
+  transition: all 0.3s ease;
+  width: 100%;
 }
 
-button:hover {
-  background-color: #5499c7;
+.login-card button:hover,
+.recovery-card button:hover,
+.primary-button:hover {
+  background-color: #1a5276;
+  transform: scale(1.02);
 }
 
+button[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.resend-button {
+  background-color: #6c757d !important;
+}
+
+.resend-button:hover {
+  background-color: #5a6268 !important;
+}
+
+.link-button,
+.forgot-password-link,
+.back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.95em;
+  padding: 0;
+  font-family: inherit;
+  transition: color 0.2s;  
+  display: flex;
+  justify-content: flex-end; 
+  width: 100%; 
+  font-weight: 600;
+  color: #2c3e50;
+  transition: all 0.1s ease;
+}
+
+.link-button:hover,
+.forgot-password-link:hover,
+.back-button:hover {
+  font-weight: 650;
+  color: #2874a6;
+  text-decoration: underline;  
+}
+
+.link-button:disabled,
+.forgot-password-link.disabled {
+  color: #95a5a6;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.forgot-password-container {
+  text-align: center;
+ 
+}
+
+.hero-text-container {
+  padding: 2rem 1rem;
+  margin-top: 1.5rem;
+  width: 100%;
+  max-width: 400px; 
+  margin: 0 auto; 
+  text-align: center;
+  padding: 0 1rem;
+  color: #2c3e50;
+  z-index: 2;
+}
+
+.hero-title {
+  font-weight: bold;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  color: #7f8c8d;
+}
+
+.error-message, 
+.success-message {
+  width: 100%;
+  padding: 1rem;
+  margin-top: 1rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+
+.error-message {
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  color: #e74c3c;
+  font-size: 0.9rem;
+}
+
+.success-message {
+  background-color: rgba(39, 174, 96, 0.1);
+  border: 1px solid rgba(39, 174, 96, 0.3);
+  color: #27ae60;
+  font-size: 0.9rem;
+}
+
+.recovery-title,
+.login-title,
+.activation-card h2 {
+  color: #2c3e50;
+  text-align: center; 
+  font-size: 1.4rem;
+}
 
 @media screen and (max-width: 768px) {
   .splash-container {
-    background-size: 120% auto;
-    background-position: center 40%;
-    justify-content: flex-start; 
+    background-size: 140% auto;
+    padding: 1.5rem;
   }
-  
-  h1 {
-    margin-top: 10vh;
-    margin-bottom: 1.5rem;
-  }
-  
-  button {
-    position: absolute;
-    bottom: 15vh;
-  }
-}
 
+  .login-card,
+  .recovery-card,
+  .activation-card {
+    padding: 1.5rem;
+  }
 
-@media screen and (max-width: 414px) and (min-height: 700px) {
-  .splash-container {
-    background-size: 150% auto;
-    background-position: center 30%;
+  .hero-title {
+    font-size: 1.6rem;
   }
-  
-  h1 {
-    margin-top: 8vh;
-  }
-  
-  button {
-    bottom: 10vh;
+
+  .hero-subtitle {
+    font-size: 0.9rem;
   }
 }
 
 @media screen and (max-width: 480px) {
   .splash-container {
-    padding: 0.8rem;
-    background-size: 140% auto;
-    background-position: center 30%;
+    padding: 1rem;
   }
-  
-  h1 {
-    font-size: clamp(2rem, 7vw, 3rem);
-    margin-top: 7vh;
-    margin-bottom: 1.2rem;
-  }
-  
-  button {
-    width: 80%;
-    max-width: 250px;
-    padding: 0.7rem 1.2rem;
-    bottom: 8vh;
-  }
-}
 
-@media screen and (max-width: 375px) {
-  .splash-container {
-    padding: 0.5rem;
-    background-size: 160% auto;
-    background-position: center 25%;
+  .login-card,
+  .recovery-card,
+  .activation-card {
+    padding: 1.25rem;
   }
-  
-  h1 {
-    font-size: clamp(1.8rem, 6vw, 2.5rem);
-    margin-top: 5vh;
-    margin-bottom: 1rem;
-  }
-  
-  button {
-    width: 90%;
-    max-width: 220px;
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
-    bottom: 7vh;
-  }
-}
 
-@media screen and (max-width: 320px) {
-  .splash-container {
-    background-size: 180% auto;
-    background-position: center 20%;
+  .login-card input,
+  .login-card button,
+  .recovery-card input,
+  .recovery-card button {
+    font-size: 0.95rem;
   }
-  
+
   h1 {
-    font-size: clamp(1.5rem, 5vw, 2rem);
-    margin-top: 3vh;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
   }
-  
-  button {
-    width: 95%;
+
+  .hero-title {
+    font-size: 1.3rem;
+  }
+
+  .hero-subtitle {
     font-size: 0.85rem;
-    padding: 0.5rem 0.8rem;
-    bottom: 5vh;
   }
+}
+.code-sent-message {
+  background-color: #e8f5e9;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+  color: #2e7d32;
+}
+.login-card input {
+  margin-bottom: 15px;
+}
+.recovery-title {
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
 }

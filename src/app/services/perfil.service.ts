@@ -1,50 +1,52 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
-import { catchError, delay } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
-import { Usuario } from '../models/usuario';
+import { Observable, throwError, Subject, BehaviorSubject, from } from 'rxjs';
+import { catchError, tap, switchMap } from 'rxjs/operators';
+import { Egresado } from '../models/egresado';
 import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PerfilService {
-  private apiUrl = `${environment.apiUrl}/perfil`;
-  private useMock = environment.useMocks;
+  private apiUrl = 'https://9wy5h80y5b.execute-api.us-east-1.amazonaws.com';
+  private perfilSubject = new BehaviorSubject<Egresado | null>(null);
+  public perfil$ = this.perfilSubject.asObservable();
 
-  constructor(private http: HttpClient,
-              private authService: AuthService
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
   ) { }
 
-  obtenerPerfil(): Observable<Usuario> {
-    const userEmail = this.authService.getStoredEmail();
-    if (!userEmail) {
-      return throwError(() => new Error('No se encontró el email del usuario'));
-    }
+  // Obtener perfil completo del usuario actual
+  obtenerPerfil(): Observable<Egresado> {
+    return from(this.authService.getCurrentUserEmail()).pipe(
+      switchMap(userEmail => {
+        return this.http.get<Egresado>(`${this.apiUrl}/perfil/${encodeURIComponent(userEmail)}`).pipe(
+          catchError(this.handleError),
+          tap(perfil => this.perfilSubject.next(perfil)) // Actualiza el subject con los nuevos datos
+        );
+      })
+    );
+  }
 
-    if (this.useMock) {
-      // Mock de datos de perfil
-      const mockUsuario: Usuario = {
-        nombre: 'Usuario Mock',
-        fotoPerfil: 'https://randomuser.me/api/portraits/lego/1.jpg',
-        datos: {
-          nombreCompleto: 'Juan Pérez Mock',
-          telefono: '11-98765432',
-          email: userEmail,
-          titulo: 'Ingeniero en Sistemas Mock',
-          anioRecibido: '2020',
-          poseeExperienciaLaboral: 'Sí',
-          ubicacion: 'Buenos Aires, Argentina'
-        },
-        descripcion: 'Descripción mock del usuario para pruebas'
-      };
-      
-      // Simulamos un delay de red
-      return of(mockUsuario).pipe(delay(500));
-    }
-    return this.http.get<Usuario>(`${this.apiUrl}?email=${encodeURIComponent(userEmail)}`).pipe(
-      catchError(this.handleError)
+  // Actualizar datos editables del perfil
+  actualizarPerfil(datos: any): Observable<Egresado> {
+    return from(this.authService.getCurrentUserEmail()).pipe(
+      switchMap(userEmail => {
+        return this.http.patch<Egresado>(
+          `${this.apiUrl}/perfil/${encodeURIComponent(userEmail)}`, 
+          datos
+        ).pipe(
+          catchError(this.handleError),
+          tap(updatedPerfil => {
+            // Actualiza el subject con los nuevos datos
+            const currentPerfil = this.perfilSubject.value;
+            const mergedPerfil = {...currentPerfil, ...updatedPerfil};
+            this.perfilSubject.next(mergedPerfil);
+          })
+        );
+      })
     );
   }
 
@@ -52,57 +54,39 @@ export class PerfilService {
     const formData = new FormData();
     formData.append('foto', archivo);
     return this.http.post<{fotoPerfil: string}>(`${this.apiUrl}/foto`, formData).pipe(
-      catchError(this.handleError)
+      catchError(this.handleError),
+      tap(result => {
+        // Actualiza solo la foto de perfil en el subject
+        const currentPerfil = this.perfilSubject.value;
+        if (currentPerfil) {
+          currentPerfil.fotoPerfil = result.fotoPerfil;
+          this.perfilSubject.next(currentPerfil);
+        }
+      })
     );
   }
 
-  actualizarDatosPersonales(datos: Partial<Usuario['datos']>): Observable<Usuario> {
-    if (this.useMock) {
-      // Mock de actualización
-      const mockUsuario: Usuario = {
-        nombre: 'Usuario Actualizado',
-        fotoPerfil: 'https://randomuser.me/api/portraits/lego/1.jpg',
-        datos: {
-          ...datos as any, // Usamos los datos enviados
-          titulo: 'Ingeniero en Sistemas Mock', // Mantenemos estos valores
-          anioRecibido: '2020',
-          poseeExperienciaLaboral: 'Sí'
-        },
-        descripcion: 'Descripción mock del usuario para pruebas'
-      };
-      return of(mockUsuario).pipe(delay(500));
-    }
-    return this.http.patch<Usuario>(`${this.apiUrl}/datos-personales`, datos).pipe(
-      catchError(this.handleError)
-    );
+  // Forzar recarga de datos
+  recargarPerfil(): void {
+    this.obtenerPerfil().subscribe();
   }
-
-  actualizarDatosProfesionales(datos: Partial<Usuario['datos']>): Observable<Usuario> {
-    if (this.useMock) {
-      // Mock de actualización
-      const mockUsuario: Usuario = {
-        nombre: 'Usuario Actualizado',
-        fotoPerfil: 'https://randomuser.me/api/portraits/lego/1.jpg',
-        datos: {
-          nombreCompleto: 'Juan Pérez Mock',
-          telefono: '11-98765432',
-          email: this.authService.getStoredEmail() || '',
-          ...datos as any, // Usamos los datos enviados
-          ubicacion: 'Buenos Aires, Argentina'
-        },
-        descripcion: 'Descripción mock del usuario para pruebas'
-      };
-      return of(mockUsuario).pipe(delay(500));
-    }
-
-    return this.http.patch<Usuario>(`${this.apiUrl}/datos-profesionales`, datos).pipe(
-      catchError(this.handleError)
-    );
-  }
-
 
   private handleError(error: HttpErrorResponse): Observable<never> {
     console.error('Error en PerfilService:', error);
-    return throwError(() => new Error('Error al procesar la solicitud'));
+    
+    let errorMessage = 'Error al procesar la solicitud';
+    if (error.error instanceof ErrorEvent) {
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      if (error.error?.error) {
+        errorMessage = error.error.error;
+      } else if (error.status === 403) {
+        errorMessage = 'Tu cuenta está desactivada. Por favor contacta al administrador.';
+      } else {
+        errorMessage = `Código: ${error.status}\nMensaje: ${error.message}`;
+      }
+    }
+    
+    return throwError(() => new Error(errorMessage));
   }
 }

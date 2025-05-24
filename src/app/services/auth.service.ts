@@ -1,95 +1,159 @@
-import { Injectable, inject } from '@angular/core';
-import { OidcSecurityService } from 'angular-auth-oidc-client';
-import { BehaviorSubject, Observable, map } from 'rxjs';
-import { Router } from '@angular/router';
-import {jwtDecode} from 'jwt-decode';
+import { Injectable } from '@angular/core';
+import { 
+  signIn,
+  signUp, 
+  getCurrentUser,
+  signOut,
+  fetchAuthSession,
+  updatePassword,
+  resetPassword,
+  confirmResetPassword,
+} from 'aws-amplify/auth';
+
+
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AuthService {
-  private readonly router = inject(Router);
-  private readonly oidcSecurityService = inject(OidcSecurityService);
-  private _isAuthenticated$ = new BehaviorSubject<boolean>(false);
-  isAuthenticated$ = this._isAuthenticated$.asObservable();
-  userData$ = this.oidcSecurityService.userData$;
+  constructor() {  }
 
-  constructor() {
-    this.initAuth();
-  }
-
-  private initAuth(): void {
-    this.oidcSecurityService.userData$.subscribe((userData) => {
-      if (userData?.userData) {
-        // Almacena el email en sessionStorage cuando se obtienen los datos del usuario
-        const email = userData.userData.email || userData.userData.preferred_username;
-        if (email) {
-          sessionStorage.setItem('userEmail', email);
+  async login(username: string, password: string): Promise<any> {
+    try {
+      return await signIn({ 
+        username, 
+        password,
+        options: {
+          authFlowType: 'USER_PASSWORD_AUTH'
         }
-      }
-    });
+      });
+    } catch (error: any) {
+      // Cognito a veces usa __type en lugar de name
+      const errorType = error.__type || error.name;
+      const cognitoError = new Error(error.message);
+      cognitoError.name = errorType;
+      throw cognitoError;
+    }
+  }
 
-    this.oidcSecurityService.isAuthenticated$.subscribe(({ isAuthenticated }) => {
-      this._isAuthenticated$.next(isAuthenticated);
-      console.log('AuthService: isAuthenticated:', isAuthenticated);
+  async signUp(username: string, password: string): Promise<any> {
+    return signUp({
+      username,
+      password
     });
   }
 
-  checkAuth(): void {
-    this.oidcSecurityService.checkAuth().subscribe(({ isAuthenticated, idToken }) => {
-      if (isAuthenticated && idToken) {
-        const decodedToken: any = jwtDecode(idToken);
-        const isAdmin = decodedToken['cognito:groups']?.includes('Admin');
-        const route = isAdmin ? '/admin-dashboard' : '/user-dashboard';
-        this.router.navigate([route]);        
+  async getCurrentUser() {
+    return getCurrentUser();
+  }
+
+  async logout() {
+    return signOut();
+  }
+
+  async isAuthenticated(): Promise<boolean> {
+    try {
+      await this.getCurrentUser();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async isAdmin(): Promise<boolean> {
+    try {
+      const { tokens } = await fetchAuthSession();
+      const groups = tokens?.accessToken?.payload['cognito:groups'] || [];
+      
+      // Verifica si groups es un array antes de usar includes
+      if (Array.isArray(groups)) {
+        return groups.includes('Admin');
       }
-    });
-  }  
+      return false;
+    } catch {
+      return false;
+    }
+  }
+  async changePassword( oldPassword: string, newPassword: string ): Promise<void> {
+    try {   
+      await updatePassword({ oldPassword, newPassword });
+    } catch (error) {
+      console.error('Error changing password:', error);
+      throw error;
+    }
+  }
+
+
+  async forgotPassword(username: string): Promise<void> {
+    try {
+      await resetPassword({ username });
+    } catch (error: any) {
+      console.error('Error en forgotPassword:', error);
+      throw new Error(this.getFriendlyErrorMessage(error));
+    }
+  }
+  
+  async confirmPasswordReset(
+    username: string,
+    confirmationCode: string,
+    newPassword: string
+  ): Promise<void> {
+    try {
+      await confirmResetPassword({ 
+        username, 
+        confirmationCode, 
+        newPassword 
+      });
+    } catch (error: any) {
+      console.error('Error en confirmPasswordReset:', error);
+      throw new Error(this.getFriendlyErrorMessage(error));
+    }
+  }
+  
+  private getFriendlyErrorMessage(error: any): string {
+    const errorType = error.__type || error.name;
     
-  isAdmin(): Observable<boolean> {
-    return this.oidcSecurityService.getIdToken().pipe(
-      map((token) => {
-        if (!token) return false;
-        const decodedToken: any = jwtDecode(token);
-        console.log(decodedToken)
-        return decodedToken['cognito:groups']?.includes('Admin') ?? false;
-      })
+    switch (errorType) {
+      case 'UserNotFoundException':
+        return 'El usuario no existe en el sistema';
+      case 'InvalidParameterException':
+        return 'El código de verificación es inválido o ha expirado';
+      case 'CodeMismatchException':
+        return 'El código de verificación no coincide';
+      case 'LimitExceededException':
+        return 'Has excedido el número máximo de intentos. Por favor intenta más tarde';
+      case 'InvalidPasswordException':
+        return 'La contraseña no cumple con los requisitos de complejidad';
+      default:
+        return error.message || 'Ocurrió un error inesperado';
+    }
+  }
+
+  async getCurrentUserEmail(): Promise<string> {
+    // Primero intenta obtener del localStorage de Cognito
+    const cognitoKeys = Object.keys(localStorage).filter(key => 
+      key.startsWith('CognitoIdentityServiceProvider') && 
+      key.includes('LastAuthUser')
     );
-  }
-  
-  isAuthenticated(): Observable<boolean> {
-    return this.oidcSecurityService.isAuthenticated$.pipe(
-      map(({ isAuthenticated }) => isAuthenticated)
-    );
-  }
-  
 
-  getCurrentUser(){
-    return this.oidcSecurityService.userData$.pipe(
-      map((data) => data?.userData)
-    );
-  }
-  
-  getUserRole(): Observable<string | null> {
-    return this.oidcSecurityService.userData$.pipe(
-      map((data) => data?.userData?.['custom:role'] ?? null)
-    );    
-  }
+    if (cognitoKeys.length > 0) {
+      const lastAuthKey = cognitoKeys[0];
+      const username = localStorage.getItem(lastAuthKey);
+      if (username) {
+        return username;
+      }
+    }
 
-  login(): void {
-    this.oidcSecurityService.authorize(); 
-  }
-
-  logout(): void {
-    sessionStorage.clear();
-    window.location.href = `https://us-east-1irahhdiiv.auth.us-east-1.amazoncognito.com/logout?client_id=4l266lkv7t1pvsd9fochnljcdq&logout_uri=http://localhost:4200/login`;
-  }
-
-  getStoredEmail(): string | null {
-    return sessionStorage.getItem('userEmail');
+    // Si no está en Cognito keys, intenta con el método actual
+    try {
+      const user = await this.getCurrentUser();
+      if (user.username) {
+        return user.username;
+      }
+      throw new Error('No se pudo obtener el email del usuario');
+    } catch (error) {
+      console.error('Error obteniendo email:', error);
+      throw new Error('No se pudo obtener el email del usuario');
+    }
   }
 }
-
-
-
-
