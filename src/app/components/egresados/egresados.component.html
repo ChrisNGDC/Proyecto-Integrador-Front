@@ -20,7 +20,7 @@
           <input 
             type="text" 
             placeholder="Buscar egresados..." 
-            [(ngModel)]="searchQuery"
+            [value]="searchQuery()" 
             (input)="searchQuery.set($any($event.target).value)">
         </div>
   
@@ -29,7 +29,7 @@
             <div class="egresado-card">
               <div class="card-header">
                 <h3>{{ egresado.nombre }} {{ egresado.apellido }}</h3>
-                <span class="nro-alumno">N° {{ egresado.nroAlumno }}</span>
+                <span class="nro-alumno">N° {{ egresado.id }}</span>
               </div>
               
               <div class="card-body">
@@ -58,13 +58,6 @@
         <form [formGroup]="egresadoForm" class="egresado-form">
           <div class="form-row">
             <div class="form-group">
-              <label for="nroAlumno">Nro Alumno:</label>
-              <input type="text" id="nroAlumno" formControlName="nroAlumno">
-            </div>
-          </div>
-  
-          <div class="form-row">
-            <div class="form-group">
               <label for="nombre">Nombre:</label>
               <input type="text" id="nombre" formControlName="nombre">
             </div>
@@ -73,7 +66,21 @@
               <input type="text" id="apellido" formControlName="apellido">
             </div>
           </div>
-  
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dni">DNI:</label>
+              <input type="text" id="dni" formControlName="dni">
+            </div>
+            <div class="form-group">
+              <label for="genero">Género:</label>
+              <select id="genero" formControlName="genero">
+                <option value="Binario">Binario</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+              </select>
+            </div>
+
+          </div>
           <div class="form-row">
             <div class="form-group">
               <label for="carrera">Carrera:</label>
@@ -91,8 +98,8 @@
               <input type="date" id="fechaNacimiento" formControlName="fechaNacimiento">
             </div>
             <div class="form-group">
-              <label for="direccion">Dirección:</label>
-              <input type="text" id="direccion" formControlName="direccion">
+              <label for="ubicacion">Dirección:</label>
+              <input type="text" id="ubicacion" formControlName="ubicacion">
             </div>
           </div>
   
@@ -106,6 +113,28 @@
               <input type="tel" id="telefono" formControlName="telefono">
             </div>
           </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="perfilLinkedin">Perfil de LinkedIn:</label>
+            <input type="text" id="perfilLinkedin" formControlName="perfilLinkedin">
+          </div>
+          <div class="form-group">
+            <label for="urlRepositorio">Repositorio:</label>
+            <input type="text" id="urlRepositorio" formControlName="urlRepositorio">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="experienciaLaboral">Experiencia Laboral:</label>
+            <input type="text" id="experienciaLaboral" formControlName="experienciaLaboral">
+          </div>
+          <div class="form-group">
+            <label for="situacionLaboral">Situación Laboral:</label>
+            <input type="text" id="situacionLaboral" formControlName="situacionLaboral">
+          </div>
+        </div>
   
           <div class="form-actions">
             <button type="button" class="btn-save" (click)="guardarEgresado()">

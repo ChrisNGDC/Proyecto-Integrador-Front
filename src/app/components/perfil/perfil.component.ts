@@ -2,86 +2,130 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { PerfilService } from '../../services/perfil.service';
+import { Egresado } from '../../models/egresado';
+import { CommonModule } from '@angular/common';
+import { ChangePasswordComponent } from '../change-password/change-password.component';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
-    MatIconModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule
+    ChangePasswordComponent
   ],
   templateUrl: './perfil.component.html',
   styleUrls: ['./perfil.component.css']
 })
-
-export class PerfilComponent {
-  usuario = {
-    nombre: 'Abatar',
-    fotoPerfil: '',
-    datos: {
-      nombreCompleto: 'Pedro Gomez',
-      telefono: '11-12345678',
-      email: 'pedro_gomez@gmail.com',
-      titulo: 'Técnico superior en desarrollo de software',
-      anioRecibido: '2023',
-      poseeExperienciaLaboral: 'No',
-      ubicacion: 'CABA - Buenos Aires'
-    },
-    descripcion: 'Descripción de recursos e valores objetivos'
-  };
-
-  imagenPerfil: string | null = this.usuario.fotoPerfil;
+export class PerfilComponent implements OnInit {
+  egresado!: Egresado;
+  imagenPerfil: string | null = null;
   archivoSeleccionado: File | null = null;
   editandoFoto = false;
   editandoDatosPersonales = false;
   editandoDatosProfesionales = false;
-  editandoDescripcion = false;
-  datosForm!: FormGroup;
-  descripcionForm!: FormGroup;
+  perfilForm!: FormGroup;
+  cargando = true;
+  errorMessage = '';
 
   constructor(
     private fb: FormBuilder,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private perfilService: PerfilService,
   ) {}
 
   ngOnInit(): void {
-    this.inicializarFormularios();
+    this.inicializarFormulario();
+    this.cargarDatosPerfil();
   }
 
-  inicializarFormularios(): void {
-    this.datosForm = this.fb.group({
-      nombreCompleto: [this.usuario.datos.nombreCompleto, Validators.required],
-      telefono: [this.usuario.datos.telefono],
-      ubicacion: [this.usuario.datos.ubicacion],
-      titulo: [this.usuario.datos.titulo],
-      anioRecibido: [this.usuario.datos.anioRecibido],
-      poseeExperienciaLaboral: [this.usuario.datos.poseeExperienciaLaboral]
+  inicializarFormulario(): void {
+    this.perfilForm = this.fb.group({
+      nombre: ['', Validators.required],
+      apellido: ['', Validators.required],
+      mail: [{value: '', disabled: true}],
+      telefono: [''],
+      genero: [''],
+      ubicacion: [''],
+      perfilLinkedin: [''],
+      urlRepositorio: [''],
+      experienciaLaboral: [''],
+      situacionLaboral: [''],
+      carrera: [{value: '', disabled: true}],
+      anioEgreso: [{value: '', disabled: true}]
     });
-  
-    this.descripcionForm = this.fb.group({
-      descripcion: [this.usuario.descripcion]
+  }
+
+  cargarDatosPerfil(): void {
+    this.cargando = true;
+    this.perfilService.obtenerPerfil().pipe(
+      finalize(() => this.cargando = false)
+    ).subscribe({
+      next: (egresado: Egresado) => {
+        this.egresado = egresado;
+        this.imagenPerfil = egresado.fotoPerfil || null;
+        this.actualizarFormularioConDatos();
+      },
+      error: (err: Error) => {
+        this.errorMessage = err.message;
+        this.mostrarError('Error al cargar el perfil');
+      }
     });
   }
 
-  getIniciales(nombreCompleto: string): string {
-    if (!nombreCompleto) return 'US';
-    
-    const nombres = nombreCompleto.split(' ');
-    if (nombres.length === 1) return nombres[0].charAt(0).toUpperCase();
-    
-    return `${nombres[0].charAt(0)}${nombres[nombres.length - 1].charAt(0)}`.toUpperCase();
+  actualizarFormularioConDatos(): void {
+    this.perfilForm.patchValue({
+      nombre: this.egresado.nombre,
+      apellido: this.egresado.apellido,
+      mail: this.egresado.mail,
+      telefono: this.egresado.telefono,
+      genero: this.egresado.genero,
+      ubicacion: this.egresado.ubicacion,
+      perfilLinkedin: this.egresado.perfilLinkedin,
+      urlRepositorio: this.egresado.urlRepositorio,
+      experienciaLaboral: this.egresado.experienciaLaboral,
+      situacionLaboral: this.egresado.situacionLaboral,
+      carrera: this.egresado.carrera,
+      anioEgreso: this.egresado.anioEgreso
+    });
   }
 
-  editarFoto(): void {
-    this.editandoFoto = true;
+  guardarCambios(): void {
+    if (this.perfilForm.valid) {
+      const datosActualizados = {
+        nombre: this.perfilForm.get('nombre')?.value,
+        apellido: this.perfilForm.get('apellido')?.value,
+        telefono: this.perfilForm.get('telefono')?.value,
+        genero: this.perfilForm.get('genero')?.value,
+        ubicacion: this.perfilForm.get('ubicacion')?.value,
+        perfilLinkedin: this.perfilForm.get('perfilLinkedin')?.value,
+        urlRepositorio: this.perfilForm.get('urlRepositorio')?.value,
+        experienciaLaboral: this.perfilForm.get('experienciaLaboral')?.value,
+        situacionLaboral: this.perfilForm.get('situacionLaboral')?.value
+      };
+
+      console.log('Datos a enviar:', datosActualizados)
+
+      this.perfilService.actualizarPerfil(datosActualizados).subscribe({
+        next: (egresadoActualizado) => {
+          console.log('Respuesta del backend:', egresadoActualizado);
+          // Actualizar el objeto local con los nuevos datos
+          this.egresado = { ...this.egresado, ...egresadoActualizado };
+          this.actualizarFormularioConDatos();
+          this.cargarDatosPerfil(); 
+          this.mostrarExito('Perfil actualizado correctamente');
+          this.editandoDatosPersonales = false;
+          this.editandoDatosProfesionales = false;
+        },
+        error: (err) => {
+          console.error('Error en la actualización:', err);
+          this.mostrarError('Error al actualizar el perfil');
+          console.error(err);
+        }
+      });
+    }
   }
 
   onFileSelected(event: Event): void {
@@ -90,17 +134,14 @@ export class PerfilComponent {
     
     if (file) {
       if (!this.validarArchivo(file)) {
-        input.value = ''; // Resetear el input
+        input.value = '';
         return;
       }
       
       this.archivoSeleccionado = file;
-      
-      // Crear preview temporal
       const reader = new FileReader();
       reader.onload = (e) => {
         this.imagenPerfil = e.target?.result as string;
-        this.usuario.fotoPerfil = this.imagenPerfil;
       };
       reader.readAsDataURL(file);
     }
@@ -108,71 +149,28 @@ export class PerfilComponent {
 
   guardarFoto(): void {
     if (this.imagenPerfil && this.archivoSeleccionado) {
-      this.usuario.fotoPerfil = this.imagenPerfil;
-      this.mostrarExito('Foto de perfil actualizada correctamente');
-      this.cancelarEdicionFoto();
+      this.perfilService.subirFotoPerfil(this.archivoSeleccionado).subscribe({
+        next: (resultado) => {
+          if (resultado.fotoPerfil) {
+            // Actualizar tanto la imagen como el objeto egresado
+            this.imagenPerfil = resultado.fotoPerfil;
+            this.egresado.fotoPerfil = resultado.fotoPerfil;
+          }
+          this.mostrarExito('Foto de perfil actualizada correctamente');
+          this.cancelarEdicionFoto();
+        },
+        error: (err) => {
+          this.mostrarError('Error al subir la foto');
+          console.error(err);
+        }
+      });
     }
   }
-   
 
   cancelarEdicionFoto(): void {
     this.editandoFoto = false;
     this.archivoSeleccionado = null;
-    this.imagenPerfil = null;
-  }
-
-  editarDatosPersonales(): void {
-    this.editandoDatosPersonales = !this.editandoDatosPersonales;
-    if (this.editandoDatosPersonales) {
-      this.datosForm.patchValue({
-        nombreCompleto: this.usuario.datos.nombreCompleto,
-        telefono: this.usuario.datos.telefono,
-        ubicacion: this.usuario.datos.ubicacion
-      });
-    }
-  }
-
-  guardarCambios(): void {
-    if (this.datosForm.valid) {
-      this.usuario.datos = {
-        ...this.usuario.datos,
-        ...this.datosForm.value
-      };
-      
-      if (this.editandoDatosPersonales) {
-        this.editandoDatosPersonales = false;
-        this.mostrarExito('Datos personales actualizados correctamente');
-      } else if (this.editandoDatosProfesionales) {
-        this.editandoDatosProfesionales = false;
-        this.mostrarExito('Datos profesionales actualizados correctamente');
-      }
-      
-      // Llamada al servicio para guardar en el backend
-      // this.perfilService.actualizarDatos(this.usuario).subscribe(...);
-    }
-  }
-
-  editarDatosProfesionales(): void {
-    this.editandoDatosProfesionales = !this.editandoDatosProfesionales;
-    if (this.editandoDatosProfesionales) {
-      this.datosForm.patchValue({
-        titulo: this.usuario.datos.titulo,
-        anioRecibido: this.usuario.datos.anioRecibido,
-        experienciaLaboral: this.usuario.datos.poseeExperienciaLaboral
-      });
-    }
-  }
-
-  editarDescripcion(): void {
-    this.editandoDescripcion = !this.editandoDescripcion;
-  }
-
-  guardarDescripcion(): void {
-    if (this.descripcionForm.valid) {
-      this.usuario.descripcion = this.descripcionForm.value.descripcion;
-      this.editandoDescripcion = false;
-      this.mostrarExito('Descripción actualizada correctamente');
-    }
+    this.imagenPerfil = this.egresado.fotoPerfil || null;
   }
 
   validarArchivo(file: File): boolean {
@@ -192,27 +190,9 @@ export class PerfilComponent {
     return true;
   }
 
-  confirmarCambio(): void {
-    if (this.imagenPerfil && this.archivoSeleccionado) {
-      // Aquí iría la lógica para guardar en el backend
-      this.imagenPerfil = this.imagenPerfil;
-      this.mostrarExito('Foto de perfil actualizada correctamente');
-      this.resetearSeleccion();
-      
-      // Ejemplo de llamada a servicio:
-      // this.perfilService.actualizarFoto(this.archivoSeleccionado).subscribe(...);
-    }
-  }
-
-  cancelarCambio(): void {
-    this.resetearSeleccion();
-  }
-
-  private resetearSeleccion(): void {
-    this.archivoSeleccionado = null;
-    this.imagenPerfil = null;
-    const fileInput = document.querySelector('.file-input') as HTMLInputElement;
-    if (fileInput) fileInput.value = '';
+  getIniciales(): string {
+    if (!this.egresado) return 'EG';
+    return `${this.egresado.nombre?.charAt(0) || ''}${this.egresado.apellido?.charAt(0) || ''}`.toUpperCase();
   }
 
   private mostrarError(mensaje: string): void {
@@ -226,34 +206,6 @@ export class PerfilComponent {
     this.snackBar.open(mensaje, 'Cerrar', {
       duration: 3000,
       panelClass: ['success-snackbar']
-    });
-  }
-
-  cancelarEdicionDescripcion() {
-    this.editandoDescripcion = false;
-    // Opcional: resetear el formulario al valor original
-    this.descripcionForm.patchValue({
-      descripcion: this.usuario.descripcion
-    });
-  }
-
-  cancelarEdicionDatosPersonales() {
-    this.editandoDatosPersonales = false;
-    // Opcional: resetear el formulario al valor original
-    this.datosForm.patchValue({
-      nombreCompleto: this.usuario.datos.nombreCompleto,
-      telefono: this.usuario.datos.telefono,
-      email: this.usuario.datos.email,
-      ubicacion: this.usuario.datos.ubicacion
-    });
-  }
-
-  cancelarEdicionDatosProfesionales(): void {
-    this.editandoDatosProfesionales = false;
-    this.datosForm.patchValue({
-      titulo: this.usuario.datos.titulo,
-      anioRecibido: this.usuario.datos.anioRecibido,
-      poseeExperienciaLaboral: this.usuario.datos.poseeExperienciaLaboral
     });
   }
 }
