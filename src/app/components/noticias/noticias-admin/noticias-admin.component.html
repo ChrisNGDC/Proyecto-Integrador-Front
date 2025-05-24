@@ -42,7 +42,7 @@
   <div class="col">
     <div class="card text-center">
       <div (click)="editarEvento(evento)">
-        <img src="noimage.jpg" class="card-img-top" />
+        <img [src]="evento.s3key" class="card-img-top" />
         <div class="card-body">
           <h5 class="card-title">{{ evento.titulo }}</h5>
           <p class="card-text">{{ evento.resumen }}</p>

@@ -8,6 +8,7 @@ export class NewsEventsService {
 
   constructor(private http: HttpClient) { }
   url = "https://w5yeuip47j.execute-api.us-east-1.amazonaws.com"
+  imgurl = "https://hq6zblepy5.execute-api.us-east-1.amazonaws.com"
   getNewsAndEvents() {
     return this.http.get(`${this.url}/noticiasYeventos`)
   }
@@ -25,10 +26,10 @@ export class NewsEventsService {
   }
   // s3key se conforma por la ruta completa de la imagen en el s3: carpeta/nombre-imagen.extencion
   getImage(s3key: string) {
-    return this.http.get(`${this.url}/getphoto?s3key=${s3key}`)
+    return this.http.get(`${this.imgurl}/images/${s3key}`)
   }
   // Retorna el codigo de la imagen en formato base64
   saveImage(foldername: string, filename: string, imageData: string) {
-    return this.http.post(`${this.url}/savephoto`, JSON.stringify({"folder": foldername, 'name': filename, "data": imageData}));
+    return this.http.post(`${this.imgurl}/images`, JSON.stringify({"folder": foldername, 'name': filename, "data": imageData}));
   }
 }

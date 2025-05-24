@@ -1,29 +1,41 @@
 <div class="modal-body">
-  <div class="card mb-3">
+  <div class="card">
     <div class="row g-0">
       <div class="col-md-5 imagen">
-        <img src="noimage.jpg" class="card-img" />
+        <img [src]="filedata.content" class="card-img" />
         <input
           type="file"
           class="file-input"
+          accept="image/png, image/jpeg, image/jpg"
           (change)="onFileSelected($event)"
+          id="fileUpload"
           #fileUpload
         />
         <button id="btn-image" (click)="fileUpload.click()">↺</button>
+        <p id="errorMessage">La imagen no debe superar los {{this.maxAllowedSize / 1024}}KB y debe ser tipo .png, .jpg o .jpeg.</p>
       </div>
       <div class="col-md-7">
         <div class="card-body">
-          <input type="text" [(ngModel)]="eventoModal.titulo" />
-          <textarea name="resumen" [(ngModel)]="eventoModal.resumen"></textarea>
-          <textarea
+          <label for="titulo">
+            <p>Titulo: </p>
+            <input type="text" name="titulo" [(ngModel)]="eventoModal.titulo" />
+          </label>
+          <label for="resumen">
+            <p>Resumen: </p>
+            <textarea name="resumen" [(ngModel)]="eventoModal.resumen"></textarea>
+          </label>
+          <label for="descipcion">
+            <p>Descripción: </p>
+            <textarea
             name="descripcion"
             [(ngModel)]="eventoModal.descripcion"
           ></textarea>
+          </label>
           <div class="card-text">
             <small class="text-muted">Publicado {{ eventoModal.fecha }}</small>
             <div class="btns">
-              <button (click)="save()">Save</button>
-              <button (click)="cancel()">Cancel</button>
+              <button id="save" (click)="save()">Save</button>
+              <button id="cancel" (click)="cancel()">Cancel</button>
             </div>
           </div>
         </div>

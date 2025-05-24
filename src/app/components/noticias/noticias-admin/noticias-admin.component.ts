@@ -3,7 +3,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from '../modal/modal.component';
 import { ModalEdicionComponent } from '../modal-edicion/modal-edicion.component';
 import { NewsEventsService } from '../../../services/news-events.service';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -24,24 +24,31 @@ export class NoticiasAdminComponent {
   };
   busqueda = '';
   constructor(private neService: NewsEventsService) {
-    this.getEventos().then(() => {setTimeout(() => this.loading = false, 2000)});
+    this.getEventos();
   }
   async getEventos() {
+    this.loading = true;
     this.neService.getNewsAndEvents().subscribe((data) => {
       this.eventos = data;
-      // this.getImages();
-      this.eventosFiltrados = this.eventos;
-      this.eventosFiltrados.sort((a: any, b: any) =>  new Date(b.fecha).getTime()- new Date(a.fecha).getTime());
+      this.getImages().then(() => {
+        this.eventosFiltrados = this.eventos;
+        this.eventosFiltrados.sort(
+          (a: any, b: any) =>
+            new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+        );
+        setTimeout(() => {
+          this.loading = false;
+        }, 2000);
+      });
     });
   }
-  // async getImages() {
-  //   this.eventos.forEach((evento: any) => {
-  //     this.neService.getImage(evento.s3key).subscribe((data) => {
-  //       evento['s3key'] =
-  //         'data:image/png;base64,' + data['data' as keyof typeof data];
-  //     });
-  //   });
-  // }
+  async getImages() {
+    this.eventos.forEach((evento: any) => {
+      this.neService.getImage(evento.s3key).subscribe((data) => {
+        evento['s3key'] = data['data' as keyof typeof data];
+      });
+    });
+  }
   open(evento: any) {
     const modalRef = this.modalService.open(ModalComponent, {
       size: 'xl',
@@ -75,7 +82,12 @@ export class NoticiasAdminComponent {
       this.eventos.forEach((evento: any) => {
         if (
           evento['fecha'] >= this.fechas.inicio! &&
-          evento['fecha'] <= this.fechas.fin.getFullYear() + '-' + this.fechas.fin.getMonth() + '-' + this.fechas.fin.getDate()
+          evento['fecha'] <=
+            this.fechas.fin.getFullYear() +
+              '-' +
+              this.fechas.fin.getMonth() +
+              '-' +
+              this.fechas.fin.getDate()
         ) {
           buscadosFechas.push(evento);
         }
@@ -83,17 +95,24 @@ export class NoticiasAdminComponent {
     }
     if (buscadosPalabras.length > 0) {
       if (buscadosFechas.length > 0) {
-        this.eventosFiltrados = buscadosPalabras.filter((item) =>buscadosFechas.includes(item));
+        this.eventosFiltrados = buscadosPalabras.filter((item) =>
+          buscadosFechas.includes(item)
+        );
       } else {
         this.eventosFiltrados = buscadosPalabras;
       }
-    } else if(buscadosFechas.length > 0)  {
+    } else if (buscadosFechas.length > 0) {
       this.eventosFiltrados = buscadosFechas;
     }
-    this.eventosFiltrados.sort((a: any, b: any) =>  new Date(b.fecha).getTime()- new Date(a.fecha).getTime());
+    this.eventosFiltrados.sort(
+      (a: any, b: any) =>
+        new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+    );
   }
   eliminarEvento(eventoAEliminar: any) {
-    this.neService.deleteNewsAndEvents(eventoAEliminar.id).subscribe(() => this.getEventos())
+    this.neService
+      .deleteNewsAndEvents(eventoAEliminar.id)
+      .subscribe(() => this.getEventos());
   }
   editarEvento(evento: any) {
     const modalRef = this.modalService.open(ModalEdicionComponent, {
@@ -101,29 +120,57 @@ export class NoticiasAdminComponent {
       centered: true,
     });
     modalRef.componentInstance.evento = evento;
-    modalRef.result.then((data: any) => {
-      let id = data.id;
-      delete data.id;
-      this.neService.patchNewsAndEvents(id, JSON.stringify(data)).subscribe(() => this.getEventos())
-    }).catch((error: any) => console.log(error));
+    modalRef.result
+      .then((data: any[]) => {
+        const evento = data[0];
+        const filedata = data[1];
+        let id = evento.id;
+        delete evento.id;
+        this.neService
+          .saveImage(
+            'noticiasYeventos',
+            `${id}.${filedata.type}`,
+            filedata.content
+          )
+          .subscribe((data) => {
+            console.log(data);
+          });
+        this.neService
+          .patchNewsAndEvents(id, JSON.stringify(evento))
+          .subscribe(() => this.getEventos());
+      })
+      .catch((error: any) => console.log(error));
   }
   agregarEvento() {
     let eventoNuevo = {
-      descripcion: "",
-      fecha: "",
-      resumen: "",
-      s3key: "",
-      titulo: ""
+      descripcion: '',
+      fecha: '',
+      resumen: '',
+      s3key: '',
+      titulo: '',
     };
     const modalRef = this.modalService.open(ModalEdicionComponent, {
       size: 'xl',
       centered: true,
     });
     modalRef.componentInstance.evento = eventoNuevo;
-    modalRef.result.then((data: any) => {
-      if (data.titulo != "" && data.resumen != "" && data.descripcion != "" && data.fecha != "") {
-        this.neService.putNewsAndEvents(data).subscribe(() => this.getEventos())
-      }
-    }).catch((error: any) => console.log(error));
+    modalRef.result
+      .then((data: any[]) => {
+        const evento = data[0];
+        const filedata = data[1];
+        this.neService
+          .saveImage(
+            'noticiasYeventos',
+            `${evento.id}.${filedata.type}`,
+            filedata.content
+          )
+          .subscribe((data) => {
+            console.log(data);
+          });
+        this.neService.putNewsAndEvents(evento).subscribe(() => {
+          this.getEventos();
+        });
+      })
+      .catch((error: any) => console.log(error));
   }
 }
