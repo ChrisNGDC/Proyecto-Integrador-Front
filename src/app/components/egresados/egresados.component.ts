@@ -62,6 +62,7 @@ export class EgresadosComponent {
       direccion: ['', Validators.required],
       mail: ['', [Validators.required, Validators.email]],
       telefono: ['', Validators.required],
+      dni: ['', Validators.required],
     });
   }
 
@@ -103,8 +104,10 @@ export class EgresadosComponent {
 
   // Guardar cambios
   guardarEgresado() {
-    this.authService.signUp(this.egresadoForm.value.mail, "Ifts2025_", this.egresadoForm.value.nroAlumno);
-    console.log("se registró el egresado: ", this.egresadoForm.value.mail);
+   const pass:string = "Ifts11"+this.egresadoForm.value.dni ;
+   const mail:string = this.egresadoForm.value.mail;
+    this.authService.signUp(mail, pass);
+    console.log("se registró el egresado: ", mail);
     this.egresadoForm.reset();
    /* if (this.egresadoForm.valid) {
       const formData = this.egresadoForm.value;

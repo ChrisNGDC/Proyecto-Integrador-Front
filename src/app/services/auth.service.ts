@@ -10,8 +10,6 @@ import {
   confirmResetPassword
 } from 'aws-amplify/auth';
 
-
-
 @Injectable({
   providedIn: 'root'
 })
@@ -36,15 +34,11 @@ export class AuthService {
     }
   }
 
-  async signUp(username: string, password: string, nroAlumno: string): Promise<any> {
+  async signUp(username: string, password: string): Promise<any> {
     return signUp({
       username,
-      password,
-      options: {
-        userAttributes: {
-          'custom:nroAlumno': nroAlumno,
-        }
-      }
+      password,   
+      
     });
   }
 
@@ -128,7 +122,7 @@ export class AuthService {
       case 'LimitExceededException':
         return 'Has excedido el número máximo de intentos. Por favor intenta más tarde';
       case 'InvalidPasswordException':
-        return 'La contraseña no cumple con los requisitos de complejidad';
+        return 'La contraseña debe contener al menos 8 caracteres, incluyendo 1 número, 1 carácter especial (^$*.[]{} ()?-"!@#%&/\\,><\':;|_~`+=) y 1 letra mayúscula y 1 letra minúscula';  
       default:
         return error.message || 'Ocurrió un error inesperado';
     }

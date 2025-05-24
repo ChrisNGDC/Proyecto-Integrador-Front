@@ -63,7 +63,7 @@ export class LoginComponent {
   }
 
   async onForgotPassword() {
-    if (!this.username) {
+    if (!this.username || !this.username.includes('@') || !this.username.includes('.')) {
       this.errorMessage = 'Por favor ingresa tu correo electrónico';
       return;
     }
@@ -86,6 +86,7 @@ export class LoginComponent {
 
   async onResetPassword() {
     if (this.newPassword !== this.confirmPassword) {
+      this.successMessage = '';
       this.errorMessage = 'Las contraseñas no coinciden';
       return;
     }
@@ -107,6 +108,7 @@ export class LoginComponent {
       this.newPassword = '';
       this.confirmPassword = '';
       this.recoveryCode = '';
+      this.password = ''; 
     } catch (error: any) {
       this.errorMessage = error.message || 'Error al restablecer la contraseña';
     } finally {

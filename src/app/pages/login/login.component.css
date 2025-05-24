@@ -17,6 +17,7 @@ body, html {
   justify-content: center;
   padding: 2rem;
   position: relative;
+  background-color: rgb(224, 238, 248);
   background-image: url(../../../../public/assets/background.svg);
   background-repeat: no-repeat;
   background-position: center;
