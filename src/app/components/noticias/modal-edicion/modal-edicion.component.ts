@@ -14,27 +14,23 @@ export class ModalEdicionComponent implements OnInit {
 
   @Input() evento: any;
   eventoModal: any;
-  filedata = {
-    type: '',
-    content: ''
-  }
+  filetype = '';
   maxAllowedSize = 200 * 1024; // KB
 
   ngOnInit() {
     this.eventoModal = JSON.parse(JSON.stringify(this.evento));
-    this.filedata.content = this.evento.s3keyvalue;
     if (this.evento.s3keyvalue.includes('png')) {
-      this.filedata.type = 'png';
+      this.filetype = 'png';
     } else if (this.evento.s3keyvalue.includes('jpg')) {
-      this.filedata.type = 'jpg';
+      this.filetype = 'jpg';
     } else if (this.evento.s3keyvalue.includes('jpeg')) {
-      this.filedata.type = 'jpeg';
+      this.filetype = 'jpeg';
     }
   }
   validEvent(evento: any) {
     console.log(evento)
     for (let key in evento) {
-      if (evento[key] == '') {
+      if (evento[key] == '' && key != 's3key') {
         return false;
       }
     }
@@ -44,7 +40,7 @@ export class ModalEdicionComponent implements OnInit {
     let fecha = formatDate(new Date(), 'yyyy-MM-dd', 'en-US');
     this.eventoModal.fecha = fecha;
     if (this.validEvent(this.eventoModal)) {
-      this.activeModal.close([this.eventoModal, this.filedata]);
+      this.activeModal.close([this.eventoModal, this.filetype]);
     } else {
       alert('Ingrese un valor en todos los campos.');
     }
@@ -63,8 +59,8 @@ export class ModalEdicionComponent implements OnInit {
       const fileReader = new FileReader();
       fileReader.onload = () => {
         const fileContent = fileReader.result as string;
-        this.filedata.type = file.type.split('/')[1];
-        this.filedata.content = fileContent;
+        this.filetype = file.type.split('/')[1];
+        this.eventoModal.s3keyvalue = fileContent;
       };
       fileReader.readAsDataURL(file);
     } else {

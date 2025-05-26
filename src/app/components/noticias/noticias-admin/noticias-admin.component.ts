@@ -40,7 +40,7 @@ export class NoticiasAdminComponent {
         );
         setTimeout(() => {
           this.loading = false;
-        }, 3000);
+        }, 2500);
       });
     });
   }
@@ -128,16 +128,17 @@ export class NoticiasAdminComponent {
     modalRef.result
       .then((data: any[]) => {
         const evento = data[0];
-        const filedata = data[1];
-        let id = evento.id;
+        const filetype = data[1];
+        const id = evento.id;
+        const filecontent = evento.s3keyvalue;
         delete evento.id;
-        evento.s3key = `noticiasYeventos/${id}.${filedata.type}`;
         delete evento.s3keyvalue;
+        evento.s3key = `noticiasYeventos/${id}.${filetype}`;
         this.neService
           .saveImage(
             'noticiasYeventos',
-            `${id}.${filedata.type}`,
-            filedata.content
+            `${id}.${filetype}`,
+            filecontent
           )
           .subscribe(() => {
             this.neService
@@ -164,15 +165,16 @@ export class NoticiasAdminComponent {
     modalRef.result
       .then((data: any[]) => {
         const evento = data[0];
-        const filedata = data[1];
-        evento.s3key = `${filedata.type}`;
+        const filetype = data[1];
+        const filecontent = evento.s3keyvalue;
         delete evento.s3keyvalue;
+        evento.s3key = `${filetype}`;
         this.neService.putNewsAndEvents(evento).subscribe((id) => {
           this.neService
             .saveImage(
               'noticiasYeventos',
-              `${id}.${filedata.type}`,
-              filedata.content
+              `${id}.${filetype}`,
+              filecontent
             )
             .subscribe(() => {
               this.getEventos();
