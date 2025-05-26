@@ -32,4 +32,7 @@ export class NewsEventsService {
   saveImage(foldername: string, filename: string, imageData: string) {
     return this.http.post(`${this.imgurl}/images`, JSON.stringify({"folder": foldername, 'name': filename, "data": imageData}));
   }
+  deleteImage(file: string) {
+    return this.http.delete(`${this.imgurl}/images/${file}`)
+  }
 }

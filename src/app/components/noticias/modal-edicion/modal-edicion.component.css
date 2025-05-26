@@ -1,38 +1,44 @@
 .card {
   border-color: transparent;
+  min-height: 100%;
+  width: 100%;
+}
+
+.card .row {
+  min-height: 100%;
 }
 
 .card-body {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
-  height: 100%;
+  justify-content: flex-start;
+  min-height: 100%;
   position: relative;
 
-  label:nth-last-child(2) {
-    margin-bottom: 1.5rem;
-  }
+  .editables {
+    margin-bottom: 1rem;
 
-  label {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    margin-bottom: .2rem;
+    label {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: flex-start;
+      margin-bottom: .2rem;
 
-    p {
-      width: 25%;
-      text-align: start;
-    }
+      p {
+        width: 25%;
+        text-align: start;
+      }
 
-    input,
-    textarea {
-      width: 75%;
-    }
+      input,
+      textarea {
+        width: 75%;
+      }
 
-    textarea {
-      resize: vertical;
-      border: .1rem solid #000000;
+      textarea {
+        resize: vertical;
+        border: .1rem solid #000000;
+      }
     }
   }
 }
@@ -50,6 +56,11 @@
 
 .imagen {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 63vh;
 }
 
 input {
@@ -75,7 +86,8 @@ input {
   color: red;
   text-align: center;
   bottom: 0;
-  font-size: .75rem;
+  font-weight: 700;
+  font-size: .9rem;
 }
 
 .btns {

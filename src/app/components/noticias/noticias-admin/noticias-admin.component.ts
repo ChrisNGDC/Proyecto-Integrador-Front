@@ -40,15 +40,15 @@ export class NoticiasAdminComponent {
         );
         setTimeout(() => {
           this.loading = false;
-        }, 2000);
+        }, 3000);
       });
     });
   }
   async getImages() {
     this.eventos.forEach((evento: any) => {
       this.neService.getImage(evento.s3key).subscribe((data) => {
-        console.log(data)
-        evento['s3key'] = data['data' as keyof typeof data];
+        console.log(data);
+        evento['s3keyvalue'] = data['data' as keyof typeof data];
       });
     });
   }
@@ -113,6 +113,8 @@ export class NoticiasAdminComponent {
     );
   }
   eliminarEvento(eventoAEliminar: any) {
+    console.log(eventoAEliminar);
+    this.neService.deleteImage(eventoAEliminar.s3key).subscribe(() => {});
     this.neService
       .deleteNewsAndEvents(eventoAEliminar.id)
       .subscribe(() => this.getEventos());
@@ -130,6 +132,7 @@ export class NoticiasAdminComponent {
         let id = evento.id;
         delete evento.id;
         evento.s3key = `noticiasYeventos/${id}.${filedata.type}`;
+        delete evento.s3keyvalue;
         this.neService
           .saveImage(
             'noticiasYeventos',
@@ -151,6 +154,7 @@ export class NoticiasAdminComponent {
       resumen: '',
       s3key: '',
       titulo: '',
+      s3keyvalue: '',
     };
     const modalRef = this.modalService.open(ModalEdicionComponent, {
       size: 'xl',
@@ -162,16 +166,17 @@ export class NoticiasAdminComponent {
         const evento = data[0];
         const filedata = data[1];
         evento.s3key = `${filedata.type}`;
+        delete evento.s3keyvalue;
         this.neService.putNewsAndEvents(evento).subscribe((id) => {
           this.neService
-          .saveImage(
-            'noticiasYeventos',
-            `${id}.${filedata.type}`,
-            filedata.content
-          )
-          .subscribe(() => {
-            this.getEventos();
-          });
+            .saveImage(
+              'noticiasYeventos',
+              `${id}.${filedata.type}`,
+              filedata.content
+            )
+            .subscribe(() => {
+              this.getEventos();
+            });
         });
       })
       .catch((error: any) => console.log(error));

@@ -22,18 +22,19 @@ export class ModalEdicionComponent implements OnInit {
 
   ngOnInit() {
     this.eventoModal = JSON.parse(JSON.stringify(this.evento));
-    this.filedata.content = this.evento.s3key;
-    if (this.evento.s3key.includes('png')) {
+    this.filedata.content = this.evento.s3keyvalue;
+    if (this.evento.s3keyvalue.includes('png')) {
       this.filedata.type = 'png';
-    } else if (this.evento.s3key.includes('jpg')) {
+    } else if (this.evento.s3keyvalue.includes('jpg')) {
       this.filedata.type = 'jpg';
-    } else if (this.evento.s3key.includes('jpeg')) {
+    } else if (this.evento.s3keyvalue.includes('jpeg')) {
       this.filedata.type = 'jpeg';
     }
   }
   validEvent(evento: any) {
+    console.log(evento)
     for (let key in evento) {
-      if (evento[key] == '' && key != 's3key') {
+      if (evento[key] == '') {
         return false;
       }
     }
@@ -72,7 +73,7 @@ export class ModalEdicionComponent implements OnInit {
       } else {
         error.style.position = 'absolute';
       }
-      error.style.display = 'block';
+      error.style.display = 'flex';
     }
   }
 }
