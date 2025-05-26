@@ -1,6 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { EgresadosService } from '../../services/egresado.service';
+import { Egresado } from '../../models/egresado';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-egresados',
@@ -15,52 +18,42 @@ export class EgresadosComponent {
   editMode = signal(false);
   currentEgresadoId = signal<number | null>(null);
   searchQuery = signal('');
-
-  // Datos de ejemplo
-  egresados = signal([
-    {
-      id: 1,
-      nroAlumno: '123456789',
-      nombre: 'Guadalupe',
-      apellido: 'Sírio',
-      carrera: 'Tecnicatura superior en Desarrollo de Software',
-      anioEgreso: 2025,
-      fechaNacimiento: '26/10/1989',
-      direccion: 'Paso 446',
-      mail: 'guadalupe.sirio@gmail.com',
-      telefono: '1123193617',
-      activo: true
-    },
-    {
-      id: 2,
-      nroAlumno: '123456790',
-      nombre: 'Harold',
-      apellido: 'Guevara',
-      carrera: 'Licenciado ....',
-      anioEgreso: 2026,
-      fechaNacimiento: '30/11/1987',
-      direccion: 'Paso 446',
-      mail: 'harold.guevara.nuinunez@gmail.com',
-      telefono: '1125432055',
-      activo: true
-    },
-    // Más egresados pueden agregarse aquí
-  ]);
+  egresados = signal<Egresado[]>([]);
 
   // Formulario
   egresadoForm: FormGroup;
+  snackBar: any;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private egresadoService: EgresadosService,
+    private authService: AuthService,
+  ) {
+    this.loadEgresados();
+
     this.egresadoForm = this.fb.group({
-      nroAlumno: ['', Validators.required],
+      mail: ['', [Validators.required, Validators.email]],
       nombre: ['', Validators.required],
       apellido: ['', Validators.required],
-      carrera: ['', Validators.required],
-      anioEgreso: ['', [Validators.required, Validators.min(2000), Validators.max(new Date().getFullYear())]],
+      dni: ['', Validators.required],
+      telefono: [''],
       fechaNacimiento: ['', Validators.required],
-      direccion: ['', Validators.required],
-      mail: ['', [Validators.required, Validators.email]],
-      telefono: ['', Validators.required],
+      carrera: ['', Validators.required],
+      anioEgreso: ['', Validators.required],
+      fotoPerfil: [''],
+      genero: ['Binario'],
+      ubicacion: [''],
+      perfilLinkedin: [''],
+      urlRepositorio: [''],
+      experienciaLaboral: [''],
+      situacionLaboral: [''],
+    });
+  }
+
+  loadEgresados() {
+    this.egresadoService.getEgresados().subscribe(data => {
+      const ordenados = data.sort((a, b) => Number(a.id) - Number(b.id));
+      this.egresados.set(ordenados);
     });
   }
 
@@ -68,10 +61,10 @@ export class EgresadosComponent {
   filteredEgresados() {
     const query = this.searchQuery().toLowerCase();
     return this.egresados().filter(egresado => 
-      egresado.activo && (
+      egresado.isActive && (
         egresado.nombre.toLowerCase().includes(query) ||
         egresado.apellido.toLowerCase().includes(query) ||
-        egresado.nroAlumno.includes(query)
+        egresado.id.toString().includes(query)
       )
     );
   }
@@ -92,40 +85,53 @@ export class EgresadosComponent {
   }
 
   // Desactivar egresado
-  desactivarEgresado(id: number) {
+  desactivarEgresado(id: string) {
     if (confirm('¿Está seguro que desea desactivar este egresado?')) {
-      this.egresados.update(egresados => 
-        egresados.map(e => e.id === id ? {...e, activo: false} : e)
-      );
+      this.egresadoService.deactivateEgresado(id).subscribe(() => {
+        this.loadEgresados();
+      });
     }
   }
 
   // Guardar cambios
   guardarEgresado() {
     if (this.egresadoForm.valid) {
+
+      const pass = "Ifts11_" + this.egresadoForm.value.dni
+      console.log("La contraseña es: "+pass)
+      this.authService.signUp(this.egresadoForm.value.mail, pass);
+      console.log("se registró el egresado: ", this.egresadoForm.value.mail);
+      //this.egresadoForm.reset();
+
       const formData = this.egresadoForm.value;
 
-      if (this.editMode()) {
-        // Actualizar existente
-        this.egresados.update(egresados => 
-          egresados.map(e => 
-            e.id === this.currentEgresadoId() ? {...e, ...formData} : e
-          )
-        );
-      } else {
-        // Agregar nuevo
-        const newId = Math.max(...this.egresados().map(e => e.id)) + 1;
-        this.egresados.update(egresados => [
-          ...egresados,
-          {
-            id: newId,
-            ...formData,
-            activo: true
-          }
-        ]);
-      }
+      const operacion = this.editMode() 
+        ? this.egresadoService.updateEgresado(this.currentEgresadoId()!, formData)
+        : this.egresadoService.createEgresado(formData);
 
-      this.setActiveTab('lista');
+      operacion.subscribe({
+        next: () => {
+          this.egresadoForm.reset();
+          this.loadEgresados();
+          this.mostrarMensaje(this.editMode() ? 'Egresado actualizado' : 'Egresado creado');
+          this.activeTab.set('lista');
+          console.log('Tab actual:', this.activeTab());
+        },
+        error: (error) => {
+          this.mostrarError(this.editMode() ? 'Error al actualizar' : 'Error al crear');
+        }
+      });
+    }else {
+      this.egresadoForm.markAllAsTouched(); // <- Esto hace que se vean los errores
+      return;
     }
+  }
+
+  mostrarMensaje(mensaje: string) {
+    console.log(mensaje);
+  }
+
+  mostrarError(mensaje: string) {
+    console.error(mensaje);
   }
 }

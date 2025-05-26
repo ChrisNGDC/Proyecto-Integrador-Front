@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, UrlTree } from '@angular/router';
-import { Observable, map, take, switchMap, of} from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 @Injectable({
@@ -9,25 +8,20 @@ import { AuthService } from '../services/auth.service';
 export class UserGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router) {}
 
-  canActivate(): Observable<boolean | UrlTree> {
-    return this.authService.isAuthenticated().pipe(
-      take(1),
-      map((isAuth) => {
-        if (!isAuth) {
-          return this.router.parseUrl('/login');
-        }
-        return true;
-      }),
-      switchMap((result) => {
-        if (result !== true) return of(result);
-  
-        return this.authService.isAdmin().pipe(
-          take(1),
-          map((isAdmin) => {
-            return !isAdmin ? true : this.router.parseUrl('/admin-dashboard');
-          })
-        );
-      })
-    );
+  async canActivate(): Promise<boolean | UrlTree> {
+    try {
+      const isAuthenticated = await this.authService.isAuthenticated();      
+      if (!isAuthenticated) {
+        return this.router.createUrlTree(['/login']);
+      }
+      const isAdmin = await this.authService.isAdmin();      
+      if (isAdmin) {
+        // Si es admin tratando de acceder a ruta de usuario, redirige al dashboard de admin
+        return this.router.createUrlTree(['/admin-dashboard']);
+      }      
+      return true;
+    } catch (error) {
+      return this.router.createUrlTree(['/login']);
+    }
   }
 }
