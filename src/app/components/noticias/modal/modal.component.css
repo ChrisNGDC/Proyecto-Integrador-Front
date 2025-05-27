@@ -1,14 +1,57 @@
 .card {
   border-color: transparent;
+  min-height: 100%;
+  width: 100%;
 }
 
-.card-text {
-  max-height: 31vh;
-  overflow-y: auto!important;
+.card .row {
+  min-height: 100%;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 100%;
+  position: relative;
+
+  .datos {
+    margin-bottom: 1rem;
+
+    h5 {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    h6 {
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+
+    h5, h6, p {
+      width: 100%;
+      text-align: start;
+      margin-bottom: .5rem;
+    }
+  }
+}
+
+.card-body>.card-text {
+  position: absolute;
+  bottom: 0;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .imagen {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+  min-height: 63vh;
 }
