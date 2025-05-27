@@ -26,7 +26,7 @@
   </div>
 </div>
 @if (loading) {
-<h1 style="color: black; text-align: center; font-size: 5rem">Loading</h1>
+<h1 id="loading"><span class="loader"></span></h1>
 } @else {
 <div class="grid-container">
   @for (evento of eventosFiltrados; track $index) {

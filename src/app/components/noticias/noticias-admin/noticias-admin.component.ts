@@ -47,7 +47,6 @@ export class NoticiasAdminComponent {
   async getImages() {
     this.eventos.forEach((evento: any) => {
       this.neService.getImage(evento.s3key).subscribe((data) => {
-        console.log(data);
         evento['s3keyvalue'] = data['data' as keyof typeof data];
       });
     });
@@ -113,7 +112,6 @@ export class NoticiasAdminComponent {
     );
   }
   eliminarEvento(eventoAEliminar: any) {
-    console.log(eventoAEliminar);
     this.neService.deleteImage(eventoAEliminar.s3key).subscribe(() => {});
     this.neService
       .deleteNewsAndEvents(eventoAEliminar.id)
