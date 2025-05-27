@@ -117,6 +117,16 @@ export class NoticiasAdminComponent {
       .deleteNewsAndEvents(eventoAEliminar.id)
       .subscribe(() => this.getEventos());
   }
+  activarEvento(eventoADesactivar: any) {
+    this.neService
+      .activateNewsAndEvents(eventoADesactivar.id)
+      .subscribe(() => this.getEventos());
+  }
+  desactivarEvento(eventoADesactivar: any) {
+    this.neService
+      .deactivateNewsAndEvents(eventoADesactivar.id)
+      .subscribe(() => this.getEventos());
+  }
   editarEvento(evento: any) {
     const modalRef = this.modalService.open(ModalEdicionComponent, {
       size: 'xl',
@@ -154,6 +164,7 @@ export class NoticiasAdminComponent {
       s3key: '',
       titulo: '',
       s3keyvalue: '',
+      active: true,
     };
     const modalRef = this.modalService.open(ModalEdicionComponent, {
       size: 'xl',

@@ -18,6 +18,12 @@ export class NewsEventsService {
   deleteNewsAndEvents(id: string) {
     return this.http.delete(`${this.url}/noticiasYeventos/${id}`)
   }
+  activateNewsAndEvents(id: string) {
+    return this.http.patch(`${this.url}/noticiasYeventos/${id}`, JSON.stringify({"active": true}))
+  }
+  deactivateNewsAndEvents(id: string) {
+    return this.http.patch(`${this.url}/noticiasYeventos/${id}`, JSON.stringify({"active": false}))
+  }
   putNewsAndEvents(data: any) {
     return this.http.put(`${this.url}/noticiasYeventos`, data)
   }

@@ -30,6 +30,7 @@ export class NoticiasUserComponent {
     this.loading = true;
     this.neService.getNewsAndEvents().subscribe((data) => {
       this.eventos = data;
+      this.eventos = this.eventos.filter((event: any) => event['active']);
       this.getImages().then(() => {
         this.eventosFiltrados = this.eventos;
         this.eventosFiltrados.sort(

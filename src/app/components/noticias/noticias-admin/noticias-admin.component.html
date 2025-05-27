@@ -53,7 +53,15 @@
       </div>
       <div class="card-footer">
         <small class="text-muted">Publicado {{ evento.fecha }}</small>
-        <button id="btn-eliminar" (click)="eliminarEvento(evento)">❌</button>
+        <div id="btns">
+          @if (evento.active) {
+            <button id="btn-desactivar" (click)="desactivarEvento(evento)">🟠</button>
+
+          } @else {
+            <button id="btn-activar" (click)="activarEvento(evento)">🟢</button>
+          }
+          <button id="btn-eliminar" (click)="eliminarEvento(evento)">🔴</button>
+        </div>
       </div>
     </div>
   </div>

@@ -28,7 +28,6 @@ export class ModalEdicionComponent implements OnInit {
     }
   }
   validEvent(evento: any) {
-    console.log(evento)
     for (let key in evento) {
       if (evento[key] == '' && key != 's3key') {
         return false;
