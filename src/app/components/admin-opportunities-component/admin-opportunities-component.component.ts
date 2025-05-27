@@ -1,31 +1,76 @@
-import { Component, signal } from "@angular/core"
-import { CommonModule } from "@angular/common"
-import { ReactiveFormsModule,  FormBuilder, FormGroup, Validators, FormsModule } from "@angular/forms"
-import type { JobOpportunity } from "../../models/job-opportunity"
+import { Component, OnInit, signal, inject } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule, AbstractControl } from "@angular/forms"; // Importa AbstractControl
+import type { JobOpportunity } from "../../models/job-opportunity";
+import { OpportunityService } from "../../services/opportunities.services";
+import type { Company } from "../../models/company.model";
+import { HttpClientModule } from '@angular/common/http';
 
-interface Company {
-  id: number
-  name: string
-  logo?: string
-  website?: string
-  industry: string
-  contactEmail?: string
-}
 
 @Component({
   selector: "app-admin-opportunities",
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   templateUrl: "./admin-opportunities-component.component.html",
   styleUrls: ["./admin-opportunities-component.component.css"],
 })
-export class AdminOpportunitiesComponent {
-  activeTab = signal<"list" | "add" | "edit" | "preview">("list")
+export class AdminOpportunitiesComponent implements OnInit {
+  // Inyección del servicio de oportunidades
+  private opportunityService = inject(OpportunityService);
+  private fb = inject(FormBuilder); // Inyectar FormBuilder en lugar de en el constructor
 
-  // Formulario reactivo para nueva oportunidad
-  opportunityForm: FormGroup
+  // Estado de la pestaña activa en el panel de administración
+  activeTab = signal<"list" | "add" | "edit" | "preview">("list");
 
-  constructor(private fb: FormBuilder) {
+  // Formulario reactivo para agregar nuevas oportunidades
+  opportunityForm: FormGroup;
+
+  // Lista de oportunidades obtenida del servicio (signal)
+  opportunities = this.opportunityService.jobs;
+
+  // Lista de empresas (HARDCODEADA - considerar obtener de un backend en el futuro)
+  companies = signal<Company[]>([
+    { id: 1, name: "Globant", industry: "Tecnología", contactEmail: "rrhh@globant.com" },
+    { id: 2, name: "G&L Group", industry: "Consultoría IT", contactEmail: "careers@glgroup.com" },
+    { id: 3, name: "IT Patagonia", industry: "Tecnología", contactEmail: "jobs@itpatagonia.com" },
+    { id: 4, name: "Gobierno de la ciudad", industry: "Sector Público", contactEmail: "recursoshumanos@buenosaires.gob.ar" },
+    { id: 5, name: "Accenture", industry: "Consultoría", contactEmail: "talent@accenture.com" },
+    { id: 6, name: "MercadoLibre", industry: "E-commerce", contactEmail: "careers@mercadolibre.com" },
+    { id: 7, name: "Freelancer", industry: "Independiente", contactEmail: "contacto@freelancer.com" },
+  ]);
+
+  // Categorías disponibles para las oportunidades
+  categories = signal<string[]>(["Backend", "FrontEnd", "QA", "Datos", "Devops", "UX/UI", "Mobile"]);
+
+  // Modalidades disponibles para las oportunidades
+  modalities = signal<string[]>(["Remoto", "Presencial", "Híbrida"]);
+
+  // Tipos de publicación (vacante o servicio)
+  publicationTypes = signal<{ value: "vacante" | "servicio"; label: string }[]>([
+    { value: "vacante", label: "Vacante laboral" },
+    { value: "servicio", label: "Servicio/Proyecto" },
+  ]);
+
+  // Signals para los filtros de la lista de oportunidades
+  searchTerm = signal<string>("");
+  categoryFilter = signal<string | null>(null);
+  modalityFilter = signal<string | null>(null);
+  typeFilter = signal<"vacante" | "servicio" | null>(null);
+  statusFilter = signal<string | null>(null);
+
+  // Oportunidad que se está editando
+  editingOpportunity: JobOpportunity | null = null;
+  // Formulario reactivo para la edición (se crea dinámicamente)
+  editForm: FormGroup | null = null;
+
+  // Oportunidad que se está previsualizando
+  previewingOpportunity: JobOpportunity | null = null;
+
+  // Requisito temporal para añadir a la lista de requisitos
+  newRequirement = "";
+
+  constructor() {
+    // Inicialización del formulario de agregar oportunidad
     this.opportunityForm = this.fb.group({
       title: ["", Validators.required],
       company: ["", Validators.required],
@@ -36,205 +81,38 @@ export class AdminOpportunitiesComponent {
       location: [""],
       salary: [""],
       contactEmail: ["", Validators.email],
-      active: [true],
-    })
+      active: [true], // Por defecto, una nueva oportunidad es activa
+      requirements: [[] as string[]] // Inicializa como un array vacío de strings
+    });
   }
 
-  // Lista de oportunidades
-  opportunities = signal<JobOpportunity[]>([
-    {
-      id: 1,
-      company: "Globant",
-      title: "Desarrollador backend Ssr 3 años de experiencia",
-      modality: "Híbrida",
-      publicationDate: new Date("2025-01-15"),
-      category: "Backend",
-      type: "vacante",
-      description:
-        "Buscamos desarrollador backend con experiencia en Node.js y bases de datos SQL/NoSQL para unirse a nuestro equipo de desarrollo.",
-      requirements: [
-        "3+ años de experiencia en desarrollo backend",
-        "Conocimientos sólidos de Node.js",
-        "Experiencia con bases de datos SQL y NoSQL",
-        "Inglés intermedio/avanzado",
-      ],
-      location: "Buenos Aires, Argentina",
-      salary: "Competitivo",
-      contactEmail: "rrhh@globant.com",
-      active: true,
-    },
-    {
-      id: 2,
-      company: "G&L Group",
-      title: "Desarrollador backend Trainee",
-      modality: "Presencial",
-      publicationDate: new Date("2025-02-10"),
-      category: "Backend",
-      type: "vacante",
-      description:
-        "Oportunidad para desarrolladores recién graduados que deseen iniciar su carrera en el desarrollo backend.",
-      requirements: [
-        "Conocimientos básicos de programación",
-        "Interés en desarrollo backend",
-        "Capacidad de aprendizaje rápido",
-      ],
-      location: "Córdoba, Argentina",
-      salary: "A convenir",
-      contactEmail: "careers@glgroup.com",
-      active: true,
-    },
-    {
-      id: 3,
-      company: "IT Patagonia",
-      title: "Desarrollador backend Junior 1 - 2 años de exp.",
-      modality: "Híbrida",
-      publicationDate: new Date("2025-02-20"),
-      category: "Backend",
-      type: "vacante",
-      description: "Buscamos desarrollador backend junior para proyectos innovadores en el sector financiero.",
-      requirements: [
-        "1-2 años de experiencia en desarrollo",
-        "Conocimientos de Java o Python",
-        "Bases de datos relacionales",
-      ],
-      location: "Remoto (Argentina)",
-      salary: "Según experiencia",
-      contactEmail: "jobs@itpatagonia.com",
-      active: true,
-    },
-    {
-      id: 4,
-      company: "Gobierno de la ciudad",
-      title: "Desarrollador backend Junior +6 meses de exp.",
-      modality: "Presencial",
-      publicationDate: new Date("2025-03-05"),
-      category: "Backend",
-      type: "servicio",
-      description: "Oportunidad para formar parte del equipo de desarrollo de aplicaciones gubernamentales.",
-      requirements: ["6+ meses de experiencia", "Conocimientos de .NET o Java", "Residir en CABA o alrededores"],
-      location: "Ciudad de Buenos Aires, Argentina",
-      salary: "Según escala salarial pública",
-      contactEmail: "recursoshumanos@buenosaires.gob.ar",
-      active: false,
-    },
-    {
-      id: 5,
-      company: "Accenture",
-      title: "Frontend Developer React",
-      modality: "Remoto",
-      publicationDate: new Date("2025-03-10"),
-      category: "FrontEnd",
-      type: "vacante",
-      description: "Buscamos desarrollador frontend con experiencia en React para proyectos internacionales.",
-      requirements: [
-        "2+ años de experiencia con React",
-        "HTML, CSS, JavaScript avanzado",
-        "Inglés intermedio/avanzado",
-      ],
-      location: "Remoto (Latam)",
-      salary: "Competitivo + beneficios",
-      contactEmail: "talent@accenture.com",
-      active: true,
-    },
-    {
-      id: 6,
-      company: "MercadoLibre",
-      title: "QA Automation Engineer",
-      modality: "Híbrida",
-      publicationDate: new Date("2025-03-15"),
-      category: "QA",
-      type: "vacante",
-      description:
-        "Únete al equipo de QA de MercadoLibre para desarrollar y mantener frameworks de automatización de pruebas.",
-      requirements: [
-        "Experiencia en automatización de pruebas",
-        "Conocimientos de Selenium, Cypress o similares",
-        "Programación en Java o Python",
-      ],
-      location: "Buenos Aires, Argentina",
-      salary: "Competitivo + beneficios",
-      contactEmail: "careers@mercadolibre.com",
-      active: true,
-    },
-    {
-      id: 7,
-      company: "Freelancer",
-      title: "Diseño de sitio web para empresa de turismo",
-      modality: "Remoto",
-      publicationDate: new Date("2025-03-20"),
-      category: "FrontEnd",
-      type: "servicio",
-      description:
-        "Se busca desarrollador frontend para diseñar y desarrollar sitio web responsive para empresa de turismo.",
-      requirements: [
-        "Experiencia en diseño web",
-        "Conocimientos de HTML, CSS y JavaScript",
-        "Portfolio de trabajos previos",
-      ],
-      location: "Remoto",
-      salary: "Proyecto - $1500 USD",
-      contactEmail: "contacto@turismoaventura.com",
-      active: true,
-    },
-  ])
+  ngOnInit(): void {
+    // Al cargar el componente de administración, cargar TODAS las oportunidades (activas e inactivas)
+    this.opportunityService.loadOpportunities(true); // <--- CAMBIO CLAVE AQUÍ
+  }
 
-  // Lista de empresas
-  companies = signal<Company[]>([
-    { id: 1, name: "Globant", industry: "Tecnología", contactEmail: "rrhh@globant.com" },
-    { id: 2, name: "G&L Group", industry: "Consultoría IT", contactEmail: "careers@glgroup.com" },
-    { id: 3, name: "IT Patagonia", industry: "Tecnología", contactEmail: "jobs@itpatagonia.com" },
-    {
-      id: 4,
-      name: "Gobierno de la ciudad",
-      industry: "Sector Público",
-      contactEmail: "recursoshumanos@buenosaires.gob.ar",
-    },
-    { id: 5, name: "Accenture", industry: "Consultoría", contactEmail: "talent@accenture.com" },
-    { id: 6, name: "MercadoLibre", industry: "E-commerce", contactEmail: "careers@mercadolibre.com" },
-    { id: 7, name: "Freelancer", industry: "Independiente", contactEmail: "contacto@freelancer.com" },
-  ])
-
-  // Categorías disponibles
-  categories = signal<string[]>(["Backend", "FrontEnd", "QA", "Datos", "Devops", "UX/UI", "Mobile", "Todos" ])
-
-  // Modalidades disponibles
-  modalities = signal<string[]>(["Remoto", "Presencial", "Híbrida"])
-
-  // Tipos de publicación
-  publicationTypes = signal<{ value: "vacante" | "servicio"; label: string }[]>([
-    { value: "vacante", label: "Vacante laboral" },
-    { value: "servicio", label: "Servicio/Proyecto" },
-  ])
-
-  // Filtros
-  searchTerm = signal<string>("")
-  categoryFilter = signal<string | null>(null)
-  modalityFilter = signal<string | null>(null)
-  typeFilter = signal<"vacante" | "servicio" | null>(null)
-  statusFilter = signal<string | null>(null)
-
-  // Oportunidad en edición
-  editingOpportunity: JobOpportunity | null = null
-  editForm: FormGroup | null = null
-
-  // Oportunidad en previsualización
-  previewingOpportunity: JobOpportunity | null = null
-
-  // Nuevo requisito temporal
-  newRequirement = ""
-
+  /**
+   * Establece la pestaña activa en el panel de administración.
+   * @param tab La pestaña a activar ("list", "add", "edit", "preview").
+   */
   setActiveTab(tab: "list" | "add" | "edit" | "preview") {
-    this.activeTab.set(tab)
-
+    this.activeTab.set(tab);
     if (tab === "add") {
-      this.resetForm()
+      this.resetForm(); // Reinicia el formulario al ir a la pestaña de añadir
     }
-
     if (tab !== "preview") {
-      this.previewingOpportunity = null
+      this.previewingOpportunity = null; // Limpia la previsualización si no estamos en esa pestaña
+    }
+    // Al salir de la edición, limpiar el formulario de edición
+    if (tab !== "edit") {
+      this.editingOpportunity = null;
+      this.editForm = null;
     }
   }
 
+  /**
+   * Reinicia el formulario de agregar oportunidad a sus valores por defecto.
+   */
   resetForm() {
     this.opportunityForm.reset({
       title: "",
@@ -247,86 +125,110 @@ export class AdminOpportunitiesComponent {
       salary: "",
       contactEmail: "",
       active: true,
-    })
-    this.newRequirement = ""
+      requirements: []
+    });
+    this.newRequirement = ""; // Limpia el campo de nuevo requisito
   }
 
+  /**
+   * Obtiene el formulario activo actualmente (oportunidad o edición).
+   * @returns El FormGroup activo.
+   */
+  getCurrentlyActiveForm(): FormGroup {
+    return this.activeTab() === "edit" && this.editForm ? this.editForm : this.opportunityForm;
+  }
+
+  /**
+   * Añade un nuevo requisito a la lista de requisitos del formulario activo.
+   */
   addRequirement() {
-    if (!this.newRequirement.trim()) return
+    if (!this.newRequirement.trim()) return; // No añadir requisitos vacíos
+    const currentForm = this.getCurrentlyActiveForm();
+    const requirementsControl = currentForm.get('requirements') as AbstractControl<string[]>; // Obtener el control de requisitos
+    const currentRequirements = requirementsControl.value || []; // Obtener los requisitos actuales
 
-    const currentRequirements = this.getCurrentRequirements()
-    currentRequirements.push(this.newRequirement.trim())
-
-    this.newRequirement = ""
+    requirementsControl.patchValue([...currentRequirements, this.newRequirement.trim()]); // Añadir el nuevo requisito
+    this.newRequirement = ""; // Limpiar el campo de entrada
   }
 
+  /**
+   * Elimina un requisito de la lista de requisitos del formulario activo.
+   * @param index El índice del requisito a eliminar.
+   */
   removeRequirement(index: number) {
-    const currentRequirements = this.getCurrentRequirements()
-    currentRequirements.splice(index, 1)
+    const currentForm = this.getCurrentlyActiveForm();
+    const requirementsControl = currentForm.get('requirements') as AbstractControl<string[]>;
+    const currentRequirements = requirementsControl.value || [];
+
+    const updatedRequirements = currentRequirements.filter((_, i) => i !== index);
+    requirementsControl.patchValue(updatedRequirements); // Actualizar los requisitos
   }
 
-  getCurrentRequirements(): string[] {
-    if (this.activeTab() === "edit" && this.editingOpportunity) {
-      if (!this.editingOpportunity.requirements) {
-        this.editingOpportunity.requirements = []
-      }
-      return this.editingOpportunity.requirements
-    } else {
-      // Para el formulario de agregar
-      if (!this.opportunityForm.value.requirements) {
-        this.opportunityForm.value.requirements = []
-      }
-      return this.opportunityForm.value.requirements
-    }
-  }
-
+  /**
+   * Agrega una nueva oportunidad laboral/servicio.
+   */
   addOpportunity() {
     if (this.opportunityForm.invalid) {
-      this.markFormGroupTouched(this.opportunityForm)
-      this.showNotification("Por favor complete todos los campos obligatorios", "error")
-      return
+      this.markFormGroupTouched(this.opportunityForm);
+      this.showNotification("Por favor complete todos los campos obligatorios", "error");
+      return;
     }
 
-    const newId = this.opportunities().length ? Math.max(...this.opportunities().map((o) => o.id)) + 1 : 1
-
-    const formValue = this.opportunityForm.value
-    const opportunity: JobOpportunity = {
-      id: newId,
+    const formValue = this.opportunityForm.value;
+    const newOpportunity: Omit<JobOpportunity, 'id' | 'publicationDate'> = {
       title: formValue.title,
       company: formValue.company,
       modality: formValue.modality,
       category: formValue.category,
       type: formValue.type,
       description: formValue.description,
-      requirements: this.opportunityForm.value.requirements || [],
+      requirements: formValue.requirements || [],
       location: formValue.location,
       salary: formValue.salary,
       contactEmail: formValue.contactEmail,
-      publicationDate: new Date(),
-      active: formValue.active,
-    }
+      active: formValue.active
+    };
 
-    this.opportunities.update((opportunities) => [...opportunities, opportunity])
-    this.showNotification("Oportunidad laboral creada exitosamente")
-    this.resetForm()
-    this.setActiveTab("list")
+    this.opportunityService.addOpportunity(newOpportunity as JobOpportunity).subscribe({
+      next: (response) => {
+        console.log('Job opportunity created:', response);
+        // Recarga la lista de oportunidades (con el parámetro true para el admin)
+        this.opportunityService.loadOpportunities(true);
+        this.showNotification("Oportunidad laboral creada exitosamente");
+        this.resetForm();
+        this.setActiveTab("list");
+      },
+      error: (error) => {
+        console.error('Error creating job opportunity:', error);
+        this.showNotification("Error al crear la oportunidad laboral", "error");
+      }
+    });
   }
 
-  // Marcar todos los campos como tocados para mostrar errores de validación
+  /**
+   * Marca todos los controles de un FormGroup como tocados para mostrar errores de validación.
+   * @param formGroup El FormGroup a marcar.
+   */
   markFormGroupTouched(formGroup: FormGroup) {
     Object.values(formGroup.controls).forEach((control) => {
-      control.markAsTouched()
+      control.markAsTouched();
       if ((control as FormGroup).controls) {
-        this.markFormGroupTouched(control as FormGroup)
+        this.markFormGroupTouched(control as FormGroup);
       }
-    })
+    });
   }
 
+  /**
+   * Inicia el proceso de edición de una oportunidad.
+   * @param opportunity La oportunidad a editar.
+   */
   startEdit(opportunity: JobOpportunity) {
-    this.editingOpportunity = { ...opportunity, requirements: [...(opportunity.requirements || [])] }
+    // Clonar la oportunidad para evitar mutaciones directas y asegurar que los requisitos son un array
+    this.editingOpportunity = { ...opportunity, requirements: [...(opportunity.requirements || [])] };
 
-    // Crear un nuevo formulario para edición
+    // Crear y poblar el formulario de edición con los datos de la oportunidad
     this.editForm = this.fb.group({
+      id: [opportunity.id], // Asegúrate de que el ID esté en el formulario de edición para el PUT
       title: [opportunity.title, Validators.required],
       company: [opportunity.company, Validators.required],
       category: [opportunity.category, Validators.required],
@@ -337,168 +239,205 @@ export class AdminOpportunitiesComponent {
       salary: [opportunity.salary || ""],
       contactEmail: [opportunity.contactEmail || "", Validators.email],
       active: [opportunity.active !== undefined ? opportunity.active : true],
-    })
+      requirements: [opportunity.requirements || []]
+    });
 
-    this.setActiveTab("edit")
+    this.setActiveTab("edit");
   }
 
+  /**
+   * Guarda los cambios de una oportunidad editada.
+   */
   saveEdit() {
-    if (!this.editingOpportunity || !this.editForm) return
+    if (!this.editingOpportunity || !this.editForm) return; // Asegurarse de que hay una oportunidad y un formulario de edición
 
     if (this.editForm.invalid) {
-      this.markFormGroupTouched(this.editForm)
-      this.showNotification("Por favor complete todos los campos obligatorios", "error")
-      return
+      this.markFormGroupTouched(this.editForm);
+      this.showNotification("Por favor complete todos los campos obligatorios", "error");
+      return;
     }
 
-    const formValue = this.editForm.value
+    const formValue = this.editForm.value;
     const updatedOpportunity: JobOpportunity = {
-      ...this.editingOpportunity,
+      // Usar el ID de la oportunidad original para la actualización
+      id: this.editingOpportunity.id,
       title: formValue.title,
       company: formValue.company,
       modality: formValue.modality,
       category: formValue.category,
       type: formValue.type,
       description: formValue.description,
+      requirements: formValue.requirements || [],
       location: formValue.location,
       salary: formValue.salary,
       contactEmail: formValue.contactEmail,
       active: formValue.active,
-    }
+      // La fecha de publicación no se actualiza en el PUT, se mantiene la original
+      publicationDate: this.editingOpportunity.publicationDate
+    };
 
-    this.opportunities.update((opportunities) =>
-      opportunities.map((o) => (o.id === updatedOpportunity.id ? updatedOpportunity : o)),
-    )
-
-    this.showNotification("Oportunidad laboral actualizada exitosamente")
-    this.editingOpportunity = null
-    this.editForm = null
-    this.setActiveTab("list")
+    this.opportunityService.updateOpportunity(updatedOpportunity).subscribe({
+      next: (response) => {
+        console.log('Job opportunity updated:', response);
+        // Recarga la lista de oportunidades (con el parámetro true para el admin)
+        this.opportunityService.loadOpportunities(true);
+        this.showNotification("Oportunidad laboral actualizada exitosamente");
+        this.editingOpportunity = null; // Limpiar oportunidad en edición
+        this.editForm = null; // Limpiar formulario de edición
+        this.setActiveTab("list");
+      },
+      error: (error) => {
+        console.error('Error updating job opportunity:', error);
+        this.showNotification("Error al actualizar la oportunidad laboral", "error");
+      }
+    });
   }
 
+  /**
+   * Cambia el estado (activo/inactivo) de una oportunidad.
+   * @param opportunity La oportunidad a la que se le cambiará el estado.
+   */
   toggleActive(opportunity: JobOpportunity) {
-    this.opportunities.update((opportunities) =>
-      opportunities.map((o) => (o.id === opportunity.id ? { ...o, active: !o.active } : o)),
-    )
-
-    const message = opportunity.active ? "Oportunidad desactivada" : "Oportunidad activada"
-    this.showNotification(message)
+    // Crea una copia de la oportunidad y cambia el estado 'active'
+    this.opportunityService.updateOpportunity({ ...opportunity, active: !opportunity.active }).subscribe({
+      next: (response) => {
+        console.log('Job opportunity status updated:', response);
+        // Recarga la lista de oportunidades (con el parámetro true para el admin)
+        this.opportunityService.loadOpportunities(true);
+        const message = opportunity.active ? "Oportunidad desactivada" : "Oportunidad activada";
+        this.showNotification(message);
+      },
+      error: (error) => {
+        console.error('Error updating job opportunity status:', error);
+        this.showNotification("Error al cambiar el estado de la oportunidad", "error");
+      }
+    });
   }
 
-  deleteOpportunity(opportunityId: number) {
-    if (confirm("¿Está seguro de que desea eliminar esta oportunidad laboral? Esta acción no se puede deshacer.")) {
-      this.opportunities.update((opportunities) => opportunities.filter((o) => o.id !== opportunityId))
-      this.showNotification("Oportunidad laboral eliminada")
-    }
-  }
-
+  /**
+   * Duplica una oportunidad existente.
+   * @param opportunity La oportunidad a duplicar.
+   */
   duplicateOpportunity(opportunity: JobOpportunity) {
-    const newId = Math.max(...this.opportunities().map((o) => o.id)) + 1
-
-    const duplicatedOpportunity: JobOpportunity = {
+    const duplicatedOpportunity: Omit<JobOpportunity, 'id' | 'publicationDate'> = {
       ...opportunity,
-      id: newId,
-      title: `${opportunity.title} (copia)`,
-      publicationDate: new Date(),
-      active: false,
-    }
+      title: `${opportunity.title} (copia)`, // Añade "(copia)" al título
+      active: false, // La copia se crea como inactiva por defecto
+    };
 
-    this.opportunities.update((opportunities) => [...opportunities, duplicatedOpportunity])
-    this.showNotification("Oportunidad laboral duplicada exitosamente")
+    this.opportunityService.addOpportunity(duplicatedOpportunity as JobOpportunity).subscribe({
+      next: (response) => {
+        console.log('Job opportunity duplicated:', response);
+        // Recarga la lista de oportunidades (con el parámetro true para el admin)
+        this.opportunityService.loadOpportunities(true);
+        this.showNotification("Oportunidad laboral duplicada exitosamente");
+      },
+      error: (error) => {
+        console.error('Error duplicating job opportunity:', error);
+        this.showNotification("Error al duplicar la oportunidad laboral", "error");
+      }
+    });
   }
 
+  /**
+   * Previsualiza una oportunidad.
+   * @param opportunity La oportunidad a previsualizar.
+   */
   previewOpportunity(opportunity: JobOpportunity) {
-    this.previewingOpportunity = { ...opportunity }
-    this.setActiveTab("preview")
+    this.previewingOpportunity = { ...opportunity }; // Clonar para previsualizar
+    this.setActiveTab("preview");
   }
 
-  // Filtrar oportunidades
+  /**
+   * Getter que devuelve la lista de oportunidades filtradas según los criterios actuales.
+   * Utiliza los signals de filtro y el signal de oportunidades del servicio.
+   */
   get filteredOpportunities() {
     return this.opportunities().filter((opportunity) => {
-      // Filtrar por término de búsqueda
       const matchesSearch =
         this.searchTerm() === "" ||
         opportunity.title.toLowerCase().includes(this.searchTerm().toLowerCase()) ||
         opportunity.company.toLowerCase().includes(this.searchTerm().toLowerCase()) ||
-        opportunity.description?.toLowerCase().includes(this.searchTerm().toLowerCase())
+        opportunity.description?.toLowerCase().includes(this.searchTerm().toLowerCase());
 
-      // Filtrar por categoría
-      const matchesCategory = !this.categoryFilter() || opportunity.category === this.categoryFilter()
-
-      // Filtrar por modalidad
-      const matchesModality = !this.modalityFilter() || opportunity.modality === this.modalityFilter()
-
-      // Filtrar por tipo
-      const matchesType = !this.typeFilter() || opportunity.type === this.typeFilter()
-
-      // Filtrar por estado
+      const matchesCategory = !this.categoryFilter() || opportunity.category === this.categoryFilter();
+      const matchesModality = !this.modalityFilter() || opportunity.modality === this.modalityFilter();
+      const matchesType = !this.typeFilter() || opportunity.type === this.typeFilter();
       const matchesStatus =
         !this.statusFilter() ||
         (this.statusFilter() === "active" && opportunity.active) ||
-        (this.statusFilter() === "inactive" && !opportunity.active)
+        (this.statusFilter() === "inactive" && !opportunity.active);
 
-      return matchesSearch && matchesCategory && matchesModality && matchesType && matchesStatus
-    })
+      return matchesSearch && matchesCategory && matchesModality && matchesType && matchesStatus;
+    });
   }
 
-  // Método para mostrar notificaciones
+  /**
+   * Muestra una notificación temporal en la parte inferior izquierda de la pantalla.
+   * @param message El mensaje a mostrar.
+   * @param type El tipo de notificación ("success", "warning", "error").
+   */
   showNotification(message: string, type: "success" | "warning" | "error" = "success") {
-    const notification = document.createElement("div")
-    notification.textContent = message
-    notification.className = `fixed bottom-4 left-4 py-2 px-4 rounded shadow-lg z-50 notification-fade`
-
-    // Aplicar color según tipo
-    if (type === "success") {
-      notification.classList.add("bg-green-500", "text-white")
-    } else if (type === "warning") {
-      notification.classList.add("bg-yellow-500", "text-white")
-    } else if (type === "error") {
-      notification.classList.add("bg-red-500", "text-white")
-    }
-
-    document.body.appendChild(notification)
-
-    // Eliminar después de 3 segundos
+    const notification = document.createElement("div");
+    notification.textContent = message;
+    notification.className = `fixed bottom-4 left-4 py-2 px-4 rounded shadow-lg z-50 notification-fade bg-${
+      type === "success"
+        ? "green-500"
+        : type === "warning"
+          ? "yellow-500"
+          : "red-500"
+      } text-white`;
+    document.body.appendChild(notification);
     setTimeout(() => {
-      notification.classList.add("opacity-0")
+      notification.classList.add("opacity-0");
       setTimeout(() => {
-        document.body.removeChild(notification)
-      }, 500)
-    }, 3000)
+        document.body.removeChild(notification);
+      }, 500);
+    }, 3000);
   }
 
-  // Obtener el email de contacto de la empresa seleccionada
+  /**
+   * Obtiene el email de contacto de una empresa por su nombre.
+   * @param companyName El nombre de la empresa.
+   * @returns El email de contacto de la empresa o una cadena vacía si no se encuentra.
+   */
   getCompanyEmail(companyName: string): string {
-    if (!companyName) return ""
-
-    const company = this.companies().find((c) => c.name === companyName)
-    return company?.contactEmail || ""
+    if (!companyName) return "";
+    const company = this.companies().find((c) => c.name === companyName);
+    return company?.contactEmail || "";
   }
 
-  // Actualizar el email de contacto cuando se selecciona una empresa
+  /**
+   * Actualiza el email de contacto en el formulario de agregar oportunidad
+   * cuando se selecciona una empresa.
+   */
   updateContactEmail() {
-    const companyName = this.opportunityForm.get("company")?.value
-    const email = this.getCompanyEmail(companyName)
-
+    const companyName = this.opportunityForm.get("company")?.value;
+    const email = this.getCompanyEmail(companyName);
     if (email && !this.opportunityForm.get("contactEmail")?.value) {
-      this.opportunityForm.patchValue({ contactEmail: email })
+      this.opportunityForm.patchValue({ contactEmail: email });
     }
   }
 
-  // Actualizar el email de contacto cuando se selecciona una empresa en el formulario de edición
+  /**
+   * Actualiza el email de contacto en el formulario de edición
+   * cuando se selecciona una empresa.
+   */
   updateEditContactEmail() {
-    if (!this.editForm) return
-
-    const companyName = this.editForm.get("company")?.value
-    const email = this.getCompanyEmail(companyName)
-
+    if (!this.editForm) return;
+    const companyName = this.editForm.get("company")?.value;
+    const email = this.getCompanyEmail(companyName);
     if (email && !this.editForm.get("contactEmail")?.value) {
-      this.editForm.patchValue({ contactEmail: email })
+      this.editForm.patchValue({ contactEmail: email });
     }
   }
 
-  // Obtener el tipo de publicación como texto
+  /**
+   * Obtiene la etiqueta legible para el tipo de publicación.
+   * @param type El tipo de publicación ("vacante" o "servicio").
+   * @returns La etiqueta correspondiente.
+   */
   getPublicationTypeLabel(type: "vacante" | "servicio"): string {
-    return type === "vacante" ? "Vacante laboral" : "Servicio/Proyecto"
+    return type === "vacante" ? "Vacante laboral" : "Servicio/Proyecto";
   }
 }

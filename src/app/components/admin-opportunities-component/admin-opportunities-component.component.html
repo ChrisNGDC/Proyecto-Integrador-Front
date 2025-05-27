@@ -1,619 +1,630 @@
 <div class="py-6">
-    <div class="flex border-b mb-6 overflow-x-auto">
-      <button 
-        class="py-2 px-4 border-b-2 mr-4 whitespace-nowrap" 
-        [class.border-blue-500]="activeTab() === 'list'"
-        [class.font-medium]="activeTab() === 'list'"
-        (click)="setActiveTab('list')">
-        Gestionar Oportunidades
-      </button>
-      <button 
-        class="py-2 px-4 border-b-2 mr-4 whitespace-nowrap" 
-        [class.border-blue-500]="activeTab() === 'add'"
-        [class.font-medium]="activeTab() === 'add'"
-        (click)="setActiveTab('add')">
-        Publicar Oportunidad
-      </button>
-    </div>
-  
-    <!-- Lista de oportunidades con filtros -->
-    <div *ngIf="activeTab() === 'list'" class="mt-4">
-      <div class="bg-white p-4 rounded-lg shadow-sm border mb-6">
-        <div class="flex flex-wrap gap-4 items-end">
-          <div class="flex-1">
-            <label for="searchTerm" class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
-            <input 
-              type="text" 
-              id="searchTerm" 
-              [(ngModel)]="searchTerm" 
-              class="w-full p-2 border rounded"
-              placeholder="Buscar por título, empresa o descripción">
-          </div>
-          
-          <div class="w-48">
-            <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-            <select 
-              id="categoryFilter" 
-              [(ngModel)]="categoryFilter" 
-              class="w-full p-2 border rounded">
-              <option [ngValue]="null">Todas</option>
-              <option *ngFor="let category of categories()" [value]="category">{{ category }}</option>
-            </select>
-          </div>
-          
-          <div class="w-48">
-            <label for="modalityFilter" class="block text-sm font-medium text-gray-700 mb-1">Modalidad</label>
-            <select 
-              id="modalityFilter" 
-              [(ngModel)]="modalityFilter" 
-              class="w-full p-2 border rounded">
-              <option [ngValue]="null">Todas</option>
-              <option *ngFor="let modality of modalities()" [value]="modality">{{ modality }}</option>
-            </select>
-          </div>
-          
-          <div class="w-48">
-            <label for="typeFilter" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-            <select 
-              id="typeFilter" 
-              [(ngModel)]="typeFilter" 
-              class="w-full p-2 border rounded">
-              <option [ngValue]="null">Todos</option>
-              <option *ngFor="let type of publicationTypes()" [value]="type.value">{{ type.label }}</option>
-            </select>
-          </div>
-          
-          <div class="w-48">
-            <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-            <select 
-              id="statusFilter" 
-              [(ngModel)]="statusFilter" 
-              class="w-full p-2 border rounded">
-              <option [ngValue]="null">Todos</option>
-              <option value="active">Activas</option>
-              <option value="inactive">Inactivas</option>
-            </select>
-          </div>
-          
-          <button 
-            (click)="setActiveTab('add')" 
-            class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 flex items-center">
-            <span class="mr-1">+</span> Nueva Oportunidad
-          </button>
+  <div class="flex border-b mb-6 overflow-x-auto">
+    <button
+      class="py-2 px-4 border-b-2 mr-4 whitespace-nowrap"
+      [class.border-blue-500]="activeTab() === 'list'"
+      [class.font-medium]="activeTab() === 'list'"
+      (click)="setActiveTab('list')"
+    >
+      Gestionar Oportunidades
+    </button>
+    <button
+      class="py-2 px-4 border-b-2 mr-4 whitespace-nowrap"
+      [class.border-blue-500]="activeTab() === 'add'"
+      [class.font-medium]="activeTab() === 'add'"
+      (click)="setActiveTab('add')"
+    >
+      Publicar Oportunidad
+    </button>
+  </div>
+
+  <div *ngIf="activeTab() === 'list'" class="mt-4">
+    <div class="bg-white p-4 rounded-lg shadow-sm border mb-6">
+      <div class="flex flex-wrap gap-4 items-end">
+        <div class="flex-1">
+          <label for="searchTerm" class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+          <input
+            type="text"
+            id="searchTerm"
+            [(ngModel)]="searchTerm"
+            class="w-full p-2 border rounded"
+            placeholder="Buscar por título, empresa o descripción"
+          />
         </div>
-      </div>
-      
-      <!-- Tarjetas de oportunidades -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div *ngFor="let opportunity of filteredOpportunities" 
-             class="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow"
-             [class.border-green-300]="opportunity.active"
-             [class.border-gray-300]="!opportunity.active">
-          <div class="p-4">
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="text-lg font-semibold">{{ opportunity.company }}</h3>
-              <div class="flex flex-col items-end">
-                <span 
-                  [class]="opportunity.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                  class="px-2 py-1 rounded text-xs font-medium mb-1">
-                  {{ opportunity.active ? 'Activa' : 'Inactiva' }}
-                </span>
-                <span 
-                  [class]="opportunity.type === 'vacante' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'"
-                  class="px-2 py-1 rounded text-xs font-medium">
-                  {{ opportunity.type === 'vacante' ? 'Vacante' : 'Servicio' }}
-                </span>
-              </div>
-            </div>
-            
-            <p class="font-medium mb-2">{{ opportunity.title }}</p>
-            <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ opportunity.description }}</p>
-            
-            <div class="flex justify-between text-sm text-gray-500 mb-3">
-              <span>{{ opportunity.modality }}</span>
-              <span>{{ opportunity.publicationDate | date:'dd/MM/yyyy' }}</span>
-            </div>
-            
-            <!-- Etiquetas -->
-            <div class="mb-3 flex flex-wrap gap-1">
-              <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                {{ opportunity.category }}
-              </span>
-              <span *ngIf="opportunity.location" class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
-                {{ opportunity.location }}
-              </span>
-            </div>
-            
-            <!-- Acciones -->
-            <div class="flex flex-wrap gap-2 mt-3">
-              <button 
-                (click)="startEdit(opportunity)" 
-                class="bg-yellow-500 text-white py-1 px-3 rounded text-sm hover:bg-yellow-600">
-                Editar
-              </button>
-              <button 
-                (click)="toggleActive(opportunity)" 
-                [class]="opportunity.active ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'"
-                class="text-white py-1 px-3 rounded text-sm">
-                {{ opportunity.active ? 'Desactivar' : 'Activar' }}
-              </button>
-              <button 
-                (click)="previewOpportunity(opportunity)" 
-                class="bg-blue-500 text-white py-1 px-3 rounded text-sm hover:bg-blue-600">
-                Previsualizar
-              </button>
-              <button 
-                (click)="duplicateOpportunity(opportunity)" 
-                class="bg-purple-500 text-white py-1 px-3 rounded text-sm hover:bg-purple-600">
-                Duplicar
-              </button>
-              <button 
-                (click)="deleteOpportunity(opportunity.id)" 
-                class="bg-gray-500 text-white py-1 px-3 rounded text-sm hover:bg-gray-600">
-                Eliminar
-              </button>
-            </div>
-          </div>
+
+        <div class="w-48">
+          <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+          <select
+            id="categoryFilter"
+            [(ngModel)]="categoryFilter"
+            class="w-full p-2 border rounded"
+          >
+            <option [ngValue]="null">Todas</option>
+            <option *ngFor="let category of categories()" [value]="category">{{ category }}</option>
+          </select>
         </div>
-      </div>
-      
-      <!-- Mensaje si no hay oportunidades -->
-      <div *ngIf="filteredOpportunities.length === 0" class="text-center py-8 bg-gray-50 rounded-lg mt-4">
-        <p class="text-gray-500">No se encontraron oportunidades laborales que coincidan con los criterios de búsqueda.</p>
-        <button 
-          (click)="setActiveTab('add')" 
-          class="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-          Publicar Nueva Oportunidad
+
+        <div class="w-48">
+          <label for="modalityFilter" class="block text-sm font-medium text-gray-700 mb-1">Modalidad</label>
+          <select
+            id="modalityFilter"
+            [(ngModel)]="modalityFilter"
+            class="w-full p-2 border rounded"
+          >
+            <option [ngValue]="null">Todas</option>
+            <option *ngFor="let modality of modalities()" [value]="modality">{{ modality }}</option>
+          </select>
+        </div>
+
+        <div class="w-48">
+          <label for="typeFilter" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+          <select
+            id="typeFilter"
+            [(ngModel)]="typeFilter"
+            class="w-full p-2 border rounded"
+          >
+            <option [ngValue]="null">Todos</option>
+            <option *ngFor="let type of publicationTypes()" [value]="type.value">{{ type.label }}</option>
+          </select>
+        </div>
+
+        <div class="w-48">
+          <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+          <select
+            id="statusFilter"
+            [(ngModel)]="statusFilter"
+            class="w-full p-2 border rounded"
+          >
+            <option [ngValue]="null">Todos</option>
+            <option value="active">Activas</option>
+            <option value="inactive">Inactivas</option>
+          </select>
+        </div>
+
+        <button
+          (click)="setActiveTab('add')"
+          class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 flex items-center"
+        >
+          <span class="mr-1">+</span> Nueva Oportunidad
         </button>
       </div>
     </div>
-  
-    <!-- Formulario para agregar oportunidad -->
-    <div *ngIf="activeTab() === 'add'" class="mt-4">
-      <div class="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 class="text-xl font-semibold mb-6">Publicar Nueva Oportunidad Laboral</h2>
-        
-        <form [formGroup]="opportunityForm" (ngSubmit)="addOpportunity()">
-          <!-- Tipo de publicación -->
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de publicación *</label>
-            <div class="flex space-x-4">
-              <label *ngFor="let type of publicationTypes()" class="inline-flex items-center">
-                <input 
-                  type="radio" 
-                  [value]="type.value" 
-                  formControlName="type"
-                  class="mr-2">
-                <span>{{ type.label }}</span>
-              </label>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div
+        *ngFor="let opportunity of filteredOpportunities"
+        class="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow"
+        [class.border-green-300]="opportunity.active"
+        [class.border-gray-300]="!opportunity.active"
+      >
+        <div class="p-4">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="text-lg font-semibold">{{ opportunity.company }}</h3>
+            <div class="flex flex-col items-end">
+              <span
+                [class]="opportunity.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                class="px-2 py-1 rounded text-xs font-medium mb-1"
+              >
+                {{ opportunity.active ? 'Activa' : 'Inactiva' }}
+              </span>
+              <span
+                [class]="opportunity.type === 'vacante' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'"
+                class="px-2 py-1 rounded text-xs font-medium"
+              >
+                {{ opportunity.type === 'vacante' ? 'Vacante' : 'Servicio' }}
+              </span>
             </div>
           </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Título del Puesto *</label>
-              <input 
-                type="text" 
-                id="title" 
-                formControlName="title" 
-                class="w-full p-2 border rounded"
-                placeholder="Ej: Desarrollador Frontend Senior"
-                [class.border-red-500]="opportunityForm.get('title')?.invalid && opportunityForm.get('title')?.touched">
-              <div *ngIf="opportunityForm.get('title')?.invalid && opportunityForm.get('title')?.touched" class="text-red-500 text-sm mt-1">
-                El título es obligatorio
-              </div>
-            </div>
-            
-            <div>
-              <label for="company" class="block text-sm font-medium text-gray-700 mb-1">Empresa *</label>
-              <select 
-                id="company" 
-                formControlName="company" 
-                (ngModelChange)="updateContactEmail()"
-                class="w-full p-2 border rounded"
-                [class.border-red-500]="opportunityForm.get('company')?.invalid && opportunityForm.get('company')?.touched">
-                <option value="">Seleccionar empresa</option>
-                <option *ngFor="let company of companies()" [value]="company.name">{{ company.name }}</option>
-              </select>
-              <div *ngIf="opportunityForm.get('company')?.invalid && opportunityForm.get('company')?.touched" class="text-red-500 text-sm mt-1">
-                La empresa es obligatoria
-              </div>
-            </div>
+
+          <p class="font-medium mb-2">{{ opportunity.title }}</p>
+          <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ opportunity.description }}</p>
+
+          <div class="flex justify-between text-sm text-gray-500 mb-3">
+            <span>{{ opportunity.modality }}</span>
+            <span>{{ opportunity.publicationDate | date: 'dd/MM/yyyy' }}</span>
           </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
-              <select 
-                id="category" 
-                formControlName="category" 
-                class="w-full p-2 border rounded"
-                [class.border-red-500]="opportunityForm.get('category')?.invalid && opportunityForm.get('category')?.touched">
-                <option value="">Seleccionar categoría</option>
-                <option *ngFor="let category of categories()" [value]="category">{{ category }}</option>
-              </select>
-              <div *ngIf="opportunityForm.get('category')?.invalid && opportunityForm.get('category')?.touched" class="text-red-500 text-sm mt-1">
-                La categoría es obligatoria
-              </div>
-            </div>
-            
-            <div>
-              <label for="modality" class="block text-sm font-medium text-gray-700 mb-1">Modalidad *</label>
-              <select 
-                id="modality" 
-                formControlName="modality" 
-                class="w-full p-2 border rounded"
-                [class.border-red-500]="opportunityForm.get('modality')?.invalid && opportunityForm.get('modality')?.touched">
-                <option value="">Seleccionar modalidad</option>
-                <option *ngFor="let modality of modalities()" [value]="modality">{{ modality }}</option>
-              </select>
-              <div *ngIf="opportunityForm.get('modality')?.invalid && opportunityForm.get('modality')?.touched" class="text-red-500 text-sm mt-1">
-                La modalidad es obligatoria
-              </div>
-            </div>
-            
-            <div>
-              <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
-              <input 
-                type="text" 
-                id="location" 
-                formControlName="location" 
-                class="w-full p-2 border rounded"
-                placeholder="Ej: Buenos Aires, Argentina">
-            </div>
+
+          <div class="mb-3 flex flex-wrap gap-1">
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+              {{ opportunity.category }}
+            </span>
+            <span *ngIf="opportunity.location" class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
+              {{ opportunity.location }}
+            </span>
           </div>
-          
-          <div class="mb-4">
-            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Descripción del Puesto</label>
-            <textarea 
-              id="description" 
-              formControlName="description" 
-              class="w-full p-2 border rounded h-24"
-              placeholder="Descripción detallada de las responsabilidades y el rol"></textarea>
-          </div>
-          
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Requisitos</label>
-            
-            <div *ngIf="opportunityForm.value.requirements && opportunityForm.value.requirements.length > 0" class="mb-3">
-              <ul class="list-disc pl-5">
-                <li *ngFor="let requirement of opportunityForm.value.requirements; let i = index" class="mb-1 flex justify-between items-center">
-                  <span>{{ requirement }}</span>
-                  <button 
-                    type="button"
-                    (click)="removeRequirement(i)" 
-                    class="text-red-500 hover:text-red-700 text-sm">
-                    Eliminar
-                  </button>
-                </li>
-              </ul>
-            </div>
-            
-            <div class="flex">
-              <input 
-                type="text" 
-                [(ngModel)]="newRequirement" 
-                [ngModelOptions]="{standalone: true}"
-                class="flex-1 p-2 border rounded-l"
-                placeholder="Ej: 3+ años de experiencia en React"
-                (keyup.enter)="addRequirement()">
-              <button 
-                type="button"
-                (click)="addRequirement()" 
-                class="bg-blue-500 text-white py-2 px-4 rounded-r hover:bg-blue-600">
-                Agregar
-              </button>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label for="salary" class="block text-sm font-medium text-gray-700 mb-1">Salario</label>
-              <input 
-                type="text" 
-                id="salary" 
-                formControlName="salary" 
-                class="w-full p-2 border rounded"
-                placeholder="Ej: $150,000 - $200,000 o Competitivo">
-            </div>
-            
-            <div>
-              <label for="contactEmail" class="block text-sm font-medium text-gray-700 mb-1">Email de Contacto</label>
-              <input 
-                type="email" 
-                id="contactEmail" 
-                formControlName="contactEmail" 
-                class="w-full p-2 border rounded"
-                [class.border-red-500]="opportunityForm.get('contactEmail')?.invalid && opportunityForm.get('contactEmail')?.touched"
-                placeholder="Ej: rrhh@empresa.com">
-              <div *ngIf="opportunityForm.get('contactEmail')?.invalid && opportunityForm.get('contactEmail')?.touched" class="text-red-500 text-sm mt-1">
-                Ingrese un email válido
-              </div>
-            </div>
-          </div>
-          
-          <div class="mb-6">
-            <div class="flex items-center">
-              <input 
-                type="checkbox" 
-                id="active" 
-                formControlName="active" 
-                class="mr-2">
-              <label for="active" class="text-sm font-medium text-gray-700">Publicar inmediatamente</label>
-            </div>
-          </div>
-          
-          <div class="flex justify-end">
-            <button 
-              type="button"
-              (click)="setActiveTab('list')" 
-              class="bg-gray-300 text-gray-800 py-2 px-4 rounded mr-2 hover:bg-gray-400">
-              Cancelar
+
+          <div class="flex flex-wrap gap-2 mt-3">
+            <button
+              (click)="startEdit(opportunity)"
+              class="bg-yellow-500 text-white py-1 px-3 rounded text-sm hover:bg-yellow-600"
+            >
+              Editar
             </button>
-            <button 
-              type="submit"
-              class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-              Publicar Oportunidad
+            <button
+              (click)="toggleActive(opportunity)"
+              [class]="opportunity.active ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'"
+              class="text-white py-1 px-3 rounded text-sm"
+            >
+              {{ opportunity.active ? 'Desactivar' : 'Activar' }}
+            </button>
+            <button
+              (click)="previewOpportunity(opportunity)"
+              class="bg-blue-500 text-white py-1 px-3 rounded text-sm hover:bg-blue-600"
+            >
+              Previsualizar
+            </button>
+            <button
+              (click)="duplicateOpportunity(opportunity)"
+              class="bg-purple-500 text-white py-1 px-3 rounded text-sm hover:bg-purple-600"
+            >
+              Duplicar
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
-  
-    <!-- Formulario para editar oportunidad -->
-    <div *ngIf="activeTab() === 'edit' && editingOpportunity && editForm" class="mt-4">
-      <div class="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 class="text-xl font-semibold mb-6">Editar Oportunidad Laboral</h2>
-        
-        <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
-          <!-- Tipo de publicación -->
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de publicación *</label>
-            <div class="flex space-x-4">
-              <label *ngFor="let type of publicationTypes()" class="inline-flex items-center">
-                <input 
-                  type="radio" 
-                  [value]="type.value" 
-                  formControlName="type"
-                  class="mr-2">
-                <span>{{ type.label }}</span>
-              </label>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label for="edit-title" class="block text-sm font-medium text-gray-700 mb-1">Título del Puesto *</label>
-              <input 
-                type="text" 
-                id="edit-title" 
-                formControlName="title" 
-                class="w-full p-2 border rounded"
-                [class.border-red-500]="editForm.get('title')?.invalid && editForm.get('title')?.touched">
-              <div *ngIf="editForm.get('title')?.invalid && editForm.get('title')?.touched" class="text-red-500 text-sm mt-1">
-                El título es obligatorio
-              </div>
-            </div>
-            
-            <div>
-              <label for="edit-company" class="block text-sm font-medium text-gray-700 mb-1">Empresa *</label>
-              <select 
-                id="edit-company" 
-                formControlName="company" 
-                (ngModelChange)="updateEditContactEmail()"
-                class="w-full p-2 border rounded"
-                [class.border-red-500]="editForm.get('company')?.invalid && editForm.get('company')?.touched">
-                <option *ngFor="let company of companies()" [value]="company.name">{{ company.name }}</option>
-              </select>
-              <div *ngIf="editForm.get('company')?.invalid && editForm.get('company')?.touched" class="text-red-500 text-sm mt-1">
-                La empresa es obligatoria
-              </div>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <label for="edit-category" class="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
-              <select 
-                id="edit-category" 
-                formControlName="category" 
-                class="w-full p-2 border rounded"
-                [class.border-red-500]="editForm.get('category')?.invalid && editForm.get('category')?.touched">
-                <option *ngFor="let category of categories()" [value]="category">{{ category }}</option>
-              </select>
-              <div *ngIf="editForm.get('category')?.invalid && editForm.get('category')?.touched" class="text-red-500 text-sm mt-1">
-                La categoría es obligatoria
-              </div>
-            </div>
-            
-            <div>
-              <label for="edit-modality" class="block text-sm font-medium text-gray-700 mb-1">Modalidad *</label>
-              <select 
-                id="edit-modality" 
-                formControlName="modality" 
-                class="w-full p-2 border rounded"
-                [class.border-red-500]="editForm.get('modality')?.invalid && editForm.get('modality')?.touched">
-                <option *ngFor="let modality of modalities()" [value]="modality">{{ modality }}</option>
-              </select>
-              <div *ngIf="editForm.get('modality')?.invalid && editForm.get('modality')?.touched" class="text-red-500 text-sm mt-1">
-                La modalidad es obligatoria
-              </div>
-            </div>
-            
-            <div>
-              <label for="edit-location" class="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
-              <input 
-                type="text" 
-                id="edit-location" 
-                formControlName="location" 
-                class="w-full p-2 border rounded">
-            </div>
-          </div>
-          
-          <div class="mb-4">
-            <label for="edit-description" class="block text-sm font-medium text-gray-700 mb-1">Descripción del Puesto</label>
-            <textarea 
-              id="edit-description" 
-              formControlName="description" 
-              class="w-full p-2 border rounded h-24"></textarea>
-          </div>
-          
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Requisitos</label>
-            
-            <div *ngIf="editingOpportunity.requirements && editingOpportunity.requirements.length > 0" class="mb-3">
-              <ul class="list-disc pl-5">
-                <li *ngFor="let requirement of editingOpportunity.requirements; let i = index" class="mb-1 flex justify-between items-center">
-                  <span>{{ requirement }}</span>
-                  <button 
-                    type="button"
-                    (click)="removeRequirement(i)" 
-                    class="text-red-500 hover:text-red-700 text-sm">
-                    Eliminar
-                  </button>
-                </li>
-              </ul>
-            </div>
-            
-            <div class="flex">
-              <input 
-                type="text" 
-                [(ngModel)]="newRequirement" 
-                [ngModelOptions]="{standalone: true}"
-                class="flex-1 p-2 border rounded-l"
-                placeholder="Nuevo requisito"
-                (keyup.enter)="addRequirement()">
-              <button 
-                type="button"
-                (click)="addRequirement()" 
-                class="bg-blue-500 text-white py-2 px-4 rounded-r hover:bg-blue-600">
-                Agregar
-              </button>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label for="edit-salary" class="block text-sm font-medium text-gray-700 mb-1">Salario</label>
-              <input 
-                type="text" 
-                id="edit-salary" 
-                formControlName="salary" 
-                class="w-full p-2 border rounded">
-            </div>
-            
-            <div>
-              <label for="edit-contactEmail" class="block text-sm font-medium text-gray-700 mb-1">Email de Contacto</label>
-              <input 
-                type="email" 
-                id="edit-contactEmail" 
-                formControlName="contactEmail" 
-                class="w-full p-2 border rounded"
-                [class.border-red-500]="editForm.get('contactEmail')?.invalid && editForm.get('contactEmail')?.touched">
-              <div *ngIf="editForm.get('contactEmail')?.invalid && editForm.get('contactEmail')?.touched" class="text-red-500 text-sm mt-1">
-                Ingrese un email válido
-              </div>
-            </div>
-          </div>
-          
-          <div class="mb-6">
-            <div class="flex items-center">
-              <input 
-                type="checkbox" 
-                id="edit-active" 
-                formControlName="active" 
-                class="mr-2">
-              <label for="edit-active" class="text-sm font-medium text-gray-700">Oportunidad activa</label>
-            </div>
-          </div>
-          
-          <div class="flex justify-end">
-            <button 
-              type="button"
-              (click)="setActiveTab('list')" 
-              class="bg-gray-300 text-gray-800 py-2 px-4 rounded mr-2 hover:bg-gray-400">
-              Cancelar
-            </button>
-            <button 
-              type="submit"
-              class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-              Guardar Cambios
-            </button>
-          </div>
-        </form>
-      </div>
+
+    <div *ngIf="filteredOpportunities.length === 0" class="text-center py-8 bg-gray-50 rounded-lg mt-4">
+      <p class="text-gray-500">No se encontraron oportunidades laborales que coincidan con los criterios de búsqueda.</p>
+      <button
+        (click)="setActiveTab('add')"
+        class="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+      >
+        Publicar Nueva Oportunidad
+      </button>
     </div>
-  
-    <!-- Previsualización de oportunidad -->
-    <div *ngIf="activeTab() === 'preview' && previewingOpportunity" class="mt-4">
-      <div class="bg-white p-6 rounded-lg shadow-sm border">
-        <div class="flex justify-between items-center mb-6">
+  </div>
+
+  <div *ngIf="activeTab() === 'add'" class="mt-4">
+    <div class="bg-white p-6 rounded-lg shadow-sm border">
+      <h2 class="text-xl font-semibold mb-6">Publicar Nueva Oportunidad Laboral</h2>
+
+      <form [formGroup]="opportunityForm" (ngSubmit)="addOpportunity()">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de publicación *</label>
+          <div class="flex space-x-4">
+            <label *ngFor="let type of publicationTypes()" class="inline-flex items-center">
+              <input type="radio" [value]="type.value" formControlName="type" class="mr-2" />
+              <span>{{ type.label }}</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <h2 class="text-xl font-semibold">{{ previewingOpportunity.title }}</h2>
-            <p class="text-gray-600 mt-1">{{ previewingOpportunity.company }} - {{ previewingOpportunity.location }}</p>
+            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Título del Puesto *</label>
+            <input
+              type="text"
+              id="title"
+              formControlName="title"
+              class="w-full p-2 border rounded"
+              placeholder="Ej: Desarrollador Frontend Senior"
+              [class.border-red-500]="opportunityForm.get('title')?.invalid && opportunityForm.get('title')?.touched"
+            />
+            <div *ngIf="opportunityForm.get('title')?.invalid && opportunityForm.get('title')?.touched" class="text-red-500 text-sm mt-1">
+              El título es obligatorio
+            </div>
           </div>
-          <button 
-            (click)="setActiveTab('list')" 
-            class="bg-gray-300 text-gray-800 py-1 px-3 rounded hover:bg-gray-400">
-            Cerrar Previsualización
-          </button>
+
+          <div>
+            <label for="company" class="block text-sm font-medium text-gray-700 mb-1">Empresa *</label>
+            <input
+              type="text"
+              id="company"
+              formControlName="company"
+              (input)="updateContactEmail()"
+              class="w-full p-2 border rounded"
+              placeholder="Nombre de la empresa"
+              [class.border-red-500]="opportunityForm.get('company')?.invalid && opportunityForm.get('company')?.touched"
+            />
+            <div *ngIf="opportunityForm.get('company')?.invalid && opportunityForm.get('company')?.touched" class="text-red-500 text-sm mt-1">
+              La empresa es obligatoria
+            </div>
+          </div>
         </div>
-        
-        <div class="flex flex-wrap gap-2 mb-4">
-          <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-            {{ previewingOpportunity.category }}
-          </span>
-          <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
-            {{ previewingOpportunity.modality }}
-          </span>
-          <span 
-            [class]="previewingOpportunity.type === 'vacante' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'"
-            class="px-2 py-1 rounded text-sm">
-            {{ getPublicationTypeLabel(previewingOpportunity.type) }}
-          </span>
-          <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm">
-            Publicada: {{ previewingOpportunity.publicationDate | date:'dd/MM/yyyy' }}
-          </span>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
+            <select
+              id="category"
+              formControlName="category"
+              class="w-full p-2 border rounded"
+              [class.border-red-500]="opportunityForm.get('category')?.invalid && opportunityForm.get('category')?.touched"
+            >
+              <option value="">Seleccionar categoría</option>
+              <option *ngFor="let category of categories()" [value]="category">{{ category }}</option>
+            </select>
+            <div *ngIf="opportunityForm.get('category')?.invalid && opportunityForm.get('category')?.touched" class="text-red-500 text-sm mt-1">
+              La categoría es obligatoria
+            </div>
+          </div>
+
+          <div>
+            <label for="modality" class="block text-sm font-medium text-gray-700 mb-1">Modalidad *</label>
+            <select
+              id="modality"
+              formControlName="modality"
+              class="w-full p-2 border rounded"
+              [class.border-red-500]="opportunityForm.get('modality')?.invalid && opportunityForm.get('modality')?.touched"
+            >
+              <option value="">Seleccionar modalidad</option>
+              <option *ngFor="let modality of modalities()" [value]="modality">{{ modality }}</option>
+            </select>
+            <div *ngIf="opportunityForm.get('modality')?.invalid && opportunityForm.get('modality')?.touched" class="text-red-500 text-sm mt-1">
+              La modalidad es obligatoria
+            </div>
+          </div>
+
+          <div>
+            <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
+            <input
+              type="text"
+              id="location"
+              formControlName="location"
+              class="w-full p-2 border rounded"
+              placeholder="Ej: Buenos Aires, Argentina"
+            />
+          </div>
         </div>
-        
+
+        <div class="mb-4">
+          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Descripción del Puesto</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            class="w-full p-2 border rounded h-24"
+            placeholder="Descripción detallada de las responsabilidades y el rol"
+          ></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Requisitos</label>
+
+          <div *ngIf="opportunityForm.value.requirements && opportunityForm.value.requirements.length > 0" class="mb-3">
+            <ul class="list-disc pl-5">
+              <li *ngFor="let requirement of opportunityForm.value.requirements; let i = index" class="mb-1 flex justify-between items-center">
+                <span>{{ requirement }}</span>
+                <button
+                  type="button"
+                  (click)="removeRequirement(i)"
+                  class="text-red-500 hover:text-red-700 text-sm"
+                >
+                  Eliminar
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <div class="flex">
+            <input
+              type="text"
+              [(ngModel)]="newRequirement"
+              [ngModelOptions]="{ standalone: true }"
+              class="flex-1 p-2 border rounded-l"
+              placeholder="Ej: 3+ años de experiencia en React"
+              (keyup.enter)="addRequirement()"
+            />
+            <button
+              type="button"
+              (click)="addRequirement()"
+              class="bg-blue-500 text-white py-2 px-4 rounded-r hover:bg-blue-600"
+            >
+              Agregar
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label for="salary" class="block text-sm font-medium text-gray-700 mb-1">Salario</label>
+            <input
+              type="text"
+              id="salary"
+              formControlName="salary"
+              class="w-full p-2 border rounded"
+              placeholder="Ej: $150,000 - $200,000 o Competitivo"
+            />
+          </div>
+
+          <div>
+            <label for="contactEmail" class="block text-sm font-medium text-gray-700 mb-1">Email de Contacto</label>
+            <input
+              type="email"
+              id="contactEmail"
+              formControlName="contactEmail"
+              class="w-full p-2 border rounded"
+              [class.border-red-500]="opportunityForm.get('contactEmail')?.invalid && opportunityForm.get('contactEmail')?.touched"
+              placeholder="Ej: rrhh@empresa.com"
+            />
+            <div *ngIf="opportunityForm.get('contactEmail')?.invalid && opportunityForm.get('contactEmail')?.touched" class="text-red-500 text-sm mt-1">
+              Ingrese un email válido
+            </div>
+          </div>
+        </div>
+
         <div class="mb-6">
-          <h3 class="text-lg font-medium mb-2">Descripción</h3>
-          <p class="text-gray-700 whitespace-pre-line">{{ previewingOpportunity.description }}</p>
-        </div>
-        
-        <div class="mb-6" *ngIf="previewingOpportunity.requirements && previewingOpportunity.requirements.length > 0">
-          <h3 class="text-lg font-medium mb-2">Requisitos</h3>
-          <ul class="list-disc pl-5">
-            <li *ngFor="let requirement of previewingOpportunity.requirements" class="mb-1 text-gray-700">
-              {{ requirement }}
-            </li>
-          </ul>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <h3 class="text-md font-medium mb-1">Salario</h3>
-            <p class="text-gray-700">{{ previewingOpportunity.salary || 'No especificado' }}</p>
-          </div>
-          
-          <div>
-            <h3 class="text-md font-medium mb-1">Contacto</h3>
-            <p class="text-gray-700">{{ previewingOpportunity.contactEmail || 'No especificado' }}</p>
+          <div class="flex items-center">
+            <input type="checkbox" id="active" formControlName="active" class="mr-2" />
+            <label for="active" class="text-sm font-medium text-gray-700">Publicar inmediatamente</label>
           </div>
         </div>
-        
-        <div class="border-t pt-4 flex justify-end">
-          <button 
-            (click)="startEdit(previewingOpportunity)" 
-            class="bg-yellow-500 text-white py-2 px-4 rounded mr-2 hover:bg-yellow-600">
-            Editar
+
+        <div class="flex justify-end">
+          <button
+            type="button"
+            (click)="setActiveTab('list')"
+            class="bg-gray-300 text-gray-800 py-2 px-4 rounded mr-2 hover:bg-gray-400"
+          >
+            Cancelar
           </button>
-          <button 
-            class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-            Aplicar (Vista Egresado)
+          <button
+            type="submit"
+            class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+          >
+            Publicar Oportunidad
           </button>
         </div>
+      </form>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab() === 'edit' && editingOpportunity && editForm" class="mt-4">
+    <div class="bg-white p-6 rounded-lg shadow-sm border">
+      <h2 class="text-xl font-semibold mb-6">Editar Oportunidad Laboral</h2>
+
+      <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de publicación *</label>
+          <div class="flex space-x-4">
+            <label *ngFor="let type of publicationTypes()" class="inline-flex items-center">
+              <input type="radio" [value]="type.value" formControlName="type" class="mr-2" />
+              <span>{{ type.label }}</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label for="edit-title" class="block text-sm font-medium text-gray-700 mb-1">Título del Puesto *</label>
+            <input
+              type="text"
+              id="edit-title"
+              formControlName="title"
+              class="w-full p-2 border rounded"
+              [class.border-red-500]="editForm.get('title')?.invalid && editForm.get('title')?.touched"
+            />
+            <div *ngIf="editForm.get('title')?.invalid && editForm.get('title')?.touched" class="text-red-500 text-sm mt-1">
+              El título es obligatorio
+            </div>
+          </div>
+
+          <div>
+            <label for="edit-company" class="block text-sm font-medium text-gray-700 mb-1">Empresa *</label>
+            <input
+              type="text"
+              id="edit-company"
+              formControlName="company"
+              (input)="updateEditContactEmail()"
+              class="w-full p-2 border rounded"
+              [class.border-red-500]="editForm.get('company')?.invalid && editForm.get('company')?.touched"
+            />
+            <div *ngIf="editForm.get('company')?.invalid && editForm.get('company')?.touched" class="text-red-500 text-sm mt-1">
+              La empresa es obligatoria
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label for="edit-category" class="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
+            <select
+              id="edit-category"
+              formControlName="category"
+              class="w-full p-2 border rounded"
+              [class.border-red-500]="editForm.get('category')?.invalid && editForm.get('category')?.touched"
+            >
+              <option *ngFor="let category of categories()" [value]="category">{{ category }}</option>
+            </select>
+            <div *ngIf="editForm.get('category')?.invalid && editForm.get('category')?.touched" class="text-red-500 text-sm mt-1">
+              La categoría es obligatoria
+            </div>
+          </div>
+
+          <div>
+            <label for="edit-modality" class="block text-sm font-medium text-gray-700 mb-1">Modalidad *</label>
+            <select
+              id="edit-modality"
+              formControlName="modality"
+              class="w-full p-2 border rounded"
+              [class.border-red-500]="editForm.get('modality')?.invalid && editForm.get('modality')?.touched"
+            >
+              <option *ngFor="let modality of modalities()" [value]="modality">{{ modality }}</option>
+            </select>
+            <div *ngIf="editForm.get('modality')?.invalid && editForm.get('modality')?.touched" class="text-red-500 text-sm mt-1">
+              La modalidad es obligatoria
+            </div>
+          </div>
+
+          <div>
+            <label for="edit-location" class="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
+            <input
+              type="text"
+              id="edit-location"
+              formControlName="location"
+              class="w-full p-2 border rounded"
+            />
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label for="edit-description" class="block text-sm font-medium text-gray-700 mb-1">Descripción del Puesto</label>
+          <textarea
+            id="edit-description"
+            formControlName="description"
+            class="w-full p-2 border rounded h-24"
+          ></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Requisitos</label>
+
+          <div *ngIf="editingOpportunity.requirements && editingOpportunity.requirements.length > 0" class="mb-3">
+            <ul class="list-disc pl-5">
+              <li *ngFor="let requirement of editingOpportunity.requirements; let i = index" class="mb-1 flex justify-between items-center">
+                <span>{{ requirement }}</span>
+                <button
+                  type="button"
+                  (click)="removeRequirement(i)"
+                  class="text-red-500 hover:text-red-700 text-sm"
+                >
+                  Eliminar
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <div class="flex">
+            <input
+              type="text"
+              [(ngModel)]="newRequirement"
+              [ngModelOptions]="{ standalone: true }"
+              class="flex-1 p-2 border rounded-l"
+              placeholder="Nuevo requisito"
+              (keyup.enter)="addRequirement()"
+            />
+            <button
+              type="button"
+              (click)="addRequirement()"
+              class="bg-blue-500 text-white py-2 px-4 rounded-r hover:bg-blue-600"
+            >
+              Agregar
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label for="edit-salary" class="block text-sm font-medium text-gray-700 mb-1">Salario</label>
+            <input
+              type="text"
+              id="edit-salary"
+              formControlName="salary"
+              class="w-full p-2 border rounded"
+            />
+          </div>
+
+          <div>
+            <label for="edit-contactEmail" class="block text-sm font-medium text-gray-700 mb-1">Email de Contacto</label>
+            <input
+              type="email"
+              id="edit-contactEmail"
+              formControlName="contactEmail"
+              class="w-full p-2 border rounded"
+              [class.border-red-500]="editForm.get('contactEmail')?.invalid && editForm.get('contactEmail')?.touched"
+            />
+            <div *ngIf="editForm.get('contactEmail')?.invalid && editForm.get('contactEmail')?.touched" class="text-red-500 text-sm mt-1">
+              Ingrese un email válido
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <div class="flex items-center">
+            <input type="checkbox" id="edit-active" formControlName="active" class="mr-2" />
+            <label for="edit-active" class="text-sm font-medium text-gray-700">Oportunidad activa</label>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button
+            type="button"
+            (click)="setActiveTab('list')"
+            class="bg-gray-300 text-gray-800 py-2 px-4 rounded mr-2 hover:bg-gray-400"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+          >
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab() === 'preview' && previewingOpportunity" class="mt-4">
+    <div class="bg-white p-6 rounded-lg shadow-sm border">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h2 class="text-xl font-semibold">{{ previewingOpportunity.title }}</h2>
+          <p class="text-gray-600 mt-1">{{ previewingOpportunity.company }} - {{ previewingOpportunity.location }}</p>
+        </div>
+        <button
+          (click)="setActiveTab('list')"
+          class="bg-gray-300 text-gray-800 py-1 px-3 rounded hover:bg-gray-400"
+        >
+          Cerrar Previsualización
+        </button>
+      </div>
+
+      <div class="flex flex-wrap gap-2 mb-4">
+        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+          {{ previewingOpportunity.category }}
+        </span>
+        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+          {{ previewingOpportunity.modality }}
+        </span>
+        <span
+          [class]="previewingOpportunity.type === 'vacante' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'"
+          class="px-2 py-1 rounded text-sm"
+        >
+          {{ getPublicationTypeLabel(previewingOpportunity.type) }}
+        </span>
+        <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm">
+          Publicada: {{ previewingOpportunity.publicationDate | date: 'dd/MM/yyyy' }}
+        </span>
+      </div>
+
+      <div class="mb-6">
+        <h3 class="text-lg font-medium mb-2">Descripción</h3>
+        <p class="text-gray-700 whitespace-pre-line">{{ previewingOpportunity.description }}</p>
+      </div>
+
+      <div class="mb-6" *ngIf="previewingOpportunity.requirements && previewingOpportunity.requirements.length > 0">
+        <h3 class="text-lg font-medium mb-2">Requisitos</h3>
+        <ul class="list-disc pl-5">
+          <li *ngFor="let requirement of previewingOpportunity.requirements" class="mb-1 text-gray-700">
+            {{ requirement }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div>
+          <h3 class="text-md font-medium mb-1">Salario</h3>
+          <p class="text-gray-700">{{ previewingOpportunity.salary || 'No especificado' }}</p>
+        </div>
+
+        <div>
+          <h3 class="text-md font-medium mb-1">Contacto</h3>
+          <p class="text-gray-700">{{ previewingOpportunity.contactEmail || 'No especificado' }}</p>
+        </div>
+      </div>
+
+      <div class="border-t pt-4 flex justify-end">
+        <button
+          (click)="startEdit(previewingOpportunity)"
+          class="bg-yellow-500 text-white py-2 px-4 rounded mr-2 hover:bg-yellow-600"
+        >
+          Editar
+        </button>
+        <button class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+          Aplicar (Vista Egresado)
+        </button>
       </div>
     </div>
   </div>
-  
+</div>
