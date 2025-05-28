@@ -1,18 +1,45 @@
 <div id="buscador">
-  <label for="busqueda">Buscar:</label>
-  <input type="text" name="busqueda" (input)="filtrar($event)">
+  <label id="buscar" for="busqueda">Buscar:</label>
+  <input id="buscado" type="text" name="busqueda" [(ngModel)] = "this.busqueda" (input)="filtrar()"/>
+  <div id="filtroFechas">
+    <div id="fecha">
+      <label>Inicio: </label>
+      <input
+        type="date"
+        max="{{this.fechas.fin}}"
+        [(ngModel)] = "fechas.inicio"
+        (keydown)="$event.preventDefault()"
+        (input)="filtrar()"
+      />
+    </div>
+    <div id="fecha">
+      <label>Fin: </label>
+      <input
+        type="date"
+        max="{{this.fechas.fin}}"
+        [ngModel]="fechas.fin | date:'yyyy-MM-dd' : 'UTC'"
+        (ngModelChange)="fechas.fin = $event"
+        (keydown)="$event.preventDefault()"
+        (input)="filtrar()"
+      />
+    </div>
+  </div>
 </div>
+@if (loading) {
+<h1 id="loading"><span class="loader"></span></h1>
+} @else {
 <div class="grid-container">
   @for (evento of eventosFiltrados; track $index) {
-    <div class="col">
-      <div class="card text-center" (click)="open(evento)">
-        <img src="noimage.jpg" class="card-img-top"/>
-        <div class="card-body">
-          <h5 class="card-title">{{evento.titulo}}</h5>
-          <p class="card-text">{{evento.resumen}}</p>
-        </div>
-        <small class="card-footer text-muted">Publicado {{evento.fecha}}</small>
+  <div class="col">
+    <div class="card text-center" (click)="open(evento)">
+      <img [src]="evento.s3key" class="card-img-top" />
+      <div class="card-body">
+        <h5 class="card-title">{{ evento.titulo }}</h5>
+        <p class="card-text">{{ evento.resumen }}</p>
       </div>
+      <small class="card-footer text-muted">Publicado {{ evento.fecha }}</small>
     </div>
+  </div>
   }
 </div>
+}

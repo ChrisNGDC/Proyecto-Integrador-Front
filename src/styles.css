@@ -17,3 +17,26 @@ app-root {
   width: 100%;
   height: 100%;
 }
+
+.modal-content {
+  width: 100%;
+  margin: auto;
+  min-height: 100%;
+}
+
+app-modal-edicion {
+  min-height: 100%;
+  width: 100%;
+
+  .modal-body {
+    min-height: 100%;
+    width: 100%;
+  }
+
+  .modal-xl {
+    min-width: 70%;
+    max-width: 70%;
+    margin: auto;
+    min-height: 100%;
+  }
+}
