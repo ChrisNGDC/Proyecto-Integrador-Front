@@ -128,6 +128,7 @@ export class NoticiasAdminComponent {
       .subscribe(() => this.getEventos());
   }
   editarEvento(evento: any) {
+    console.log(evento)
     const modalRef = this.modalService.open(ModalEdicionComponent, {
       size: 'xl',
       centered: true,

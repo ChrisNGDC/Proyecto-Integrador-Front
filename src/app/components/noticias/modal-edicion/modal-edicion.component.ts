@@ -29,7 +29,7 @@ export class ModalEdicionComponent implements OnInit {
   }
   validEvent(evento: any) {
     for (let key in evento) {
-      if (evento[key] == '' && key != 's3key') {
+      if (key != 'active' && evento[key] == '' && key != 's3key') {
         return false;
       }
     }

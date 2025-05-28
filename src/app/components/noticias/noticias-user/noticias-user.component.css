@@ -115,13 +115,16 @@
 
 .col {
   display: flex;
+  width: 100%;
 }
 
 .card {
   transition: .5s;
   backface-visibility: hidden;
   height: 100%;
+  width: 100%;
   justify-content: space-between;
+  word-break: break-word;
 }
 
 .card:hover {
