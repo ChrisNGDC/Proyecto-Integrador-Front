@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AdminOpportunitiesComponentComponent } from './admin-opportunities-component.component';
+import { AdminOpportunitiesComponent } from './admin-opportunities-component.component';
 
-describe('AdminOpportunitiesComponentComponent', () => {
-  let component: AdminOpportunitiesComponentComponent;
-  let fixture: ComponentFixture<AdminOpportunitiesComponentComponent>;
+describe('AdminOpportunitiesComponent', () => {
+  let component: AdminOpportunitiesComponent;
+  let fixture: ComponentFixture<AdminOpportunitiesComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminOpportunitiesComponentComponent]
+      imports: [AdminOpportunitiesComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AdminOpportunitiesComponentComponent);
+    fixture = TestBed.createComponent(AdminOpportunitiesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

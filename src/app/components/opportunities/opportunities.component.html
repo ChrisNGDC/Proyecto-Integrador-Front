@@ -1,118 +1,125 @@
 <div class="py-6">
-    <!-- Tabs -->
-    <div class="flex border-b mb-6">
-      <button 
-        class="py-2 px-4 border-b-2 mr-4" 
-        [class.border-blue-500]="activeTab() === 'view'"
-        [class.font-medium]="activeTab() === 'view'"
-        (click)="setActiveTab('view')">
-        Ver Oportunidades
-      </button>
-      <button 
-        class="py-2 px-4 border-b-2" 
-        [class.border-blue-500]="activeTab() === 'publish'"
-        [class.font-medium]="activeTab() === 'publish'"
-        (click)="setActiveTab('publish')">
-        Publicar Oportunidad
-      </button>
+  <div class="flex border-b mb-6">
+    <button
+      class="py-2 px-4 border-b-2 mr-4"
+      [class.border-blue-500]="activeTab() === 'view'"
+      [class.font-medium]="activeTab() === 'view'"
+      (click)="setActiveTab('view')">
+      Ver Oportunidades
+    </button>
+    <button
+      class="py-2 px-4 border-b-2"
+      [class.border-blue-500]="activeTab() === 'publish'"
+      [class.font-medium]="activeTab() === 'publish'"
+      (click)="setActiveTab('publish')">
+      Publicar Oportunidad
+    </button>
+  </div>
+
+  <div *ngIf="activeTab() === 'publish'" class="flex gap-4 mb-6">
+    <button
+      class="px-4 py-2 rounded border"
+      [class.bg-blue-500]="publicationType() === 'vacante'"
+      [class.text-white]="publicationType() === 'vacante'"
+      (click)="publicationType.set('vacante')">
+      Vacante
+    </button>
+    <button
+      class="px-4 py-2 rounded border"
+      [class.bg-blue-500]="publicationType() === 'servicio'"
+      [class.text-white]="publicationType() === 'servicio'"
+      (click)="publicationType.set('servicio')">
+      Servicio
+    </button>
+  </div>
+
+  <div *ngIf="activeTab() === 'view'" class="bg-gray-100 p-4 rounded">
+    <div class="flex flex-wrap gap-2 mb-6">
+      @for (category of categories(); track category) {
+        <button
+          class="border border-gray-800 rounded px-4 py-1 bg-white hover:bg-gray-50"
+          [class.bg-gray-200]="opportunityService.selectedCategory() === category"
+          (click)="opportunityService.filterByCategory(category)">
+          {{ category }}
+        </button>
+      }
     </div>
 
-    <div *ngIf="activeTab() === 'publish'" class="flex gap-4 mb-6">
-        <button 
-          class="px-4 py-2 rounded border" 
-          [class.bg-blue-500]="publicationType() === 'vacante'" 
-          [class.text-white]="publicationType() === 'vacante'"
-          (click)="publicationType.set('vacante')">
-          Vacante
-        </button>
-        <button 
-          class="px-4 py-2 rounded border" 
-          [class.bg-blue-500]="publicationType() === 'servicio'" 
-          [class.text-white]="publicationType() === 'servicio'"
-          (click)="publicationType.set('servicio')">
-          Servicio
-        </button>
-      </div>
-  
-    <!-- Ver oportunidades -->
-    <div *ngIf="activeTab() === 'view'" class="bg-gray-100 p-4 rounded">
-      <div class="flex flex-wrap gap-2 mb-6">
-        @for (category of categories(); track category) {
-          <button 
-            class="border border-gray-800 rounded px-4 py-1 bg-white hover:bg-gray-50"
-            [class.bg-gray-200]="selectedCategory() === category"
-            (click)="filterByCategory(category)">
-            {{ category }}
-          </button>
-        }
-      </div>
-  
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        @for (job of filteredJobs(); track job.id) {
-          <app-job-card [job]="job"></app-job-card>
-        }
-      </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      @for (job of filteredJobs(); track job.id) {
+        <app-job-card [job]="job"></app-job-card>
+      }
     </div>
-  
-    <!-- Publicar oportunidad -->
-    <div *ngIf="activeTab() === 'publish' && publicationType() === 'vacante'" class="bg-gray-100 p-6 rounded max-w-3xl">
-        <form [formGroup]="form" (ngSubmit)="submitForm()">
-          <div class="mb-4">
-            <label>Empresa</label>
-            <input type="text" formControlName="company" class="w-full border rounded p-2">
-          </div>
-          <div class="mb-4">
-            <label>Rol solicitado</label>
-            <input type="text" formControlName="title" class="w-full border rounded p-2">
-          </div>
-          <div class="mb-4">
-            <label>Modalidad</label>
-            <select formControlName="modality" class="w-full border rounded p-2">
-              <option value="Remoto">Remoto</option>
-              <option value="Presencial">Presencial</option>
-              <option value="Híbrida">Híbrida</option>
-            </select>
-          </div>
-          <div class="mb-4">
-            <label>Categoría</label>
-            <select formControlName="category" class="w-full border rounded p-2">
-              @for (cat of categories(); track cat) {
-                <option [value]="cat">{{ cat }}</option>
-              }
-            </select>
-          </div>
-          <button type="submit" class="bg-black text-white py-2 px-4 rounded hover:bg-gray-800">
-            Publicar Vacante
-          </button>
-        </form>
-      </div>
 
-      
-      <div *ngIf="activeTab() === 'publish' && publicationType() === 'servicio'" class="bg-gray-100 p-6 rounded max-w-3xl">
-        <form [formGroup]="form" (ngSubmit)="submitForm()">
-          <div class="mb-4">
-            <label>Nombre </label>
-            <input type="text" formControlName="company" class="w-full border rounded p-2">
-          </div>
-          <div class="mb-4">
-            <label>Rol ofrecido</label>
-            <input type="text" formControlName="title" class="w-full border rounded p-2">
-          </div>
-          <div class="mb-4">
-            <label>Descripción del servicio</label>
-            <textarea formControlName="description" rows="4" class="w-full border rounded p-2"></textarea>
-          </div>
-          <div class="mb-4">
-            <label>Categoría</label>
-            <select formControlName="category" class="w-full border rounded p-2">
-              @for (cat of categories(); track cat) {
-                <option [value]="cat">{{ cat }}</option>
-              }
-            </select>
-          </div>
-          <button type="submit" class="bg-black text-white py-2 px-4 rounded hover:bg-gray-800">
-            Publicar Servicio
-          </button>
-        </form>
+    <div *ngIf="filteredJobs().length === 0" class="text-center py-8 bg-gray-50 rounded-lg mt-4">
+      <p class="text-gray-500">No se encontraron oportunidades laborales que coincidan con los criterios de búsqueda.</p>
+      <button
+        (click)="setActiveTab('publish')"
+        class="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+        Publicar Nueva Oportunidad
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab() === 'publish' && publicationType() === 'vacante'" class="bg-gray-100 p-6 rounded max-w-3xl">
+    <form [formGroup]="form" (ngSubmit)="submitForm()">
+      <div class="mb-4">
+        <label>Empresa</label>
+        <input type="text" formControlName="company" class="w-full border rounded p-2">
       </div>
-            
+      <div class="mb-4">
+        <label>Rol solicitado</label>
+        <input type="text" formControlName="title" class="w-full border rounded p-2">
+      </div>
+      <div class="mb-4">
+        <label>Modalidad</label>
+        <select formControlName="modality" class="w-full border rounded p-2">
+          <option value="Remoto">Remoto</option>
+          <option value="Presencial">Presencial</option>
+          <option value="Híbrida">Híbrida</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label>Categoría</label>
+        <select formControlName="category" class="w-full border rounded p-2">
+          @for (cat of categories(); track cat) {
+            <option [value]="cat">{{ cat }}</option>
+          }
+        </select>
+      </div>
+      <button type="submit" class="bg-black text-white py-2 px-4 rounded hover:bg-gray-800">
+        Publicar Vacante
+      </button>
+    </form>
+  </div>
+
+
+  <div *ngIf="activeTab() === 'publish' && publicationType() === 'servicio'" class="bg-gray-100 p-6 rounded max-w-3xl">
+    <form [formGroup]="form" (ngSubmit)="submitForm()">
+      <div class="mb-4">
+        <label>Nombre </label>
+        <input type="text" formControlName="company" class="w-full border rounded p-2">
+      </div>
+      <div class="mb-4">
+        <label>Rol ofrecido</label>
+        <input type="text" formControlName="title" class="w-full border rounded p-2">
+      </div>
+      <div class="mb-4">
+        <label>Descripción del servicio</label>
+        <textarea formControlName="description" rows="4" class="w-full border rounded p-2"></textarea>
+      </div>
+      <div class="mb-4">
+        <label>Categoría</label>
+        <select formControlName="category" class="w-full border rounded p-2">
+          @for (cat of categories(); track cat) {
+            <option [value]="cat">{{ cat }}</option>
+          }
+        </select>
+      </div>
+      <button type="submit" class="bg-black text-white py-2 px-4 rounded hover:bg-gray-800">
+        Publicar Servicio
+      </button>
+    </form>
+  </div>
+  
+</div>

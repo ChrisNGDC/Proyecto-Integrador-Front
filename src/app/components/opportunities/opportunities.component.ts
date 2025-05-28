@@ -1,114 +1,86 @@
-import { Component, signal } from "@angular/core";
+import { Component, signal, inject, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { JobOpportunity } from "../../models/job-opportunity";
 import { JobCardComponent } from "../job-card/job-card.component";
+import { OpportunityService } from "../../services/opportunities.services"; // Importa el servicio
 
 @Component({
   selector: "app-opportunities",
   standalone: true,
-  imports: [CommonModule, JobCardComponent, ReactiveFormsModule],
+  imports: [CommonModule, JobCardComponent, ReactiveFormsModule, FormsModule], 
   templateUrl: "./opportunities.component.html",
   styleUrls: ["./opportunities.component.css"]
 })
-export class OpportunitiesComponent {
+export class OpportunitiesComponent implements OnInit {
 
   form!: FormGroup;
+  public opportunityService = inject(OpportunityService); // Inyecta el servicio
+  activeTab = signal<"view" | "publish">("view");
+  publicationType = signal<"vacante" | "servicio">("vacante");
+  categories = signal<string[]>(["Todos", "Backend", "FrontEnd", "QA", "Datos", "Devops", "UX/UI", "Mobile"]); 
+  modalities = signal<string[]>(["Remoto", "Presencial", "Híbrida"]); 
+
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
       company: ['', Validators.required],
       title: ['', Validators.required],
       modality: ['Remoto', Validators.required],
       category: ['', Validators.required],
-      description: ['']
+      description: [''],
+  
     });
   }
 
-  activeTab = signal<"view" | "publish">("view");
-  publicationType = signal<"vacante" | "servicio">("vacante");
-  categories = signal<string[]>(["Todos","Backend", "FrontEnd", "QA", "Datos", "Devops"]);
-  selectedCategory = signal<string | null>(null);
+  ngOnInit(): void {
+    this.opportunityService.loadOpportunities();
+  }
 
-  jobs = signal<JobOpportunity[]>([
-    {
-      id: 1,
-      company: "Globant",
-      title: "Desarrollador backend Ssr 3 años de experiencia",
-      modality: "Híbrida",
-      publicationDate: new Date(),
-      category: "QA",
-      type: "vacante",
-      description:"ded"
-    },
-    {
-      id: 2,
-      company: "G&L Group",
-      title: "Desarrollador backend Trainee",
-      modality: "Presencial",
-      publicationDate: new Date(),
-      category: "Backend",
-        type: "vacante",
-      description:"ded"
+  // Getters para acceder a los signals del servicio de forma reactiva en el template
+  get jobs() {
+    return this.opportunityService.jobs;
+  }
 
-    },
-    {
-      id: 3,
-      company: "IT Patagonia",
-      title: "Desarrollador backend Junior 1 - 2 años de exp.",
-      modality: "Híbrida",
-      publicationDate: new Date(),
-      category: "Backend",
-      type: "vacante",
-      description:"ded"
-    },
-    {
-      id: 4,
-      company: "Gobierno de la ciudad",
-      title: "Desarrollador backend Junior +6 meses de exp.",
-      modality: "Presencial",
-      publicationDate: new Date(),
-      category: "Backend",
-      type: "servicio",
-      description:"ded"
-    },
-  ]);
-
-  filteredJobs = signal<JobOpportunity[]>(this.jobs());
+  get filteredJobs() {
+    return this.opportunityService.filteredJobs;
+  }
 
   setActiveTab(tab: "view" | "publish") {
     this.activeTab.set(tab);
   }
 
-  filterByCategory(category: string) {
-    if (category === 'Todos') {
-      this.selectedCategory.set(null); // Limpiar la selección de cualquier otra categoría
-      this.filteredJobs.set(this.jobs()); // Mostrar todas las oportunidades
-    } 
-  else {
-      this.selectedCategory.set(category);
-      this.filteredJobs.set(this.jobs().filter((job) => job.category === category));
-    }
-    
-  }
 
   submitForm() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      // Opcional: Marcar campos tocados para mostrar errores de validación
+      Object.values(this.form.controls).forEach(control => {
+        control.markAsTouched();
+      });
+      return;
+    }
 
-    const newJob: JobOpportunity = {
-      id: Date.now(), // id único temporal
+    const newJob: Omit<JobOpportunity, 'id' | 'publicationDate'> = {
+      // id: Date.now(), // La API debería generar el ID
       company: this.form.value.company,
       title: this.form.value.title,
       modality: this.form.value.modality,
       category: this.form.value.category,
-      publicationDate: new Date(),
-      type: this.publicationType(), 
-      description: this.publicationType() === 'servicio' ? this.form.value.description : undefined
+      // publicationDate: new Date(), // La API debería establecer la fecha
+      type: this.publicationType(),
+      description: this.publicationType() === 'servicio' ? this.form.value.description : undefined,
     };
 
-    this.jobs.update(jobs => [...jobs, newJob]);
-    this.filteredJobs.set(this.jobs());
-
-    this.form.reset({ modality: 'Remoto' });
-    this.setActiveTab('view');
+    this.opportunityService.addOpportunity(newJob as JobOpportunity).subscribe({
+      next: () => {
+        this.opportunityService.loadOpportunities(); // Recargar la lista desde el backend
+        this.form.reset({ modality: 'Remoto' });
+        this.setActiveTab('view');
+        // Opcional: Mostrar una notificación de éxito
+      },
+      error: (error) => {
+        console.error('Error al publicar oportunidad:', error);
+        // Opcional: Mostrar una notificación de error
+      }
+    });
   }
 }
