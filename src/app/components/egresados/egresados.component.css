@@ -199,3 +199,8 @@
     -webkit-appearance: none;
     -moz-appearance: none;
   }
+
+  .required {
+    color: red;
+    margin-left: 2px;
+  }
