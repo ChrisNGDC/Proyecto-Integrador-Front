@@ -10,32 +10,23 @@ body, html {
 }
 
 .splash-container {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
-  grid-template-rows: auto 1fr auto;
-  align-items:baseline;
-  justify-content: center;
-  padding: 2rem;
+  padding: 1rem;
   position: relative;
   background-image: url(../../../../public/assets/background.svg);
   background-repeat: no-repeat;
   background-position: center;
-  background-size: contain;
+  background-size: cover;
+  justify-content: space-between;
 }
-.card-container {
-  width: 100%;
-  position: relative;
-  margin: 0 auto; 
-  z-index: 2;
+
+.header-content {
+  flex: 0 0 15%;
+  max-height: 15vh;
   display: flex;
-  flex-direction: column;
-  align-items: center; 
-}
-.form-container {
-  position: relative;
-  width: 100%;
-  min-height: 420px;
-  display: flex;
+  align-items: center;
   justify-content: center;
 }
 
@@ -44,41 +35,54 @@ h1 {
   color: #2c3e50;
   text-align: center;
   z-index: 2;
-  margin-bottom: 8%;
+  margin-bottom: 0;
 }
 
-.login-card,
-.recovery-card,
-.activation-card {
+
+.card-container {
+  flex: 1 1 70%;
+  min-height: 50vh;
+  max-height: 75vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 1rem 0;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  min-height: 420px;
+}
+
+.login-card {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 2rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  max-width: 400px;
   width: 100%;
   z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(5px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  margin: 1rem 0;
+  transition: min-height 0.3s ease;
 }
 
-.login-card {
-  position: absolute;
-  top: 0;
+.login-card.has-message {
+  min-height: 480px; 
 }
 
-.login-card label,
-.recovery-card label {
+.login-card label {
   font-weight: 600;
   color: #2c3e50;
-  margin-bottom: 0.25rem;  
+  margin-bottom: 0.25rem;
 }
 
-.login-card input,
-.recovery-card input {
+.login-card input {
   padding: 0.75rem 1rem;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -86,19 +90,17 @@ h1 {
   width: 100%;
   background: rgba(255, 255, 255, 0.6);
   transition: all 0.3s ease;
+  margin-bottom: 15px;
 }
 
-.login-card input:focus,
-.recovery-card input:focus {
+.login-card input:focus {
   background: rgba(255, 255, 255, 0.6);
   border-color: #3498db;
   outline: none;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
-.login-card button,
-.recovery-card button,
-.primary-button {
+.login-card button {
   margin-top: 1rem;
   font-size: 1rem;
   padding: 0.8rem 1.5rem;
@@ -111,9 +113,7 @@ h1 {
   width: 100%;
 }
 
-.login-card button:hover,
-.recovery-card button:hover,
-.primary-button:hover {
+.login-card button:hover {
   background-color: #1a5276;
   transform: scale(1.02);
 }
@@ -124,17 +124,11 @@ button[disabled] {
   transform: none !important;
 }
 
-.resend-button {
-  background-color: #6c757d !important;
+.forgot-password-container {
+  text-align: center;
 }
 
-.resend-button:hover {
-  background-color: #5a6268 !important;
-}
-
-.link-button,
-.forgot-password-link,
-.back-button {
+.forgot-password-link {
   background: none;
   border: none;
   cursor: pointer;
@@ -142,55 +136,40 @@ button[disabled] {
   font-size: 0.95em;
   padding: 0;
   font-family: inherit;
-  transition: color 0.2s;  
-  display: flex;
-  justify-content: flex-end; 
-  width: 100%; 
   font-weight: 600;
   color: #2c3e50;
   transition: all 0.1s ease;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
 }
 
-.link-button:hover,
-.forgot-password-link:hover,
-.back-button:hover {
+.forgot-password-link:hover {
   font-weight: 650;
   color: #2874a6;
-  text-decoration: underline;  
-}
-
-.link-button:disabled,
-.forgot-password-link.disabled {
-  color: #95a5a6;
-  cursor: not-allowed;
-  text-decoration: none;
-}
-
-.forgot-password-container {
-  text-align: center;
- 
+  text-decoration: underline;
 }
 
 .hero-text-container {
-  padding: 2rem 1rem;
-  margin-top: 1.5rem;
-  width: 100%;
-  max-width: 400px; 
-  margin: 0 auto; 
+  flex: 0 0 10%;
+  max-height: 10vh;
   text-align: center;
-  padding: 0 1rem;
   color: #2c3e50;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: 1rem;
 }
 
 .hero-title {
   font-weight: bold;
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
   margin-bottom: 0.5rem;
 }
 
 .hero-subtitle {
-  font-size: 1rem;
+  font-size: clamp(0.8rem, 2vw, 1rem);
   color: #7f8c8d;
 }
 
@@ -202,7 +181,6 @@ button[disabled] {
   border-radius: 8px;
   text-align: center;
 }
-
 
 .error-message {
   background-color: rgba(231, 76, 60, 0.1);
@@ -218,80 +196,187 @@ button[disabled] {
   font-size: 0.9rem;
 }
 
-.recovery-title,
 .login-title,
-.activation-card h2 {
+.recovery-title {
   color: #2c3e50;
-  text-align: center; 
+  text-align: center;
   font-size: 1.4rem;
+  margin-bottom: 1rem;
 }
 
 @media screen and (max-width: 768px) {
   .splash-container {
-    background-size: 140% auto;
+    padding: 1.5rem;
+    background-size: cover;
+  }
+  
+  .header-content {
+    flex: 0 0 12%;
+  }
+  
+  .card-container {
+    flex: 1 1 78%;
+    max-height: none;
+  }
+  
+  .login-card {
     padding: 1.5rem;
   }
-
-  .login-card,
-  .recovery-card,
-  .activation-card {
-    padding: 1.5rem;
+  
+  .login-card.has-message {
+    min-height: 450px;
   }
-
-  .hero-title {
-    font-size: 1.6rem;
+  
+  h1 {
+    margin-bottom: 0;
   }
-
-  .hero-subtitle {
-    font-size: 0.9rem;
-  }
+ 
 }
 
 @media screen and (max-width: 480px) {
   .splash-container {
     padding: 1rem;
   }
-
-  .login-card,
-  .recovery-card,
-  .activation-card {
-    padding: 1.25rem;
+  
+  .header-content {
+    flex: 0 0 10%;
   }
-
+  
+  .card-container {
+    flex: 1 1 80%;
+  }
+  
+  .login-card {
+    padding: 1.25rem;
+    min-height: 380px;
+  }
+  
+  .login-card.has-message {
+    min-height: 430px;
+  }
+  
   .login-card input,
-  .login-card button,
-  .recovery-card input,
-  .recovery-card button {
+  .login-card button {
     font-size: 0.95rem;
   }
-
+  
   h1 {
     font-size: 2rem;
-    margin-bottom: 1.5rem;
   }
+}
 
-  .hero-title {
-    font-size: 1.3rem;
+@media screen and (min-width: 1200px) {
+  .splash-container {
+    padding: 2rem;
   }
+  
+  .form-container {
+    max-width: 450px;
+  }
+}
 
-  .hero-subtitle {
-    font-size: 0.85rem;
+@media screen and (min-height: 900px) {
+  .login-card {
+    min-height: 450px;
+  }
+  
+  .login-card.has-message {
+    min-height: 500px;
   }
 }
-.code-sent-message {
-  background-color: #e8f5e9;
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 15px;
-  text-align: center;
-  color: #2e7d32;
+
+@media screen and (max-height: 800px) {
+  .splash-container {
+    justify-content: flex-start;
+    overflow-y: auto;
+  }
+  
+  .header-content {
+    flex: 0 0 auto;
+    padding: 0.5rem 0;
+  }
+  
+  .card-container {
+    flex: 0 1 auto;
+    min-height: auto;
+    max-height: none;
+    padding: 0.5rem 0;
+  }
+  
+  .hero-text-container {
+    flex: 0 0 auto;
+    padding: 0.5rem 0;
+  }
+  
+  .login-card {
+    min-height: 350px;
+  }
+  
+  .login-card.has-message {
+    min-height: 400px;
+  }
+  .hero-title{
+  
+    font-size: 1.2rem;
+    font-weight: 400;
+  }
+  .hero-text-container{
+    margin-top: 1rem;
+  }
 }
-.login-card input {
+
+.password-container {
+  position: relative;
+  width: 100%;
   margin-bottom: 15px;
 }
-.recovery-title {
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon input {
+  padding-right: 40px !important; 
+  width: 100%;
+  height: 48px; 
+  line-height: 1.5; 
+}
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-65%);
+  cursor: pointer;
   color: #2c3e50;
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 1.4rem;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+  background: none;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  width: 52px; 
+}
+
+.toggle-password:hover {
+  opacity: 1;
+  color: #1a5276;
+  background: none;
+}
+
+.toggle-password i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.3;
+  height: 100%;
+  width: 100%;
+}
+.toggle-password i:hover {
+  opacity: 1;
+  color: #1a5276; 
+  justify-content: center;
 }
