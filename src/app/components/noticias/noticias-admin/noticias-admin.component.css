@@ -187,12 +187,30 @@ img {
   align-items: center;
 }
 
-#btn-eliminar, #boton-activar, #boton-desactivar {
+#btn-eliminar, #btn-activar, #btn-desactivar {
   right: 0;
-  padding: 0;
-  border: none;
-  background: none;
+  margin: .1rem;
+  padding: .1rem;
+  border: .05rem solid #000000;
+  color: #000000;
+  border-radius: 0.375rem;
   font-size: 1rem;
+}
+
+#btn-eliminar {
+  background-color: #FF0000;
+}
+
+#btn-activar {
+  background-color: #00FF00;
+}
+
+#btn-desactivar {
+  background-color: #FFAA00;
+}
+
+#btn-eliminar:hover, #btn-activar:hover, #btn-desactivar:hover {
+  cursor: pointer;
 }
 
 .card-footer {
