@@ -28,10 +28,19 @@
       font-weight: 500;
     }
 
-    h5, h6, p {
+    h5, h6, #description {
       width: 100%;
       text-align: start;
       margin-bottom: .5rem;
+    }
+
+    ::ng-deep img {
+      max-width: 100%;
+      max-height: 250px;
+    }
+
+    ::ng-deep a {
+      color: #3333FF;
     }
   }
 }
