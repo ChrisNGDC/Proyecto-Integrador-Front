@@ -1,8 +1,8 @@
 import { formatDate } from '@angular/common';
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit, SecurityContext } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-
+import { DomSanitizer } from '@angular/platform-browser';
 @Component({
   selector: 'app-modal-edicion',
   imports: [FormsModule],
@@ -16,6 +16,8 @@ export class ModalEdicionComponent implements OnInit {
   eventoModal: any;
   filetype = '';
   maxAllowedSize = 200 * 1024; // KB
+
+  constructor(private sanitizer: DomSanitizer) {}
 
   ngOnInit() {
     this.eventoModal = JSON.parse(JSON.stringify(this.evento));
@@ -37,6 +39,7 @@ export class ModalEdicionComponent implements OnInit {
   }
   save() {
     let fecha = formatDate(new Date(), 'yyyy-MM-dd', 'en-US');
+    this.eventoModal.descripcion = this.sanitizer.sanitize(SecurityContext.HTML, this.eventoModal.descripcion);
     this.eventoModal.fecha = fecha;
     if (this.validEvent(this.eventoModal)) {
       this.activeModal.close([this.eventoModal, this.filetype]);
