@@ -22,7 +22,6 @@ export class EgresadosComponent {
 
   // Formulario
   egresadoForm: FormGroup;
-  snackBar: any;
 
   constructor(
     private fb: FormBuilder,
@@ -35,11 +34,11 @@ export class EgresadosComponent {
       mail: ['', [Validators.required, Validators.email]],
       nombre: ['', Validators.required],
       apellido: ['', Validators.required],
-      dni: ['', Validators.required],
-      telefono: [''],
+      dni: ['', [Validators.required, Validators.pattern(/^[0-9]*$/)]],
+      telefono: ['', Validators.pattern(/^[0-9]*$/)],
       fechaNacimiento: ['', Validators.required],
       carrera: ['', Validators.required],
-      anioEgreso: ['', Validators.required],
+      anioEgreso: ['', [Validators.required, Validators.min(1900), Validators.max(new Date().getFullYear())]],
       fotoPerfil: [''],
       genero: ['Binario'],
       ubicacion: [''],
@@ -81,7 +80,15 @@ export class EgresadosComponent {
     this.activeTab.set('agregar');
     this.editMode.set(true);
     this.currentEgresadoId.set(egresado.id);
-    this.egresadoForm.patchValue(egresado);
+    
+    // Convertir la fecha al formato correcto para el input date
+    const egresadoData = {...egresado};
+    if (egresadoData.fechaNacimiento) {
+      const fecha = new Date(egresadoData.fechaNacimiento);
+      egresadoData.fechaNacimiento = fecha.toISOString().split('T')[0];
+    }
+    
+    this.egresadoForm.patchValue(egresadoData);
   }
 
   // Desactivar egresado
@@ -89,49 +96,63 @@ export class EgresadosComponent {
     if (confirm('¿Está seguro que desea desactivar este egresado?')) {
       this.egresadoService.deactivateEgresado(id).subscribe(() => {
         this.loadEgresados();
+        this.mostrarMensaje('Egresado desactivado correctamente');
       });
     }
   }
 
-  // Guardar cambios
-  guardarEgresado() {
-    if (this.egresadoForm.valid) {
+  // Guardar cambios 
+async guardarEgresado() {
+  // Marcar todos los campos como tocados para mostrar errores
+  this.egresadoForm.markAllAsTouched();
 
-      const pass = "Ifts11_" + this.egresadoForm.value.dni
-      console.log("La contraseña es: "+pass)
-      this.authService.signUp(this.egresadoForm.value.mail, pass);
+  // Verificar si el formulario es válido
+  if (this.egresadoForm.invalid) {
+    this.mostrarError('Por favor complete todos los campos obligatorios correctamente');
+    return;
+  }
+
+  const pass = "Ifts11_" + this.egresadoForm.value.dni;
+  console.log("La contraseña es: " + pass);
+  
+  try {
+    // Primero intentar registrar el usuario (await para la Promise) si el modo no es edicion
+    if (!this.editMode()) {
+      await this.authService.signUp(this.egresadoForm.value.mail, pass);
       console.log("se registró el egresado: ", this.egresadoForm.value.mail);
-      //this.egresadoForm.reset();
-
-      const formData = this.egresadoForm.value;
-
-      const operacion = this.editMode() 
-        ? this.egresadoService.updateEgresado(this.currentEgresadoId()!, formData)
-        : this.egresadoService.createEgresado(formData);
-
-      operacion.subscribe({
-        next: () => {
-          this.egresadoForm.reset();
-          this.loadEgresados();
-          this.mostrarMensaje(this.editMode() ? 'Egresado actualizado' : 'Egresado creado');
-          this.activeTab.set('lista');
-          console.log('Tab actual:', this.activeTab());
-        },
-        error: (error) => {
-          this.mostrarError(this.editMode() ? 'Error al actualizar' : 'Error al crear');
-        }
-      });
-    }else {
-      this.egresadoForm.markAllAsTouched(); // <- Esto hace que se vean los errores
-      return;
     }
+
+    const formData = this.egresadoForm.value;
+    const operacion = this.editMode() 
+      ? this.egresadoService.updateEgresado(this.currentEgresadoId()!, formData)
+      : this.egresadoService.createEgresado(formData);
+
+    // Manejar la operación (que sí es un Observable)
+    operacion.subscribe({
+      next: () => {
+        this.egresadoForm.reset();
+        this.loadEgresados();
+        this.mostrarMensaje(this.editMode() ? 'Egresado actualizado correctamente' : 'Egresado creado correctamente');
+        this.activeTab.set('lista');
+      },
+      error: (error) => {
+        this.mostrarError(this.editMode() ? 'Error al actualizar el egresado' : 'Error al crear el egresado');
+        console.error('Error:', error);
+      }
+    });
+  } catch (error) {
+    this.mostrarError('Error al registrar el usuario: ' + (error instanceof Error ? error.message : 'Comuníquese con el administrador'));
+    console.error('Error en registro:', error);
   }
+}
 
   mostrarMensaje(mensaje: string) {
     console.log(mensaje);
+    alert(mensaje);
   }
 
   mostrarError(mensaje: string) {
     console.error(mensaje);
+    alert(mensaje);
   }
 }
