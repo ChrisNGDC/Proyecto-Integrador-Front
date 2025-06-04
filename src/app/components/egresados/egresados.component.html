@@ -61,14 +61,14 @@
               <label for="nombre">Nombre:<span class="required">*</span></label>
               <input type="text" id="nombre" formControlName="nombre" [class.invalid]="egresadoForm.get('nombre')?.invalid && egresadoForm.get('nombre')?.touched">
               @if (egresadoForm.get('nombre')?.invalid && egresadoForm.get('nombre')?.touched) {
-                <div class="error-message">El nombre es obligatorio</div>
+                <div class="error-message">El campo Nombre es obligatorio</div>
               }
             </div>
             <div class="form-group">
               <label for="apellido">Apellido:<span class="required">*</span></label>
               <input type="text" id="apellido" formControlName="apellido" [class.invalid]="egresadoForm.get('apellido')?.invalid && egresadoForm.get('apellido')?.touched">
               @if (egresadoForm.get('apellido')?.invalid && egresadoForm.get('apellido')?.touched) {
-                <div class="error-message">El apellido es obligatorio</div>
+                <div class="error-message">El campo Apellido es obligatorio</div>
               }
             </div>
           </div>
@@ -77,14 +77,14 @@
               <label for="dni">DNI:<span class="required">*</span></label>
               <input type="text" id="dni" formControlName="dni" [class.invalid]="egresadoForm.get('dni')?.invalid && egresadoForm.get('dni')?.touched">
               @if (egresadoForm.get('dni')?.invalid && egresadoForm.get('dni')?.touched) {
-                <div class="error-message">El documento es obligatorio</div>
+                <div class="error-message">El campo Documento es obligatorio</div>
               }
             </div>
             <div class="form-group">
               <label for="mail">Mail:<span class="required">*</span></label>
               <input type="email" id="mail" formControlName="mail" [class.invalid]="egresadoForm.get('mail')?.invalid && egresadoForm.get('mail')?.touched">
               @if (egresadoForm.get('mail')?.invalid && egresadoForm.get('mail')?.touched) {
-                <div class="error-message">El campo mail de egreso es obligatorio</div>
+                <div class="error-message">El campo Mail es obligatorio</div>
               }
             </div>
           </div>
@@ -93,14 +93,14 @@
               <label for="carrera">Carrera:<span class="required">*</span></label>
               <input type="text" id="carrera" formControlName="carrera" [class.invalid]="egresadoForm.get('carrera')?.invalid && egresadoForm.get('carrera')?.touched">
               @if (egresadoForm.get('carrera')?.invalid && egresadoForm.get('carrera')?.touched) {
-                <div class="error-message">El campo carrera es obligatorio</div>
+                <div class="error-message">El campo Carrera es obligatorio</div>
               }
             </div>
             <div class="form-group">
               <label for="anioEgreso">Año de egreso:<span class="required">*</span></label>
               <input type="number" id="anioEgreso" formControlName="anioEgreso" [class.invalid]="egresadoForm.get('anioEgreso')?.invalid && egresadoForm.get('anioEgreso')?.touched">
               @if (egresadoForm.get('anioEgreso')?.invalid && egresadoForm.get('anioEgreso')?.touched) {
-                <div class="error-message">El campo año de egreso es obligatorio</div>
+                <div class="error-message">El campo Año de egreso es obligatorio</div>
               }
             </div>
           </div>
@@ -110,7 +110,7 @@
               <label for="fechaNacimiento">Fecha de nacimiento:<span class="required">*</span></label>
               <input type="date" id="fechaNacimiento" formControlName="fechaNacimiento" [class.invalid]="egresadoForm.get('fechaNacimiento')?.invalid && egresadoForm.get('fechaNacimiento')?.touched">
               @if (egresadoForm.get('fechaNacimiento')?.invalid && egresadoForm.get('fechaNacimiento')?.touched) {
-                <div class="error-message">El campo fecha de nacimiento de egreso es obligatorio</div>
+                <div class="error-message">El campo Fecha de Nacimiento es obligatorio</div>
               }
             </div>
             <div class="form-group">
@@ -147,12 +147,18 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="experienciaLaboral">Experiencia Laboral:</label>
-            <input type="text" id="experienciaLaboral" formControlName="experienciaLaboral">
+            <label for="experienciaLaboral">Posee experiencia Laboral:</label>
+            <select id="experienciaLaboral" formControlName="experienciaLaboral">
+              <option value="Sí">Sí</option>
+              <option value="No">No</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="situacionLaboral">Situación Laboral:</label>
-            <input type="text" id="situacionLaboral" formControlName="situacionLaboral">
+            <select id="situacionLaboral" formControlName="situacionLaboral">
+              <option value="Sí">Empleado</option>
+              <option value="No">Desempleado</option>
+            </select>
           </div>
         </div>
   
