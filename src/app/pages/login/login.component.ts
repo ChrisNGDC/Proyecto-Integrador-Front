@@ -27,6 +27,10 @@ export class LoginComponent {
   isLoading = false;
   isRecoveringPassword = false;
   codeSent = false;
+  // Propiedades para mostrar contraseñas
+  showLoginPassword: boolean = false;
+  showNewPassword: boolean = false;
+  showConfirmPassword: boolean = false;
  
 
   constructor(private authService: AuthService, private router: Router) {}
@@ -126,5 +130,17 @@ export class LoginComponent {
     this.codeSent = false;
     this.errorMessage = '';
     this.successMessage = '';
+  }
+  
+  toggleLoginPasswordVisibility(): void {
+    this.showLoginPassword = !this.showLoginPassword;
+  }
+  
+  toggleNewPasswordVisibility(): void {
+    this.showNewPassword = !this.showNewPassword;
+  }
+  
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 }

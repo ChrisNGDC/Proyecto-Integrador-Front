@@ -55,12 +55,12 @@
         <small class="text-muted">Publicado {{ evento.fecha }}</small>
         <div id="btns">
           @if (evento.active) {
-            <button id="btn-desactivar" (click)="desactivarEvento(evento)">🟠</button>
+            <button id="btn-desactivar" (click)="desactivarEvento(evento)">Desactivar</button>
 
           } @else {
-            <button id="btn-activar" (click)="activarEvento(evento)">🟢</button>
+            <button id="btn-activar" (click)="activarEvento(evento)">Activar</button>
           }
-          <button id="btn-eliminar" (click)="eliminarEvento(evento)">🔴</button>
+          <button id="btn-eliminar" (click)="eliminarEvento(evento)">Eliminar</button>
         </div>
       </div>
     </div>
