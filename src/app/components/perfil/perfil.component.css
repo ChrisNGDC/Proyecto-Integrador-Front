@@ -1,5 +1,6 @@
+/* Estructura principal */
 .perfil-card {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
   border: 1px solid #ddd;
@@ -13,6 +14,7 @@
   gap: 20px;
 }
 
+/* Sección de imagen */
 .imagen-section {
   text-align: center;
   padding: 15px;
@@ -21,17 +23,8 @@
   border: 1px solid #ddd;
 }
 
-.avatar-default {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #3f51b5;
-  color: white;
-  font-size: 50px;
-  font-weight: bold;
-  border-radius: 50%;
+.avatar-controls {
+  position: relative;
 }
 
 .avatar-wrapper {
@@ -49,6 +42,19 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.avatar-default {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #3f51b5;
+  color: white;
+  font-size: 50px;
+  font-weight: bold;
+  border-radius: 50%;
 }
 
 .avatar-overlay {
@@ -76,11 +82,12 @@
 
 .file-actions {
   display: flex;
-  gap: 15px;
+  gap: 10px;
   justify-content: center;
   margin-top: 15px;
 }
 
+/* Sección de datos */
 .datos-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -102,6 +109,19 @@
   margin-bottom: 15px;
 }
 
+/* Formularios */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -109,6 +129,7 @@
   margin-top: 15px;
 }
 
+/* Botones */
 .btn-edit, .btn-save, .btn-cancel {
   padding: 8px 15px;
   border: none;
@@ -127,19 +148,12 @@
   color: white;
 }
 
+.btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btn-cancel {
   background-color: #ff9800;
   color: white;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
 }
