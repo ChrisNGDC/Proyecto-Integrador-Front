@@ -14,6 +14,14 @@
       (click)="setActiveTab('publish')">
       Publicar Oportunidad
     </button>
+    <button
+      *ngIf="activeTab() === 'detail'"
+      class="py-2 px-4 border-b-2"
+      [class.border-blue-500]="activeTab() === 'detail'"
+      [class.font-medium]="activeTab() === 'detail'"
+      (click)="setActiveTab('view')">
+      Volver a Oportunidades
+    </button>
   </div>
 
   <div *ngIf="activeTab() === 'publish'" class="flex gap-4 mb-6">
@@ -47,79 +55,115 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       @for (job of filteredJobs(); track job.id) {
-        <app-job-card [job]="job"></app-job-card>
+        <app-job-card [job]="job" (viewDetails)="viewJobDetails($event)"></app-job-card>
       }
     </div>
 
     <div *ngIf="filteredJobs().length === 0" class="text-center py-8 bg-gray-50 rounded-lg mt-4">
       <p class="text-gray-500">No se encontraron oportunidades laborales que coincidan con los criterios de búsqueda.</p>
-      <button
-        (click)="setActiveTab('publish')"
-        class="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-        Publicar Nueva Oportunidad
-      </button>
     </div>
   </div>
 
-  <div *ngIf="activeTab() === 'publish' && publicationType() === 'vacante'" class="bg-gray-100 p-6 rounded max-w-3xl">
-    <form [formGroup]="form" (ngSubmit)="submitForm()">
-      <div class="mb-4">
-        <label>Empresa</label>
-        <input type="text" formControlName="company" class="w-full border rounded p-2">
-      </div>
-      <div class="mb-4">
-        <label>Rol solicitado</label>
-        <input type="text" formControlName="title" class="w-full border rounded p-2">
-      </div>
-      <div class="mb-4">
-        <label>Modalidad</label>
-        <select formControlName="modality" class="w-full border rounded p-2">
-          <option value="Remoto">Remoto</option>
-          <option value="Presencial">Presencial</option>
-          <option value="Híbrida">Híbrida</option>
-        </select>
-      </div>
-      <div class="mb-4">
-        <label>Categoría</label>
-        <select formControlName="category" class="w-full border rounded p-2">
-          @for (cat of categories(); track cat) {
-            <option [value]="cat">{{ cat }}</option>
-          }
-        </select>
-      </div>
-      <button type="submit" class="bg-black text-white py-2 px-4 rounded hover:bg-gray-800">
-        Publicar Vacante
-      </button>
-    </form>
+  <div *ngIf="activeTab() === 'detail' && selectedOpportunity()" class="bg-gray-100 p-6 rounded">
+    <h2 class="text-2xl font-bold mb-4">Detalles de la Oportunidad</h2>
+    <div class="space-y-2">
+      <p>
+        <span class="font-medium">
+          {{ selectedOpportunity()?.type === 'vacante' ? 'Empresa:' : 'Nombre:' }}
+        </span>
+        {{ selectedOpportunity()?.company }}
+      </p>
+      <p><span class="font-medium">Rol/Servicio:</span> {{ selectedOpportunity()?.title }}</p>
+      <p *ngIf="selectedOpportunity()?.modality"><span class="font-medium">Modalidad:</span> {{ selectedOpportunity()?.modality }}</p>
+      <p><span class="font-medium">Categoría:</span> {{ selectedOpportunity()?.category }}</p>
+      <p *ngIf="selectedOpportunity()?.description"><span class="font-medium">Descripción:</span> {{ selectedOpportunity()?.description }}</p>
+      <p><span class="font-medium">Tipo:</span> {{ selectedOpportunity()?.type === 'vacante' ? 'Vacante' : 'Servicio' }}</p>
+      <p><span class="font-medium">Contacto: </span> {{ selectedOpportunity()?.contactEmail }}</p>
+    </div>
+    <button (click)="setActiveTab('view')" class="mt-6 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+      Volver a la lista
+    </button>
   </div>
 
+  <div *ngIf="activeTab() === 'publish' && publicationType() === 'vacante'" class="bg-gray-100 p-6 rounded max-w-3xl">
+    <form [formGroup]="form" (ngSubmit)="submitForm()" novalidate>
+      <div class="space-y-4">
+        <div>
+          <label for="company-vacante" class="block font-medium mb-1">Empresa</label>
+          <input type="text" id="company-vacante" formControlName="company" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('company')">
+          <div *ngIf="isInvalid('company')" class="text-red-600 text-sm mt-1">El nombre de la empresa es obligatorio.</div>
+        </div>
+        <div>
+          <label for="title-vacante" class="block font-medium mb-1">Rol solicitado</label>
+          <input type="text" id="title-vacante" formControlName="title" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('title')">
+          <div *ngIf="isInvalid('title')" class="text-red-600 text-sm mt-1">El rol es obligatorio.</div>
+        </div>
+        <div>
+          <label for="modality-vacante" class="block font-medium mb-1">Modalidad</label>
+          <select id="modality-vacante" formControlName="modality" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('modality')">
+            <option *ngFor="let modality of modalities()" [value]="modality">{{ modality }}</option>
+          </select>
+        </div>
+        <div>
+          <label for="category-vacante" class="block font-medium mb-1">Categoría</label>
+          <select id="category-vacante" formControlName="category" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('category')">
+            <option value="" disabled>Selecciona una categoría</option>
+            <option *ngFor="let cat of categories().slice(1)" [value]="cat">{{ cat }}</option>
+          </select>
+          <div *ngIf="isInvalid('category')" class="text-red-600 text-sm mt-1">Debes seleccionar una categoría.</div>
+        </div>
+        <div>
+          <label for="description-vacante" class="block font-medium mb-1">Descripción de la vacante (Opcional)</label>
+          <textarea id="description-vacante" formControlName="description" rows="4" class="w-full border rounded p-2"></textarea>
+        </div>
+        <div>
+          <label for="email-vacante" class="block font-medium mb-1">Email de Contacto</label>
+          <input type="email" id="email-vacante" formControlName="contactEmail" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('contactEmail')">
+          <div *ngIf="isInvalid('contactEmail')" class="text-red-600 text-sm mt-1">
+            <span *ngIf="form.get('contactEmail')?.errors?.['required']">El email es obligatorio.</span>
+            <span *ngIf="form.get('contactEmail')?.errors?.['email']">El formato del email no es válido.</span>
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="mt-6 w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Publicar Vacante</button>
+    </form>
+  </div>
 
   <div *ngIf="activeTab() === 'publish' && publicationType() === 'servicio'" class="bg-gray-100 p-6 rounded max-w-3xl">
-    <form [formGroup]="form" (ngSubmit)="submitForm()">
-      <div class="mb-4">
-        <label>Nombre </label>
-        <input type="text" formControlName="company" class="w-full border rounded p-2">
+    <form [formGroup]="form" (ngSubmit)="submitForm()" novalidate>
+      <div class="space-y-4">
+        <div>
+          <label for="company-servicio" class="block font-medium mb-1">Nombre</label>
+          <input type="text" id="company-servicio" formControlName="company" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('company')">
+          <div *ngIf="isInvalid('company')" class="text-red-600 text-sm mt-1">Tu nombre o el de tu empresa es obligatorio.</div>
+        </div>
+        <div>
+          <label for="title-servicio" class="block font-medium mb-1">Servicio ofrecido</label>
+          <input type="text" id="title-servicio" formControlName="title" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('title')">
+          <div *ngIf="isInvalid('title')" class="text-red-600 text-sm mt-1">El servicio es obligatorio.</div>
+        </div>
+        <div>
+          <label for="category-servicio" class="block font-medium mb-1">Categoría</label>
+          <select id="category-servicio" formControlName="category" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('category')">
+            <option value="" disabled>Selecciona una categoría</option>
+            <option *ngFor="let cat of categories().slice(1)" [value]="cat">{{ cat }}</option>
+          </select>
+          <div *ngIf="isInvalid('category')" class="text-red-600 text-sm mt-1">Debes seleccionar una categoría.</div>
+        </div>
+        <div>
+          <label for="description-servicio" class="block font-medium mb-1">Descripción del servicio (Opcional)</label>
+          <textarea id="description-servicio" formControlName="description" rows="4" class="w-full border rounded p-2"></textarea>
+        </div>
+        <div>
+          <label for="email-servicio" class="block font-medium mb-1">Email de Contacto</label>
+          <input type="email" id="email-servicio" formControlName="contactEmail" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('contactEmail')">
+          <div *ngIf="isInvalid('contactEmail')" class="text-red-600 text-sm mt-1">
+            <span *ngIf="form.get('contactEmail')?.errors?.['required']">El email es obligatorio.</span>
+            <span *ngIf="form.get('contactEmail')?.errors?.['email']">El formato del email no es válido.</span>
+          </div>
+        </div>
       </div>
-      <div class="mb-4">
-        <label>Rol ofrecido</label>
-        <input type="text" formControlName="title" class="w-full border rounded p-2">
-      </div>
-      <div class="mb-4">
-        <label>Descripción del servicio</label>
-        <textarea formControlName="description" rows="4" class="w-full border rounded p-2"></textarea>
-      </div>
-      <div class="mb-4">
-        <label>Categoría</label>
-        <select formControlName="category" class="w-full border rounded p-2">
-          @for (cat of categories(); track cat) {
-            <option [value]="cat">{{ cat }}</option>
-          }
-        </select>
-      </div>
-      <button type="submit" class="bg-black text-white py-2 px-4 rounded hover:bg-gray-800">
-        Publicar Servicio
-      </button>
+      <button type="submit" class="mt-6 w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Publicar Servicio</button>
     </form>
   </div>
-  
 </div>
