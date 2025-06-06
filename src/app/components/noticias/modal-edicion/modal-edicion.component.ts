@@ -45,7 +45,6 @@ export class ModalEdicionComponent implements OnInit {
     }
   }
   validEvent(evento: any) {
-    console.log(evento);
     for (let key in evento) {
       if (
         (key != 'active' && evento[key] == '' && key != 's3key') ||
@@ -87,6 +86,7 @@ export class ModalEdicionComponent implements OnInit {
         this.eventoModal.s3keyvalue = fileContent;
       };
       fileReader.readAsDataURL(file);
+      this.updateOverlay();
     } else {
       if (imgSrc?.includes('data:image/')) {
         error.style.position = 'static';
