@@ -32,11 +32,11 @@ app-modal-edicion {
     min-height: 100%;
     width: 100%;
   }
+}
 
-  .modal-xl {
-    min-width: 70%;
-    max-width: 70%;
-    margin: auto;
-    min-height: 100%;
-  }
+.modal-xl {
+  min-width: 95%;
+  max-width: 95%;
+  margin: auto;
+  min-height: 100%;
 }

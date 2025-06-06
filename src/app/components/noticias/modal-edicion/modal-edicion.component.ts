@@ -1,8 +1,17 @@
 import { formatDate } from '@angular/common';
-import { Component, inject, Input, OnInit, SecurityContext } from '@angular/core';
+import {
+  Component,
+  inject,
+  Input,
+  OnInit,
+  SecurityContext,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { DomSanitizer } from '@angular/platform-browser';
+import { marked } from 'marked';
+import { HtmlToMarkdownService } from '../../../services/html-to-markdown.service';
+
 @Component({
   selector: 'app-modal-edicion',
   imports: [FormsModule],
@@ -16,11 +25,17 @@ export class ModalEdicionComponent implements OnInit {
   eventoModal: any;
   filetype = '';
   maxAllowedSize = 200 * 1024; // KB
+  rows = 0;
 
-  constructor(private sanitizer: DomSanitizer) {}
+  constructor(
+    private sanitizer: DomSanitizer,
+    private htmlToMarkdownService: HtmlToMarkdownService
+  ) {}
 
   ngOnInit() {
     this.eventoModal = JSON.parse(JSON.stringify(this.evento));
+    this.eventoModal.descripcion = this.htmlToMarkdownService.convert(this.eventoModal.descripcion) + '\n';
+    this.rows = this.eventoModal.descripcion.split('\n').length * 2;
     if (this.evento.s3keyvalue.includes('png')) {
       this.filetype = 'png';
     } else if (this.evento.s3keyvalue.includes('jpg')) {
@@ -30,9 +45,12 @@ export class ModalEdicionComponent implements OnInit {
     }
   }
   validEvent(evento: any) {
-    console.log(evento)
+    console.log(evento);
     for (let key in evento) {
-      if ((key != 'active' && evento[key] == '' && key != 's3key') || (key == 's3keyvalue' && evento[key] == './add-image.png')) {
+      if (
+        (key != 'active' && evento[key] == '' && key != 's3key') ||
+        (key == 's3keyvalue' && evento[key] == './add-image.png')
+      ) {
         return false;
       }
     }
@@ -40,7 +58,10 @@ export class ModalEdicionComponent implements OnInit {
   }
   save() {
     let fecha = formatDate(new Date(), 'yyyy-MM-dd', 'en-US');
-    this.eventoModal.descripcion = this.sanitizer.sanitize(SecurityContext.HTML, this.eventoModal.descripcion);
+    this.eventoModal.descripcion = this.sanitizer.sanitize(
+      SecurityContext.HTML,
+      marked.parse(this.eventoModal.descripcion)
+    );
     this.eventoModal.fecha = fecha;
     if (this.validEvent(this.eventoModal)) {
       this.activeModal.close([this.eventoModal, this.filetype]);
