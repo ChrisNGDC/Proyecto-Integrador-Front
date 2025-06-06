@@ -35,7 +35,7 @@
       </div>
     </div>
   </div>
-  <button id="btn-agregar" (click)="agregarEvento()" [disabled]="loading">➕</button>
+  <button id="btn-agregar" (click)="agregarEvento()" [disabled]="loading">Agregar</button>
 </div>
 @if (loading) {
 <h1 id="loading"><span class="loader"></span></h1>
@@ -44,8 +44,11 @@
   @for (evento of eventosFiltrados; track $index) {
   <div class="col">
     <div class="card text-center">
-      <div (click)="editarEvento(evento)">
-        <img [src]="evento.s3keyvalue" class="card-img-top" />
+      <div>
+        <div class="card-img">
+          <img [src]="evento.s3keyvalue" class="card-img-top"/>
+          <div class="img-overlay" (click)="editarEvento(evento)">Editar</div>
+        </div>
         <div class="card-body">
           <h5 class="card-title">{{ evento.titulo }}</h5>
           <p class="card-text">{{ evento.resumen }}</p>

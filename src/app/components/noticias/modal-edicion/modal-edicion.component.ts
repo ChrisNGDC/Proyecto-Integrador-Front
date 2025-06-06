@@ -30,8 +30,9 @@ export class ModalEdicionComponent implements OnInit {
     }
   }
   validEvent(evento: any) {
+    console.log(evento)
     for (let key in evento) {
-      if (key != 'active' && evento[key] == '' && key != 's3key') {
+      if ((key != 'active' && evento[key] == '' && key != 's3key') || (key == 's3keyvalue' && evento[key] == './add-image.png')) {
         return false;
       }
     }
@@ -73,5 +74,11 @@ export class ModalEdicionComponent implements OnInit {
       }
       error.style.display = 'flex';
     }
+  }
+
+  updateOverlay() {
+    let overlay = document.getElementById('img-overlay')!;
+    let img = document.getElementById('img')!;
+    overlay.style.height = `${img.offsetHeight}px`;
   }
 }
