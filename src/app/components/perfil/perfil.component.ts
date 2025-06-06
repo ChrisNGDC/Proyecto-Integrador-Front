@@ -28,7 +28,6 @@ export class PerfilComponent implements OnInit {
   editandoDatosProfesionales = false;
   perfilForm!: FormGroup;
   cargando = true;
-  errorMessage = '';
 
   constructor(
     private fb: FormBuilder,
@@ -65,11 +64,30 @@ export class PerfilComponent implements OnInit {
     ).subscribe({
       next: (egresado: Egresado) => {
         this.egresado = egresado;
-        this.imagenPerfil = egresado.fotoPerfil || null;
+        
+        this.perfilService.getImage(egresado.id).subscribe({
+          next: (res: any) => {
+            console.log('Respuesta getImage:', res);
+            
+            // Verificar si existe res.data y es una cadena válida
+            if (res?.data && typeof res.data === 'string') {
+              this.imagenPerfil = res.data;
+              console.log('Imagen asignada correctamente:', this.imagenPerfil);
+            } else {
+              console.warn('No se encontró imagen en res.data');
+              this.imagenPerfil = null;
+            }
+          },
+          error: (err) => {
+            console.error('Error al obtener imagen de perfil:', err);
+            this.imagenPerfil = null;
+          }
+        });
+
         this.actualizarFormularioConDatos();
       },
       error: (err: Error) => {
-        this.errorMessage = err.message;
+        err.message;
         this.mostrarError('Error al cargar el perfil');
       }
     });
@@ -149,19 +167,28 @@ export class PerfilComponent implements OnInit {
 
   guardarFoto(): void {
     if (this.imagenPerfil && this.archivoSeleccionado) {
-      this.perfilService.subirFotoPerfil(this.archivoSeleccionado).subscribe({
-        next: (resultado) => {
-          if (resultado.fotoPerfil) {
-            // Actualizar tanto la imagen como el objeto egresado
-            this.imagenPerfil = resultado.fotoPerfil;
-            this.egresado.fotoPerfil = resultado.fotoPerfil;
-          }
-          this.mostrarExito('Foto de perfil actualizada correctamente');
-          this.cancelarEdicionFoto();
+      const extension = this.archivoSeleccionado.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const nombreArchivo = `${this.egresado.id}.${extension}`;
+      const base64Data = this.imagenPerfil.split(',')[1] || this.imagenPerfil;
+      
+      this.perfilService.saveImage(nombreArchivo, base64Data).subscribe({
+        next: () => {
+          this.perfilService.getImage(this.egresado.id).subscribe({
+            next: (res: any) => {
+              this.imagenPerfil = res.data; // Usamos res.data directamente
+              this.mostrarExito('Foto de perfil actualizada correctamente');
+              this.limpiarEstadoFoto(); // Limpiar todo el estado
+            },
+            error: (err) => {
+              console.error('Error al obtener la imagen:', err);
+              this.limpiarEstadoFoto();
+            }
+          });
         },
         error: (err) => {
-          this.mostrarError('Error al subir la foto');
-          console.error(err);
+          console.error('Error al guardar la imagen:', err);
+          this.mostrarError('Error al actualizar la foto de perfil');
+          this.limpiarEstadoFoto();
         }
       });
     }
@@ -170,7 +197,39 @@ export class PerfilComponent implements OnInit {
   cancelarEdicionFoto(): void {
     this.editandoFoto = false;
     this.archivoSeleccionado = null;
-    this.imagenPerfil = this.egresado.fotoPerfil || null;
+    
+    if (this.egresado?.id) {
+      this.perfilService.getImage(this.egresado.id).subscribe({
+        next: (res: any) => {
+          if (res?.data && typeof res.data === 'string') {
+            this.imagenPerfil = res.data;
+          } else {
+            this.imagenPerfil = null;
+          }
+        },
+        error: (err) => {
+          console.error('Error al obtener imagen:', err);
+          this.imagenPerfil = null;
+        }
+      });
+    } else {
+      this.imagenPerfil = null;
+    }
+    
+    const fileInput = document.querySelector('.file-input') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  }
+
+  private limpiarEstadoFoto(): void {
+    this.editandoFoto = false;
+    this.archivoSeleccionado = null;
+    const fileInput = document.querySelector('.file-input') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  }
+
+  iniciarEdicionFoto(): void {
+    this.editandoFoto = true;
+    this.archivoSeleccionado = null;
   }
 
   validarArchivo(file: File): boolean {
@@ -191,7 +250,6 @@ export class PerfilComponent implements OnInit {
   }
 
   getIniciales(): string {
-    if (!this.egresado) return 'EG';
     return `${this.egresado.nombre?.charAt(0) || ''}${this.egresado.apellido?.charAt(0) || ''}`.toUpperCase();
   }
 

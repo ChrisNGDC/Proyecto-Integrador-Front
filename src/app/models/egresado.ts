@@ -1,5 +1,4 @@
 export interface Egresado {
-  fotoPerfil: string;
   id: string;
   mail: string;
   nombre: string;
