@@ -25,6 +25,10 @@ app-root {
 }
 
 app-modal-edicion {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   min-height: 100%;
   width: 100%;
 
@@ -34,13 +38,10 @@ app-modal-edicion {
   }
 }
 
-.modal-xl {
-  min-width: 95%;
-  max-width: 95%;
-  margin: auto;
-  min-height: 100%;
-
-  .notification-fade {
+.notification-fade {
   transition: opacity 0.5s ease-in-out;
-}
+
+  .opacity-0 {
+    opacity: 0;
+  }
 }
