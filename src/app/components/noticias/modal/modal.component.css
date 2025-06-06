@@ -30,19 +30,37 @@
       font-weight: 500;
     }
 
-    h5, h6, #description {
+    h5,
+    h6,
+    #description {
       width: 100%;
       text-align: start;
       margin-bottom: .5rem;
     }
 
-    ::ng-deep img {
-      max-width: 100%;
-      max-height: 250px;
-    }
+    #description {
+      ::ng-deep >* {
+        margin-bottom: .25rem;
+      }
 
-    ::ng-deep a {
-      color: #3333FF;
+      ::ng-deep img {
+        max-width: 100%;
+        max-height: 10rem;
+      }
+
+      ::ng-deep a {
+        color: #3333FF;
+      }
+
+      ::ng-deep ul {
+        list-style: square;
+        padding-left: 2rem;
+        margin-bottom: 1rem;
+      }
+
+      /*
+    Aca se agregaran en caso de tener que cambiar el estilo de algun otra tag
+    */
     }
   }
 }
