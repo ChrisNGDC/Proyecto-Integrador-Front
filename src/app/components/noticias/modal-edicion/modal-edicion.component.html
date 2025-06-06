@@ -1,8 +1,8 @@
 <div class="modal-body">
   <div class="card">
     <div class="row g-0">
-      <div class="col-md-5 imagen">
-        <img [src]="eventoModal.s3keyvalue" class="card-img" />
+      <div class="col-md-5 imagen" (pointerenter)="updateOverlay()">
+        <img [src]="eventoModal.s3keyvalue" id="img" alt="Imagen" class="card-img" />
         <input
           type="file"
           class="file-input"
@@ -11,7 +11,7 @@
           id="fileUpload"
           #fileUpload
         />
-        <button id="btn-image" (click)="fileUpload.click()">Subir Imagen</button>
+        <div id="img-overlay" (click)="fileUpload.click()">Subir Imagen</div>
         <p id="errorMessage">La imagen no debe superar los {{this.maxAllowedSize / 1024}}KB y debe ser .png, .jpg o .jpeg.</p>
       </div>
       <div class="col-md-7">
