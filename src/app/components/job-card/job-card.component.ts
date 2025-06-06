@@ -1,4 +1,5 @@
-import { Component, Input } from "@angular/core";
+// job-card.component.ts
+import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { JobOpportunity } from "../../models/job-opportunity";
 
@@ -11,4 +12,8 @@ import { JobOpportunity } from "../../models/job-opportunity";
 })
 export class JobCardComponent {
   @Input({ required: true }) job!: JobOpportunity;
+ @Output() viewDetails = new EventEmitter<string>();
+
+
+  
 }

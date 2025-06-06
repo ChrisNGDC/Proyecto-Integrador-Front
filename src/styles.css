@@ -39,4 +39,8 @@ app-modal-edicion {
     margin: auto;
     min-height: 100%;
   }
+
+  .notification-fade {
+  transition: opacity 0.5s ease-in-out;
+}
 }
