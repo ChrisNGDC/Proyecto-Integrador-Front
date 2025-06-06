@@ -93,7 +93,6 @@ export class ModalEdicionComponent implements OnInit {
         this.eventoModal.s3keyvalue = fileContent;
       };
       fileReader.readAsDataURL(file);
-      this.updateOverlay();
     } else {
       if (imgSrc?.includes('data:image/')) {
         error.style.position = 'static';
@@ -107,6 +106,7 @@ export class ModalEdicionComponent implements OnInit {
   updateOverlay() {
     let overlay = document.getElementById('img-overlay')!;
     let img = document.getElementById('img')!;
+    console.log(img.offsetHeight)
     overlay.style.height = `${img.offsetHeight}px`;
   }
 
