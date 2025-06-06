@@ -2,16 +2,16 @@
   <div class="card-content">
     <section class="imagen-section">
       <div class="avatar-controls">
-        <div class="avatar-wrapper" (click)="fileInput.click()">
-          @if (egresado.fotoPerfil) {
-            <img [src]="egresado.fotoPerfil" class="avatar-image" alt="Foto de perfil">
+        <div class="avatar-wrapper" (click)="iniciarEdicionFoto(); fileInput.click()">
+          @if (imagenPerfil) {
+            <img [src]="imagenPerfil" class="avatar-image" alt="Foto de perfil" onerror="this.style.display='none'">
           } @else {
             <div class="avatar-default">
               {{ getIniciales() }}
             </div>
           }
           <div class="avatar-overlay">
-            <span>{{ egresado.fotoPerfil ? 'Cambiar foto' : 'Agregar foto' }}</span>
+            <span>{{ imagenPerfil ? 'Cambiar foto' : 'Agregar foto' }}</span>
           </div>
         </div>
         
@@ -22,9 +22,9 @@
               (change)="onFileSelected($event)"
               aria-label="Seleccionar imagen de perfil">
         
-        @if (archivoSeleccionado) {
+        @if (editandoFoto) {
           <div class="file-actions">
-            <button class="btn-save" (click)="guardarFoto()">
+            <button class="btn-save" (click)="guardarFoto()" [disabled]="!archivoSeleccionado">
               Confirmar
             </button>
             <button class="btn-cancel" (click)="cancelarEdicionFoto()">
@@ -47,7 +47,7 @@
         </div>
 
         @if (editandoDatosPersonales) {
-          <form [formGroup]="perfilForm" class="egresado-form">
+          <form [formGroup]="perfilForm">
             <div class="form-group">
               <strong><label for="telefono">Teléfono: </label></strong>
               <input type="tel" id="telefono" formControlName="telefono">
@@ -89,7 +89,7 @@
         </div>
 
         @if (editandoDatosProfesionales) {
-          <form [formGroup]="perfilForm" class="egresado-form">
+          <form [formGroup]="perfilForm">
             <div class="form-group">
               <strong><label for="experienciaLaboral">Experiencia laboral: </label></strong>
               <select id="experienciaLaboral" formControlName="experienciaLaboral">
@@ -100,18 +100,18 @@
 
             <div class="form-group">
               <strong><label for="situacionLaboral">Situación laboral:</label></strong>
-              <input type="text" id="situacionLaboral" formControlName="situacionLaboral">
+              <select id="situacionLaboral" formControlName="situacionLaboral">
+                <option value="Empleado">Empleado</option>
+                <option value="Desempleado">Desempleado</option>
+              </select>
             </div>
 
-            <div class="form-group">
-              <strong><label for="perfilLinkedin">LinkedIn:</label></strong>
-              <input type="url" id="perfilLinkedin" formControlName="perfilLinkedin">
-            </div>
-
-            <div class="form-group">
-              <strong><label for="urlRepositorio">Repositorio:</label></strong>
-              <input type="url" id="urlRepositorio" formControlName="urlRepositorio">
-            </div>
+            <p><strong>LinkedIn:</strong> 
+              <a [href]="egresado.perfilLinkedin?.trim()" target="_blank">{{ egresado.perfilLinkedin?.trim() }}</a>
+            </p>
+            <p><strong>Repositorio:</strong> 
+              <a [href]="egresado.urlRepositorio?.trim()" target="_blank">{{ egresado.urlRepositorio?.trim() }}</a>
+            </p>
 
             <div class="form-actions">
               <button type="button" class="btn-cancel" (click)="editandoDatosProfesionales = false">

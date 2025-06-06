@@ -10,6 +10,7 @@ import { AuthService } from './auth.service';
 })
 export class PerfilService {
   private apiUrl = 'https://9wy5h80y5b.execute-api.us-east-1.amazonaws.com';
+  private imgUrl = 'https://gg3vaf9adg.execute-api.us-east-1.amazonaws.com';
   private perfilSubject = new BehaviorSubject<Egresado | null>(null);
   public perfil$ = this.perfilSubject.asObservable();
 
@@ -22,9 +23,9 @@ export class PerfilService {
   obtenerPerfil(): Observable<Egresado> {
     return from(this.authService.getCurrentUserEmail()).pipe(
       switchMap(userEmail => {
-        return this.http.get<Egresado>(`${this.apiUrl}/perfil/${encodeURIComponent(userEmail)}`).pipe(
+        return this.http.get<Egresado>(`${this.apiUrl}/perfil/${(userEmail)}`).pipe(
           catchError(this.handleError),
-          tap(perfil => this.perfilSubject.next(perfil)) // Actualiza el subject con los nuevos datos
+          tap(perfil => this.perfilSubject.next(perfil))
         );
       })
     );
@@ -40,7 +41,6 @@ export class PerfilService {
         ).pipe(
           catchError(this.handleError),
           tap(updatedPerfil => {
-            // Actualiza el subject con los nuevos datos
             const currentPerfil = this.perfilSubject.value;
             const mergedPerfil = {...currentPerfil, ...updatedPerfil};
             this.perfilSubject.next(mergedPerfil);
@@ -50,20 +50,12 @@ export class PerfilService {
     );
   }
 
-  subirFotoPerfil(archivo: File): Observable<{fotoPerfil: string}> {
-    const formData = new FormData();
-    formData.append('foto', archivo);
-    return this.http.post<{fotoPerfil: string}>(`${this.apiUrl}/foto`, formData).pipe(
-      catchError(this.handleError),
-      tap(result => {
-        // Actualiza solo la foto de perfil en el subject
-        const currentPerfil = this.perfilSubject.value;
-        if (currentPerfil) {
-          currentPerfil.fotoPerfil = result.fotoPerfil;
-          this.perfilSubject.next(currentPerfil);
-        }
-      })
-    );
+  getImage(idImage: string) {
+    return this.http.get(`${this.imgUrl}/image/image-profile/${idImage}`)
+  }
+  // Retorna el codigo de la imagen en formato base64
+  saveImage(filename: string, imageData: string) {
+    return this.http.post(`${this.imgUrl}/image/image-profile`, JSON.stringify({'name': filename, "data": imageData}));
   }
 
   // Forzar recarga de datos
