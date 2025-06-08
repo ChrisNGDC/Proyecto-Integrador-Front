@@ -5,6 +5,7 @@ import {
   Input,
   OnInit,
   SecurityContext,
+  ViewEncapsulation,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -106,7 +107,6 @@ export class ModalEdicionComponent implements OnInit {
   updateOverlay() {
     let overlay = document.getElementById('img-overlay')!;
     let img = document.getElementById('img')!;
-    console.log(img.offsetHeight)
     overlay.style.height = `${img.offsetHeight}px`;
   }
 
@@ -124,5 +124,30 @@ export class ModalEdicionComponent implements OnInit {
         modal.removeChild(notification);
       }, 500);
     }, 2000);
+  }
+
+  previsualizarDescripcion(event: any) {
+    event.target.style.display = 'none';
+    (event.target as HTMLElement).parentElement!.children[0].setAttribute(
+      'style',
+      'display: flex'
+    );
+    document.getElementById('descripcion')!.style.display = 'none';
+    let previsualizacion = document.getElementById('previsualizacion');
+    previsualizacion!.style.display = 'flex';
+    let previsualizacionHTML = marked
+      .parse(this.eventoModal.descripcion)
+      .toString();
+    previsualizacion!.innerHTML = previsualizacionHTML;
+  }
+
+  editarDescripcion(event: any) {
+    event.target.style.display = 'none';
+    (event.target as HTMLElement).parentElement!.children[1].setAttribute(
+      'style',
+      'display: flex'
+    );
+    document.getElementById('descripcion')!.style.display = 'flex';
+    document.getElementById('previsualizacion')!.style.display = 'none';
   }
 }

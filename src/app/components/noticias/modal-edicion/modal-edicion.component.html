@@ -50,7 +50,12 @@
                 [rows]="this.rows"
                 [(ngModel)]="eventoModal.descripcion"
               ></textarea>
+              <div id="previsualizacion"></div>
             </label>
+            <div class="btns">
+              <button id="editar-descripcion" (click)="editarDescripcion($event)">Editar</button>
+              <button id="previsualizar-descripcion" (click)="previsualizarDescripcion($event)">Previsualizar</button>
+            </div>
           </div>
           <div class="card-text">
             <small class="text-muted">Publicado {{ eventoModal.fecha }}</small>

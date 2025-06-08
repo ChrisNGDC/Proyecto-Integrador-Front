@@ -39,6 +39,9 @@
     }
 
     #description {
+      max-height: 55vh;
+      overflow: scroll;
+
       ::ng-deep >* {
         margin-bottom: .25rem;
       }
@@ -57,10 +60,6 @@
         padding-left: 2rem;
         margin-bottom: 1rem;
       }
-
-      /*
-    Aca se agregaran en caso de tener que cambiar el estilo de algun otra tag
-    */
     }
   }
 }
