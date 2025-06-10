@@ -5,14 +5,10 @@ import {
   Input,
   OnInit,
   SecurityContext,
-  ViewEncapsulation,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { DomSanitizer } from '@angular/platform-browser';
-import { marked } from 'marked';
-import { HtmlToMarkdownService } from '../../../services/html-to-markdown.service';
-
 import { marked } from 'marked';
 import { HtmlToMarkdownService } from '../../../services/html-to-markdown.service';
 
@@ -30,12 +26,7 @@ export class ModalEdicionComponent implements OnInit {
   filetype = '';
   maxAllowedSize = 200 * 1024; // KB
   rows = 0;
-  rows = 0;
 
-  constructor(
-    private sanitizer: DomSanitizer,
-    private htmlToMarkdownService: HtmlToMarkdownService
-  ) {}
   constructor(
     private sanitizer: DomSanitizer,
     private htmlToMarkdownService: HtmlToMarkdownService
@@ -63,10 +54,6 @@ export class ModalEdicionComponent implements OnInit {
         (key != 'active' && evento[key] == '' && key != 's3key') ||
         (key == 's3keyvalue' && evento[key] == './add-image.png')
       ) {
-      if (
-        (key != 'active' && evento[key] == '' && key != 's3key') ||
-        (key == 's3keyvalue' && evento[key] == './add-image.png')
-      ) {
         return false;
       }
     }
@@ -87,19 +74,7 @@ export class ModalEdicionComponent implements OnInit {
         );
         this.activeModal.close([this.eventoModal, this.filetype]);
       }, 2500);
-      this.showNotification(
-        'Evento creado/actualizado correctamente',
-        'success'
-      );
-      setTimeout(() => {
-        this.eventoModal.descripcion = this.sanitizer.sanitize(
-          SecurityContext.HTML,
-          marked.parse(this.eventoModal.descripcion)
-        );
-        this.activeModal.close([this.eventoModal, this.filetype]);
-      }, 2500);
     } else {
-      this.showNotification('Por favor, complete todos los campos', 'error');
       this.showNotification('Por favor, complete todos los campos', 'error');
     }
   }
@@ -134,7 +109,7 @@ export class ModalEdicionComponent implements OnInit {
   updateOverlay() {
     let overlay = document.getElementById('img-overlay')!;
     let img = document.getElementById('img')!;
-    console.log(img.offsetHeight)
+    console.log(img.offsetHeight);
     overlay.style.height = `${img.offsetHeight}px`;
   }
 
