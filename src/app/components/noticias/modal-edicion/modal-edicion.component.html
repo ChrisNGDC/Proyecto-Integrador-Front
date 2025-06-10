@@ -9,6 +9,14 @@
           class="card-img"
           (load)="this.updateOverlay()"
         />
+      <div class="col-md-5 imagen">
+        <img
+          [src]="eventoModal.s3keyvalue"
+          id="img"
+          alt="Imagen"
+          class="card-img"
+          (load)="this.updateOverlay()"
+        />
         <input
           type="file"
           class="file-input"
@@ -22,9 +30,14 @@
           La imagen no debe superar los {{ this.maxAllowedSize / 1024 }}KB y
           debe ser .png, .jpg o .jpeg.
         </p>
+        <p id="errorMessage">
+          La imagen no debe superar los {{ this.maxAllowedSize / 1024 }}KB y
+          debe ser .png, .jpg o .jpeg.
+        </p>
       </div>
       <div class="col-md-7">
         <div class="card-body">
+          <div id="editables">
           <div id="editables">
             <label for="titulo">
               <p>Titulo:</p>

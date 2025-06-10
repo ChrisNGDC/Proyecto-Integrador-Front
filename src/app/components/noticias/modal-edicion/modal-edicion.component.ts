@@ -13,6 +13,9 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { HtmlToMarkdownService } from '../../../services/html-to-markdown.service';
 
+import { marked } from 'marked';
+import { HtmlToMarkdownService } from '../../../services/html-to-markdown.service';
+
 @Component({
   selector: 'app-modal-edicion',
   imports: [FormsModule],
@@ -27,7 +30,12 @@ export class ModalEdicionComponent implements OnInit {
   filetype = '';
   maxAllowedSize = 200 * 1024; // KB
   rows = 0;
+  rows = 0;
 
+  constructor(
+    private sanitizer: DomSanitizer,
+    private htmlToMarkdownService: HtmlToMarkdownService
+  ) {}
   constructor(
     private sanitizer: DomSanitizer,
     private htmlToMarkdownService: HtmlToMarkdownService
@@ -35,6 +43,9 @@ export class ModalEdicionComponent implements OnInit {
 
   ngOnInit() {
     this.eventoModal = JSON.parse(JSON.stringify(this.evento));
+    this.eventoModal.descripcion =
+      this.htmlToMarkdownService.convert(this.eventoModal.descripcion) + '\n';
+    this.rows = this.eventoModal.descripcion.split('\n').length * 2;
     this.eventoModal.descripcion =
       this.htmlToMarkdownService.convert(this.eventoModal.descripcion) + '\n';
     this.rows = this.eventoModal.descripcion.split('\n').length * 2;
@@ -48,6 +59,10 @@ export class ModalEdicionComponent implements OnInit {
   }
   validEvent(evento: any) {
     for (let key in evento) {
+      if (
+        (key != 'active' && evento[key] == '' && key != 's3key') ||
+        (key == 's3keyvalue' && evento[key] == './add-image.png')
+      ) {
       if (
         (key != 'active' && evento[key] == '' && key != 's3key') ||
         (key == 's3keyvalue' && evento[key] == './add-image.png')
@@ -72,7 +87,19 @@ export class ModalEdicionComponent implements OnInit {
         );
         this.activeModal.close([this.eventoModal, this.filetype]);
       }, 2500);
+      this.showNotification(
+        'Evento creado/actualizado correctamente',
+        'success'
+      );
+      setTimeout(() => {
+        this.eventoModal.descripcion = this.sanitizer.sanitize(
+          SecurityContext.HTML,
+          marked.parse(this.eventoModal.descripcion)
+        );
+        this.activeModal.close([this.eventoModal, this.filetype]);
+      }, 2500);
     } else {
+      this.showNotification('Por favor, complete todos los campos', 'error');
       this.showNotification('Por favor, complete todos los campos', 'error');
     }
   }
@@ -107,6 +134,7 @@ export class ModalEdicionComponent implements OnInit {
   updateOverlay() {
     let overlay = document.getElementById('img-overlay')!;
     let img = document.getElementById('img')!;
+    console.log(img.offsetHeight)
     overlay.style.height = `${img.offsetHeight}px`;
   }
 
