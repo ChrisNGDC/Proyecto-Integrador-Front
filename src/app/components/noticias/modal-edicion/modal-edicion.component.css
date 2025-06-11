@@ -72,6 +72,11 @@
           padding-left: 2rem;
           margin-bottom: 1rem;
         }
+        ::ng-deep ol {
+          list-style: decimal;
+          padding-left: 2rem;
+          margin-bottom: 1rem;
+        }
       }
     }
 
@@ -199,5 +204,9 @@ input {
     cursor: pointer;
     color: #ffffff;
     transform: scale(1.05);
+
+    &:disabled {
+      cursor: not-allowed;
+    }
   }
 }

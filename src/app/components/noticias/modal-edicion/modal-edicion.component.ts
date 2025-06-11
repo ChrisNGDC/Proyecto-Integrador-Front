@@ -1,4 +1,4 @@
-import { formatDate } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import {
   Component,
   inject,
@@ -14,7 +14,7 @@ import { HtmlToMarkdownService } from '../../../services/html-to-markdown.servic
 
 @Component({
   selector: 'app-modal-edicion',
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './modal-edicion.component.html',
   styleUrl: './modal-edicion.component.css',
 })
@@ -25,7 +25,8 @@ export class ModalEdicionComponent implements OnInit {
   eventoModal: any;
   filetype = '';
   maxAllowedSize = 200 * 1024; // KB
-  rows = 0;
+  rows = 20;
+  saving: string | null = null;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -33,10 +34,10 @@ export class ModalEdicionComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.saving = null;
     this.eventoModal = JSON.parse(JSON.stringify(this.evento));
     this.eventoModal.descripcion =
       this.htmlToMarkdownService.convert(this.eventoModal.descripcion) + '\n';
-    this.rows = this.eventoModal.descripcion.split('\n').length * 2;
     if (this.evento.s3keyvalue.includes('png')) {
       this.filetype = 'png';
     } else if (this.evento.s3keyvalue.includes('jpg')) {
@@ -60,6 +61,8 @@ export class ModalEdicionComponent implements OnInit {
     let fecha = formatDate(new Date(), 'yyyy-MM-dd', 'en-US');
     this.eventoModal.fecha = fecha;
     if (this.validEvent(this.eventoModal)) {
+      this.saving = 'disabled';
+      document.getElementById('img-overlay')!.style.pointerEvents = 'none';
       this.showNotification(
         'Evento creado/actualizado correctamente',
         'success'
