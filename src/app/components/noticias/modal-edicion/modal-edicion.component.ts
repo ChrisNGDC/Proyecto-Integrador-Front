@@ -4,7 +4,7 @@ import {
   inject,
   Input,
   OnInit,
-  SecurityContext,
+  SecurityContext
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -34,9 +34,6 @@ export class ModalEdicionComponent implements OnInit {
 
   ngOnInit() {
     this.eventoModal = JSON.parse(JSON.stringify(this.evento));
-    this.eventoModal.descripcion =
-      this.htmlToMarkdownService.convert(this.eventoModal.descripcion) + '\n';
-    this.rows = this.eventoModal.descripcion.split('\n').length * 2;
     this.eventoModal.descripcion =
       this.htmlToMarkdownService.convert(this.eventoModal.descripcion) + '\n';
     this.rows = this.eventoModal.descripcion.split('\n').length * 2;
@@ -109,7 +106,6 @@ export class ModalEdicionComponent implements OnInit {
   updateOverlay() {
     let overlay = document.getElementById('img-overlay')!;
     let img = document.getElementById('img')!;
-    console.log(img.offsetHeight);
     overlay.style.height = `${img.offsetHeight}px`;
   }
 
