@@ -164,7 +164,7 @@ export class NoticiasAdminComponent {
       resumen: '',
       s3key: '',
       titulo: '',
-      s3keyvalue: '',
+      s3keyvalue: './no-image.png',
       active: true,
     };
     const modalRef = this.modalService.open(ModalEdicionComponent, {

@@ -2,7 +2,13 @@
   <div class="card">
     <div class="row g-0">
       <div class="col-md-5 imagen">
-        <img [src]="eventoModal.s3keyvalue" class="card-img" />
+        <img
+          [src]="eventoModal.s3keyvalue"
+          id="img"
+          alt="Imagen"
+          class="card-img"
+          (load)="this.updateOverlay()"
+        />
         <input
           type="file"
           class="file-input"
@@ -11,28 +17,40 @@
           id="fileUpload"
           #fileUpload
         />
-        <button id="btn-image" (click)="fileUpload.click()">Subir Imagen</button>
-        <p id="errorMessage">La imagen no debe superar los {{this.maxAllowedSize / 1024}}KB y debe ser .png, .jpg o .jpeg.</p>
+        <div id="img-overlay" (click)="fileUpload.click()">Subir Imagen</div>
+        <p id="errorMessage">
+          La imagen no debe superar los {{ this.maxAllowedSize / 1024 }}KB y
+          debe ser .png, .jpg o .jpeg.
+        </p>
       </div>
       <div class="col-md-7">
         <div class="card-body">
-          <div class="editables">
+          <div id="editables">
             <label for="titulo">
-            <p>Titulo: </p>
-            <input type="text" name="titulo" [(ngModel)]="eventoModal.titulo" />
-          </label>
-          <label for="resumen">
-            <p>Resumen: </p>
-            <textarea name="resumen" rows="2" [(ngModel)]="eventoModal.resumen"></textarea>
-          </label>
-          <label for="descipcion">
-            <p>Descripción: </p>
-            <textarea
-            name="descripcion"
-            rows="5"
-            [(ngModel)]="eventoModal.descripcion"
-          ></textarea>
-          </label>
+              <p>Titulo:</p>
+              <input
+                type="text"
+                name="titulo"
+                [(ngModel)]="eventoModal.titulo"
+              />
+            </label>
+            <label for="resumen">
+              <p>Resumen:</p>
+              <textarea
+                name="resumen"
+                rows="2"
+                [(ngModel)]="eventoModal.resumen"
+              ></textarea>
+            </label>
+            <label for="descipcion">
+              <p>Descripción:</p>
+              <textarea
+                id="descripcion"
+                name="descripcion"
+                [rows]="this.rows"
+                [(ngModel)]="eventoModal.descripcion"
+              ></textarea>
+            </label>
           </div>
           <div class="card-text">
             <small class="text-muted">Publicado {{ eventoModal.fecha }}</small>
