@@ -106,12 +106,15 @@
               </select>
             </div>
 
-            <p><strong>LinkedIn:</strong> 
-              <a [href]="egresado.perfilLinkedin?.trim()" target="_blank">{{ egresado.perfilLinkedin?.trim() }}</a>
-            </p>
-            <p><strong>Repositorio:</strong> 
-              <a [href]="egresado.urlRepositorio?.trim()" target="_blank">{{ egresado.urlRepositorio?.trim() }}</a>
-            </p>
+            <div class="form-group">
+              <strong><label for="perfilLinkedin">LinkedIn:</label></strong>
+              <input type="url" id="perfilLinkedin" formControlName="perfilLinkedin">
+            </div>
+
+            <div class="form-group">
+              <strong><label for="urlRepositorio">Repositorio:</label></strong>
+              <input type="url" id="urlRepositorio" formControlName="urlRepositorio">
+            </div>
 
             <div class="form-actions">
               <button type="button" class="btn-cancel" (click)="editandoDatosProfesionales = false">
