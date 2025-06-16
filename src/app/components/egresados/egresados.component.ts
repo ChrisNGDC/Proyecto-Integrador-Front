@@ -112,14 +112,29 @@ async guardarEgresado() {
     return;
   }
 
+  const dni = this.egresadoForm.value.dni;
+  const mail = this.egresadoForm.value.mail;
   const pass = "Ifts11_" + this.egresadoForm.value.dni;
-  console.log("La contraseña es: " + pass);
   
+  if (!this.editMode()) {
+    const dniDuplicado = this.egresados().some(e =>e.dni  === dni);
+    const mailDuplicado = this.egresados().some(e => e.mail === mail);
+
+    if (dniDuplicado) {
+      this.mostrarError('Ya existe un egresado con ese DNI');
+      return;
+    }
+
+    if (mailDuplicado) {
+      this.mostrarError('Ya existe un egresado con ese mail');
+      return;
+    }
+  }
+
   try {
-    // Primero intentar registrar el usuario (await para la Promise) si el modo no es edicion
     if (!this.editMode()) {
-      await this.authService.signUp(this.egresadoForm.value.mail, pass);
-      console.log("se registró el egresado: ", this.egresadoForm.value.mail);
+      await this.authService.signUp(mail, pass);
+      console.log("Se registró el egresado: ", mail);
     }
 
     const formData = this.egresadoForm.value;
