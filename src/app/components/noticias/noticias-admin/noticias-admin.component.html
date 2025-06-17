@@ -35,39 +35,61 @@
       </div>
     </div>
   </div>
-  <button id="btn-agregar" (click)="agregarEvento()" [disabled]="loading">Agregar</button>
+  
 </div>
 @if (loading) {
 <h1 id="loading"><span class="loader"></span></h1>
 } @else {
 <div class="grid-container">
-  @for (evento of eventosFiltrados; track $index) {
   <div class="col">
-    <div class="card text-center">
-      <div>
-        <div class="card-img">
-          <img [src]="evento.s3keyvalue" class="card-img-top"/>
-          <div class="img-overlay" (click)="editarEvento(evento)">Editar</div>
+    <div class="add-news-card"  (click)="agregarEvento()">
+      <div class="add-news-content">
+        <div class="add-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
         </div>
-        <div class="card-body">
-          <h5 class="card-title">{{ evento.titulo }}</h5>
-          <p class="card-text">{{ evento.resumen }}</p>
-        </div>
+        <h3 class="add-title">Crear Nueva Noticia</h3>
+        <p class="add-description">Haz clic aquí para publicar una nueva noticia en el sistema</p>
       </div>
-      <div class="card-footer">
-        <small class="text-muted">Publicado {{ evento.fecha }}</small>
-        <div id="btns">
-          @if (evento.active) {
-            <button id="btn-desactivar" (click)="desactivarEvento(evento)">Desactivar</button>
-
-          } @else {
-            <button id="btn-activar" (click)="activarEvento(evento)">Activar</button>
-          }
-          <button id="btn-eliminar" (click)="eliminarEvento(evento)">Eliminar</button>
-        </div>
+      <div class="add-hover-overlay">
+        <span>+ Nueva Noticia</span>
       </div>
     </div>
   </div>
+  <!-- Agrega más columnas según sea necesario
+  <div class="col ">
+    <div class="card text-center">
+      <button id="btn-agregar" (click)="agregarEvento()" [disabled]="loading">Agregar</button>
+    </div>
+  </div>  -->
+  @for (evento of eventosFiltrados; track $index) {
+    <div class="col">
+      <div class="card text-center">
+        <div class="card-content-wrapper" (click)="editarEvento(evento)">
+          <div class="card-img">
+            <img [src]="evento.s3keyvalue" class="card-img-top"/>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">{{ evento.titulo }}</h5>
+            <p class="card-text">{{ evento.resumen }}</p>
+          </div>
+          <div class="img-overlay">Editar</div>
+        </div>
+        <div class="card-footer">
+          <small class="text-muted">Publicado {{ evento.fecha }}</small>
+          <div id="btns">
+            @if (evento.active) {
+              <button id="btn-desactivar"  class="btn btn-xs" (click)="desactivarEvento(evento)">Desactivar</button>
+            } @else {
+              <button id="btn-activar" class="btn btn-xs" (click)="activarEvento(evento)">Activar</button>
+            }
+            <button id="btn-eliminar"  class="btn btn-xs"(click)="eliminarEvento(evento)">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
   }
 </div>
 }

@@ -1,4 +1,4 @@
-<div class="py-6">
+<div class="py-6 px-20">
   <!-- Notificaciones -->
   <div *ngIf="notifications().length > 0" class="mb-6">
     <div *ngFor="let notification of notifications()" 
@@ -27,41 +27,34 @@
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div *ngFor="let survey of availableSurveys()" 
-           class="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow"
+           class="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full"
            [class.border-blue-300]="survey.theme === 'blue'"
            [class.border-green-300]="survey.theme === 'green'"
            [class.border-purple-300]="survey.theme === 'purple'"
            [class.border-gray-800]="survey.theme === 'dark'"
            [class.bg-gray-900]="survey.theme === 'dark'"
            [class.text-white]="survey.theme === 'dark'">
-        <div class="p-5">
+        <div class="p-4 flex flex-col flex-grow">
           <div class="flex justify-between items-start">
-            <h3 class="text-xl font-semibold mb-2">{{ survey.title }}</h3>
+            <h3 class="text-xl font-semibold">{{ survey.title }}</h3>
             <span *ngIf="isCompleted(survey.id)" 
-                  class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                  class="bg-green-100 text-green-800 text-xs px-2 rounded-full">
               Completada
             </span>
           </div>
           
           <p [class.text-gray-400]="survey.theme === 'dark'" 
              [class.text-gray-600]="survey.theme !== 'dark'" 
-             class="mb-4">{{ survey.description }}</p>
+             class="mb-2 ">{{ survey.description }}</p>
           
-          <div class="flex justify-between text-sm text-gray-500 mb-4">
+          <div class="flex justify-between text-sm text-gray-500 mb-2">
             <span>{{ survey.questions.length }} preguntas</span>
             <span>Tiempo estimado: {{ getEstimatedTime(survey) }} min</span>
           </div>
-          
-          <!-- Progreso guardado -->
-          <div *ngIf="hasSavedResponses(survey.id)" class="mb-4">
-            <div class="text-sm font-medium text-gray-700 mb-1">Progreso guardado: {{ getSavedProgress(survey.id) }}%</div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5">
-              <div class="bg-blue-600 h-2.5 rounded-full" [style.width]="getSavedProgress(survey.id) + '%'"></div>
-            </div>
-          </div>
+                  
           
           <!-- Etiquetas de categoría -->
-          <div class="mb-4">
+          <div class="mb-2">
             <span 
               [class.bg-blue-100]="survey.category === 'finalizacion' && survey.theme !== 'dark'"
               [class.text-blue-800]="survey.category === 'finalizacion' && survey.theme !== 'dark'"
@@ -71,20 +64,27 @@
               [class.text-purple-800]="survey.category === 'satisfaccion' && survey.theme !== 'dark'"
               [class.bg-gray-700]="survey.theme === 'dark'"
               [class.text-gray-300]="survey.theme === 'dark'"
-              class="text-xs px-2 py-1 rounded">
+              class=" tag">
               <span *ngIf="survey.category === 'finalizacion'">Finalización de Carrera</span>
               <span *ngIf="survey.category === 'empleabilidad'">Empleabilidad</span>
               <span *ngIf="survey.category === 'satisfaccion'">Satisfacción</span>
               <span *ngIf="survey.category === 'otro'">Otro</span>
             </span>
           </div>
+           <!-- Progreso guardado -->
+           <div *ngIf="hasSavedResponses(survey.id)" class="mt-4">
+            <div class="text-sm font-medium text-gray-700 mb-1">Progreso guardado: {{ getSavedProgress(survey.id) }}%</div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+              <div class="bg-blue-600 h-2.5 rounded-full" [style.width]="getSavedProgress(survey.id) + '%'"></div>
+            </div>
+          </div>
           
-          <div class="flex justify-end">
+          <div class="flex justify-end mt-auto pt-4">
             <button 
               (click)="startSurvey(survey)" 
               [disabled]="isCompleted(survey.id)"
               [class.opacity-50]="isCompleted(survey.id)"
-              class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+              class="btn btn-primary">
               {{ hasSavedResponses(survey.id) ? 'Continuar' : isCompleted(survey.id) ? 'Completada' : 'Comenzar' }}
             </button>
           </div>
@@ -118,7 +118,7 @@
       </div>
       <button 
         (click)="saveProgress(); currentSurvey.set(null)" 
-        class="text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+        class="btn btn-secondary "
         aria-label="Volver a la lista de encuestas">
         Volver a la lista
       </button>
@@ -270,7 +270,7 @@
       </div>
       <button 
         (click)="nextStep()" 
-        class="bg-blue-500 text-white py-2 px-6 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+        class="btn btn-primary"
         aria-label="Ir al siguiente paso o finalizar">
         {{ currentStep() < getTotalSteps() - 1 ? 'Siguiente →' : 'Finalizar' }}
       </button>
