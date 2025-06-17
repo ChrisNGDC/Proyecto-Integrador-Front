@@ -1,4 +1,4 @@
-/* Estructura principal del modal */
+
 .modal-body {
   padding: 0;
   background-color: #FAFAFA;
@@ -19,7 +19,6 @@
   margin: 0;
 }
 
-/* Sección de imagen */
 .imagen {
   position: relative;
   display: flex;
@@ -81,7 +80,6 @@
   display: none;
 }
 
-/* Sección de formulario */
 .card-body {
   padding: 2rem;
   display: flex;
@@ -130,7 +128,6 @@
   max-height: 300px;
 }
 
-/* Pie del modal */
 .card-text {
   display: flex;
   justify-content: space-between;
@@ -184,7 +181,6 @@
   background-color:#AEB6BF;
 }
 
-/* Responsive */
 @media (max-width: 992px) {
   .card .row {
     flex-direction: column;

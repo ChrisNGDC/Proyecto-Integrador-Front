@@ -1,10 +1,8 @@
-/* Estilo base del modal */
 .modal-body {
   padding: 2rem;
   background-color: #FAFAFA;
 }
 
-/* Contenedor principal de la card */
 .card {
   border: none;
   border-radius: 12px;
@@ -16,14 +14,12 @@
   transition: all 0.3s ease;
 }
 
-/* Layout de la card con flexbox */
 .card .row {
   display: flex;
   min-height: 100%;
   margin: 0;
 }
 
-/* Sección de la imagen */
 .imagen {
   display: flex;
   justify-content: center;
@@ -40,7 +36,6 @@
   object-position: center;
 }
 
-/* Contenido de la card */
 .card-body {
   display: flex;
   flex-direction: column;
@@ -51,7 +46,6 @@
   border-left: 1px solid #E8F0FE;
 }
 
-/* Estilos para los textos */
 .datos {
   margin-bottom: 1.5rem;
 }
@@ -72,7 +66,6 @@
   line-height: 1.5;
 }
 
-/* Estilos para la descripción HTML */
 #description {
   font-size: 1rem;
   font-weight: 400;
@@ -118,7 +111,6 @@
   margin-bottom: 0.5rem;
 }
 
-/* Pie de card con fecha */
 .card-body > .card-text {
   position: absolute;
   bottom: 1.5rem;
@@ -135,7 +127,6 @@
   font-weight: 400;
 }
 
-/* Responsive */
 @media (max-width: 992px) {
   .modal-body {
     padding: 1.5rem;

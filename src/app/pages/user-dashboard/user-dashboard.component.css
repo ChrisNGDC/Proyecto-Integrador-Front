@@ -63,7 +63,6 @@
   transition: all 0.3s ease;
 }
 
-
 .nav-links li a::before {
   font-family: 'Tabler Icons';
   font-size: 1.2rem;
@@ -84,11 +83,9 @@
   content: "🚪"; 
 }
 
-
 .nav-links li a:hover {
   color: #2DCC70;
 }
-
 
 .nav-links li:last-child a:hover {
   color: #fa2828;
