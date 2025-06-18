@@ -59,7 +59,8 @@ export class NoticiasUserComponent {
   }
   convertdate(date: Date) {
     let nextDayDate = new Date(date);
-    nextDayDate.setDate(nextDayDate.getDate() + 1);
+    nextDayDate.setDate(nextDayDate.getDate() + 2);
+    nextDayDate.setHours(0, 0, 0, 0);
     return nextDayDate.toLocaleDateString('en-CA', {
       month: '2-digit',
       day: '2-digit',
@@ -92,7 +93,7 @@ export class NoticiasUserComponent {
   filtroPorFechas() {
     let buscadosFechasMin: any[] = [];
     let buscadosFechasMax: any[] = [];
-    this.fechas.fin = new Date(this.fechas.fin)
+    this.fechas.fin = new Date(this.fechas.fin);
     if (this.fechas.inicio != null) {
       this.eventos.forEach((evento: any) => {
         if (evento['fecha'] >= this.fechas.inicio!) {
@@ -117,7 +118,9 @@ export class NoticiasUserComponent {
     let buscadosPalabras: any[] = this.filtroPorBusqueda();
     let buscadosFechas: any[] = this.filtroPorFechas();
 
-    this.eventosFiltrados = buscadosPalabras.filter((item) => buscadosFechas.includes(item));
+    this.eventosFiltrados = buscadosPalabras.filter((item) =>
+      buscadosFechas.includes(item)
+    );
     this.eventosFiltrados.sort(
       (a: any, b: any) =>
         new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
