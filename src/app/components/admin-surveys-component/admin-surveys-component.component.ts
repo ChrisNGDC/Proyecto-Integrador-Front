@@ -1,1063 +1,904 @@
-import { Component, signal, type OnInit, type OnDestroy } from "@angular/core"
-import { CommonModule } from "@angular/common"
-import { FormsModule, ReactiveFormsModule, FormBuilder, type FormGroup, Validators } from "@angular/forms"
-import { type CdkDragDrop, moveItemInArray, CdkDragHandle, CdkDropList, CdkDrag } from "@angular/cdk/drag-drop"
-import { Chart, registerables } from "chart.js"
-import { SurveyService } from "../../services/survey.service"
-import type { Survey, SurveyQuestion, SurveyResponse, SurveyTemplate } from "../../models/survey"
 
-// Registrar componentes de Chart.js
-Chart.register(...registerables)
 
-interface NotificationSettings {
-  enabled: boolean
-  initialDelay: number // días
-  reminderFrequency: number // días
-  maxReminders: number
-}
+import { Component, signal, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormArray, FormControl, AbstractControl } from '@angular/forms';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { SurveyService } from '../../services/survey.service';
+import { ISurvey, IQuestion, ITemplate } from '../../models/survey';
+import { v4 as uuidv4 } from 'uuid';
+
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { ModalComponent } from '../../shared/modal/modal.component';
+import { Router, RouterModule } from "@angular/router";
+
 
 @Component({
-  selector: "app-admin-surveys-component",
+  selector: 'app-admin-surveys',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, CdkDropList, CdkDrag, CdkDragHandle],
-  templateUrl:"./admin-surveys-component.component.html",
-  styleUrls: ["./admin-surveys-component.component.css"],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    DragDropModule,
+    ModalComponent,
+    RouterModule,
+  ],
+  templateUrl: './admin-surveys-component.component.html',
+  styleUrl: './admin-surveys-component.component.css',
 })
-export class AdminSurveysComponent implements OnInit, OnDestroy {
-  activeTab = signal<"list" | "add" | "edit" | "preview" | "analytics" | "settings" | "import">("list")
+export class AdminSurveysComponent implements OnInit {
+  // === Propiedades para la gestión de pestañas ===
+  activeTab = signal<'list' | 'add' | 'edit' | 'preview' | 'templates' | 'addTemplate' | 'editTemplate'>('list');
+  sourceTabForPreview: 'list' | 'add' | 'edit' | 'preview' | 'templates' | 'addTemplate' | 'editTemplate' | null = null;
 
-  // Datos de encuestas y respuestas
-  surveys = signal<Survey[]>([])
-  surveyResponses = signal<SurveyResponse[]>([])
-  surveyTemplates = signal<SurveyTemplate[]>([])
-  availableAudiences = signal<string[]>([])
+  // === Propiedades para Encuestas ===
+  surveys = signal<ISurvey[]>([]);
+  filteredSurveys = signal<ISurvey[]>([]);
 
-  // Formulario para nueva encuesta
-  surveyForm: FormGroup
-  questionForm: FormGroup
+  searchTerm: string = '';
+  categoryFilter: string | null = null;
+  statusFilter: 'active' | 'inactive' | null = null;
 
-  // Encuesta en edición
-  editingSurvey: Survey | null = null
-  editForm: FormGroup | null = null
-  editQuestionForm: FormGroup | null = null
+  surveyForm!: FormGroup;
+  questionForm!: FormGroup;
+  editForm!: FormGroup;
+  editQuestionForm!: FormGroup;
 
-  // Encuesta en previsualización
-  previewingSurvey: Survey | null = null
-  previewResponses: { [key: number]: any } = {}
+  editingSurvey: ISurvey | null = null;
+  previewingSurvey: ISurvey | null = null;
+  previewResponses: { [key: string]: any } = {};
 
-  // Encuesta para análisis
-  analyticsSurvey: Survey | null = null
+  // === Propiedades para Plantillas ===
+  surveyTemplates = signal<ITemplate[]>([]);
+  templateForm!: FormGroup;
+  templateQuestionForm!: FormGroup;
 
-  // Configuración de notificaciones
-  notificationSettings: NotificationSettings = {
-    enabled: true,
-    initialDelay: 3, // días después de publicar la encuesta
-    reminderFrequency: 7, // cada 7 días
-    maxReminders: 3, // máximo 3 recordatorios
+  editingTemplate: ITemplate | null = null;
+
+  // === Propiedades Generales ===
+  lastSaved = signal<Date | null>(null);
+  loading = signal<boolean>(false);
+  error = signal<string | null>(null);
+
+
+  showDeleteConfirmationModal: boolean = false;
+  surveyToDelete: ISurvey | null = null;
+  templateToDelete: ITemplate | null = null;
+  deleteConfirmationMessage: string = '';
+
+  showModalInput: boolean = false;
+  modalInputTitle: string = '';
+  modalInputMessage: string = '';
+  modalInputPlaceholder: string = '';
+  modalInputCurrentValue: string = ''; 
+  modalInputCallback: ((value: string | null) => void) | null = null;
+
+  showMessageModal: boolean = false;
+  modalMessageTitle: string = '';
+  modalMessage: string = '';
+
+  constructor(private fb: FormBuilder, private surveyService: SurveyService) {}
+
+  ngOnInit(): void {
+    this.initForms();
+    this.loadSurveys();
+    this.loadTemplates();
   }
 
-  // Variables para guardar automáticamente
-  autoSaveInterval: any
-  lastSaved = signal<Date | null>(null)
-  isDirty = signal<boolean>(false)
+  // === Métodos de Gestión de Pestañas ===
+  setActiveTab(tab: 'list' | 'add' | 'edit' | 'preview' | 'templates' | 'addTemplate' | 'editTemplate'): void {
+    this.activeTab.set(tab);
+    if (tab === 'add') {
+      this.resetAddForm();
+    } else if (tab === 'list') {
+      this.loadSurveys();
+    } else if (tab === 'templates') {
+      this.loadTemplates();
+    } else if (tab === 'addTemplate') {
+      this.resetAddTemplateForm();
+    }
+  }
 
-  // Filtros para la lista de encuestas
-  searchTerm = signal<string>("")
-  categoryFilter = signal<string | null>(null)
-  statusFilter = signal<string | null>(null)
+  // === Métodos de Carga (Encuestas y Plantillas) ===
+  loadSurveys(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    console.log('Iniciando carga de encuestas...');
+    this.surveyService.getSurveys().subscribe({
+      next: (data: ISurvey[]) => {
+        console.log('Datos brutos de encuestas cargados desde el backend (AdminSurveysComponent):', JSON.parse(JSON.stringify(data)));
+        this.surveys.set(data.sort((a: ISurvey, b: ISurvey) => {
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
+          return dateB - dateA;
+        }));
+        this.applyFilters();
+        this.loading.set(false);
+        console.log('Encuestas procesadas y filtradas (AdminSurveysComponent):', this.filteredSurveys());
+      },
+      error: (err: any) => {
+        console.error('Error al cargar encuestas (AdminSurveysComponent):', err);
+        this.error.set('Error al cargar encuestas. Inténtalo de nuevo.');
+        this.loading.set(false);
+      },
+    });
+  }
 
-  // Variables para gráficos
-  charts: { [key: string]: Chart } = {}
 
-  // Variables para importación/exportación
-  importData = ""
-  importError = ""
-  importSuccess = ""
+  loadTemplates(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.surveyService.getTemplates().subscribe({
+      next: (data: ITemplate[]) => {
+        console.log('Datos brutos de plantillas cargadas desde el backend (AdminSurveysComponent):', JSON.parse(JSON.stringify(data)));
+        this.surveyTemplates.set(data.sort((a: ITemplate, b: ITemplate) => {
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
+          return dateB - dateA;
+        }));
+        this.loading.set(false);
+        console.log('Plantillas procesadas (AdminSurveysComponent):', this.surveyTemplates());
+      },
+      error: (err: any) => {
+        console.error('Error al cargar plantillas (AdminSurveysComponent):', err);
+        this.error.set('No se pudieron cargar las plantillas de encuesta.');
+        this.loading.set(false);
+        this.showErrorMessage('Error de Carga', 'No se pudieron cargar las plantillas de encuesta.');
+      }
+    });
+  }
 
-  constructor(
-    private fb: FormBuilder,
-    private surveyService: SurveyService,
-  ) {
-    // Inicializar formulario de encuesta
+  applyFilters(): void {
+    let tempSurveys = this.surveys();
+
+    if (this.searchTerm) {
+      const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
+      tempSurveys = tempSurveys.filter(
+        (survey) =>
+          survey.title.toLowerCase().includes(lowerCaseSearchTerm) ||
+          survey.description?.toLowerCase().includes(lowerCaseSearchTerm)
+      );
+    }
+
+    if (this.categoryFilter) {
+      tempSurveys = tempSurveys.filter((survey) => survey.category === this.categoryFilter);
+    }
+
+    if (this.statusFilter !== null) {
+      const isActive = this.statusFilter === 'active';
+      tempSurveys = tempSurveys.filter((survey) => !!survey.active === isActive);
+    }
+
+    this.filteredSurveys.set(tempSurveys);
+  }
+
+  // === Inicialización de Formularios ===
+  initForms(): void {
     this.surveyForm = this.fb.group({
-      title: ["", Validators.required],
-      description: ["", Validators.required],
-      category: ["finalizacion", Validators.required],
-      theme: ["default", Validators.required],
+      title: ['', Validators.required],
+      description: ['', Validators.required],
+      category: ['satisfaccion', Validators.required],
+      theme: ['default', Validators.required],
       expirationDate: [null],
-      targetAudience: [[]],
-      active: [true],
-      questions: [[]],
-    })
+      questions: this.fb.array([]),
+    });
 
-    // Inicializar formulario de pregunta
     this.questionForm = this.fb.group({
-      text: ["", Validators.required],
-      type: ["checkbox", Validators.required],
+      id: [uuidv4()],
+      text: ['', Validators.required],
+      description: [''],
+      type: ['text', Validators.required],
       required: [false],
-      description: [""],
-      options: [[]],
-      conditionalLogic: [null],
-    })
-  }
+      options: this.fb.array([]),
+      // conditionalLogic: [null], // Eliminado
+    });
 
-  ngOnInit() {
-    // Cargar datos
-    this.surveys.set(this.surveyService.getSurveys()())
-    this.surveyResponses.set(this.surveyService.getSurveyResponses()())
-    this.surveyTemplates.set(this.surveyService.getSurveyTemplates()())
-    this.availableAudiences.set(this.surveyService.getAvailableAudiences()())
-
-    // Iniciar guardado automático cuando se está editando
-    this.setupAutoSave()
-  }
-
-  ngOnDestroy() {
-    // Limpiar el intervalo al destruir el componente
-    this.clearAutoSave()
-  }
-
-  setupAutoSave() {
-    this.autoSaveInterval = setInterval(() => {
-      if (this.isDirty()) {
-        this.saveToLocalStorage()
-        this.lastSaved.set(new Date())
-        this.isDirty.set(false)
-      }
-    }, 30000) // Guardar cada 30 segundos si hay cambios
-  }
-
-  clearAutoSave() {
-    if (this.autoSaveInterval) {
-      clearInterval(this.autoSaveInterval)
-    }
-  }
-
-  saveToLocalStorage() {
-    if (this.activeTab() === "add") {
-      localStorage.setItem("draftSurvey", JSON.stringify(this.surveyForm.value))
-    } else if (this.activeTab() === "edit" && this.editForm) {
-      localStorage.setItem("editingSurvey", JSON.stringify(this.editForm.value))
-    }
-  }
-
-  loadFromLocalStorage() {
-    if (this.activeTab() === "add") {
-      const savedDraft = localStorage.getItem("draftSurvey")
-      if (savedDraft) {
-        this.surveyForm.patchValue(JSON.parse(savedDraft))
-        this.lastSaved.set(new Date())
-        return true
-      }
-    } else if (this.activeTab() === "edit") {
-      const savedEdit = localStorage.getItem("editingSurvey")
-      if (savedEdit && this.editForm) {
-        this.editForm.patchValue(JSON.parse(savedEdit))
-        this.lastSaved.set(new Date())
-        return true
-      }
-    }
-    return false
-  }
-
-  markAsDirty() {
-    this.isDirty.set(true)
-  }
-
-  setActiveTab(tab: "list" | "add" | "edit" | "preview" | "analytics" | "settings" | "import") {
-    // Si estamos cambiando de pestaña y hay cambios sin guardar, preguntar
-    if (this.isDirty() && this.activeTab() !== tab) {
-      if (!confirm("Hay cambios sin guardar. ¿Desea continuar sin guardar?")) {
-        return
-      }
-    }
-
-    this.activeTab.set(tab)
-
-    if (tab === "add") {
-      // Intentar cargar borrador guardado
-      if (!this.loadFromLocalStorage()) {
-        this.resetSurveyForm()
-      }
-    }
-
-    // Limpiar previsualización si salimos de ella
-    if (tab !== "preview") {
-      this.previewingSurvey = null
-      this.previewResponses = {}
-    }
-
-    // Si entramos a analytics, inicializar gráficos
-    if (tab === "analytics" && this.analyticsSurvey) {
-      setTimeout(() => {
-        this.initCharts()
-      }, 100)
-    }
-  }
-
-  resetSurveyForm() {
-    this.surveyForm.reset({
-      title: "",
-      description: "",
-      category: "finalizacion",
-      theme: "default",
-      expirationDate: null,
-      targetAudience: [],
-      active: true,
-      questions: [],
-    })
-    this.resetQuestionForm()
-    localStorage.removeItem("draftSurvey")
-    this.isDirty.set(false)
-  }
-
-  resetQuestionForm() {
-    this.questionForm.reset({
-      text: "",
-      type: "checkbox",
-      required: false,
-      description: "",
-      options: [],
-      conditionalLogic: null,
-    })
-  }
-
-  // Método para manejar el cambio en la selección de audiencia objetivo
-    // Método para manejar el cambio en la selección de audiencia objetivo
-    toggleAudienceSelection(audience: string, event: any) {
-      const isChecked = event.target.checked
-  
-      // Asegurarse de que targetAudience sea un array
-      const currentTargetAudience = this.surveyForm.get("targetAudience")?.value || []
-  
-      if (isChecked) {
-        // Agregar la audiencia si está seleccionada
-        if (!currentTargetAudience.includes(audience)) {
-          currentTargetAudience.push(audience)
-        }
-      } else {
-        // Remover la audiencia si está deseleccionada
-        const index = currentTargetAudience.indexOf(audience)
-        if (index !== -1) {
-          currentTargetAudience.splice(index, 1)
-        }
-      }
-  
-      // Actualizar el valor en el formulario
-      this.surveyForm.patchValue({ targetAudience: currentTargetAudience })
-      this.markAsDirty()
-    }
-
-  // Método para manejar el cambio en la selección de audiencia objetivo en el formulario de edición
-  toggleEditAudienceSelection(audience: string, event: any) {
-    if (!this.editForm) return
-
-    const isChecked = event.target.checked
-
-    // Asegurarse de que targetAudience sea un array
-    const currentTargetAudience = this.editForm.get("targetAudience")?.value || []
-
-    if (isChecked) {
-      // Agregar la audiencia si está seleccionada
-      if (!currentTargetAudience.includes(audience)) {
-        currentTargetAudience.push(audience)
-      }
-    } else {
-      // Remover la audiencia si está deseleccionada
-      const index = currentTargetAudience.indexOf(audience)
-      if (index !== -1) {
-        currentTargetAudience.splice(index, 1)
-      }
-    }
-
-    // Actualizar el valor en el formulario
-    this.editForm.patchValue({ targetAudience: currentTargetAudience })
-    this.markAsDirty()
-  }
-
-  addQuestion() {
-    if (this.questionForm.invalid) {
-      this.markFormGroupTouched(this.questionForm)
-      this.showNotification("Por favor complete todos los campos obligatorios de la pregunta", "error")
-      return
-    }
-
-    const formValue = this.questionForm.value
-
-    // Determinar el ID de la nueva pregunta
-    let questions: SurveyQuestion[] = []
-    if (this.activeTab() === "add") {
-      questions = this.surveyForm.value.questions || []
-    } else if (this.activeTab() === "edit" && this.editingSurvey) {
-      questions = this.editingSurvey.questions || []
-    }
-
-    const questionId = questions.length ? Math.max(...questions.map((q) => q.id || 0)) + 1 : 1
-
-    const newQuestion: SurveyQuestion = {
-      id: questionId,
-      text: formValue.text,
-      type: formValue.type,
-      options: formValue.type === "radio" || formValue.type === "select" ? formValue.options : undefined,
-      required: formValue.required,
-      description: formValue.description || undefined,
-      conditionalLogic: formValue.conditionalLogic,
-    }
-
-    if (this.activeTab() === "add") {
-      const currentQuestions = this.surveyForm.value.questions || []
-      this.surveyForm.patchValue({ questions: [...currentQuestions, newQuestion] })
-    } else if (this.activeTab() === "edit" && this.editingSurvey) {
-      this.editingSurvey.questions = [...this.editingSurvey.questions, newQuestion]
-    }
-
-    this.resetQuestionForm()
-    this.markAsDirty()
-  }
-
-  removeQuestion(questionId: number) {
-    let questions: SurveyQuestion[] = []
-
-    if (this.activeTab() === "add") {
-      questions = this.surveyForm.value.questions || []
-    } else if (this.activeTab() === "edit" && this.editingSurvey) {
-      questions = this.editingSurvey.questions || []
-    }
-
-    // Verificar si hay preguntas condicionales que dependen de esta
-    const hasDependent = questions.some((q) => q.conditionalLogic && q.conditionalLogic.parentQuestionId === questionId)
-
-    if (hasDependent) {
-      if (
-        !confirm(
-          "Hay preguntas que dependen de esta. Si la elimina, también se eliminarán las condiciones. ¿Desea continuar?",
-        )
-      ) {
-        return
-      }
-
-      // Eliminar las condiciones de las preguntas dependientes
-      questions = questions.map((q) => {
-        if (q.conditionalLogic && q.conditionalLogic.parentQuestionId === questionId) {
-          const { conditionalLogic, ...rest } = q
-          return rest
-        }
-        return q
-      })
-    }
-
-    // Filtrar la pregunta a eliminar
-    const updatedQuestions = questions.filter((q) => q.id !== questionId)
-
-    if (this.activeTab() === "add") {
-      this.surveyForm.patchValue({ questions: updatedQuestions })
-    } else if (this.activeTab() === "edit" && this.editingSurvey) {
-      this.editingSurvey.questions = updatedQuestions
-    }
-
-    this.markAsDirty()
-  }
-
-  duplicateQuestion(question: SurveyQuestion) {
-    let questions: SurveyQuestion[] = []
-
-    if (this.activeTab() === "add") {
-      questions = this.surveyForm.value.questions || []
-    } else if (this.activeTab() === "edit" && this.editingSurvey) {
-      questions = this.editingSurvey.questions || []
-    }
-
-    const questionId = Math.max(...questions.map((q) => q.id)) + 1
-
-    const duplicatedQuestion: SurveyQuestion = {
-      ...JSON.parse(JSON.stringify(question)),
-      id: questionId,
-      text: `${question.text} (copia)`,
-    }
-
-    if (this.activeTab() === "add") {
-      this.surveyForm.patchValue({ questions: [...questions, duplicatedQuestion] })
-    } else if (this.activeTab() === "edit" && this.editingSurvey) {
-      this.editingSurvey.questions = [...questions, duplicatedQuestion]
-    }
-
-    this.markAsDirty()
-  }
-
-  addOptionToQuestion() {
-    const options = this.questionForm.get("options")?.value || []
-    options.push("")
-    this.questionForm.patchValue({ options })
-  }
-
-  removeOptionFromQuestion(index: number) {
-    const options = this.questionForm.get("options")?.value || []
-    options.splice(index, 1)
-    this.questionForm.patchValue({ options })
-  }
-
-  // Método para configurar lógica condicional
-  setConditionalLogic() {
-    let questions: SurveyQuestion[] = []
-
-    if (this.activeTab() === "add") {
-      questions = this.surveyForm.value.questions || []
-    } else if (this.activeTab() === "edit" && this.editingSurvey) {
-      questions = this.editingSurvey.questions || []
-    }
-
-    if (questions.length === 0) {
-      alert("Primero debe agregar al menos una pregunta para establecer condiciones.")
-      return
-    }
-
-    // Obtener preguntas que pueden ser padres (no la actual)
-    const potentialParents = questions.filter((q) => q.type === "checkbox" || q.type === "radio" || q.type === "select")
-
-    if (potentialParents.length === 0) {
-      alert(
-        "No hay preguntas disponibles para establecer condiciones. Necesita preguntas de tipo checkbox, radio o select.",
-      )
-      return
-    }
-
-    // Mostrar diálogo para seleccionar pregunta padre y valor
-    const parentId = prompt(
-      "Ingrese el ID de la pregunta padre: " + potentialParents.map((p) => `\n${p.id}: ${p.text}`).join(""),
-    )
-
-    if (!parentId) return
-
-    const parentQuestion = potentialParents.find((p) => p.id === Number.parseInt(parentId))
-    if (!parentQuestion) {
-      alert("Pregunta no encontrada.")
-      return
-    }
-
-    let conditionValue: any
-
-    if (parentQuestion.type === "checkbox") {
-      const value = prompt("¿Mostrar cuando la respuesta sea 'Sí'? (s/n)")
-      if (!value) return
-      conditionValue = value.toLowerCase() === "s"
-    } else if (parentQuestion.type === "radio" || parentQuestion.type === "select") {
-      if (!parentQuestion.options || parentQuestion.options.length === 0) {
-        alert("La pregunta padre no tiene opciones definidas.")
-        return
-      }
-
-      const optionPrompt =
-        "Seleccione la opción que activará esta pregunta: " +
-        parentQuestion.options.map((opt, idx) => `\n${idx + 1}: ${opt}`).join("")
-
-      const optionIndex = prompt(optionPrompt)
-      if (!optionIndex) return
-
-      const idx = Number.parseInt(optionIndex) - 1
-      if (isNaN(idx) || idx < 0 || idx >= parentQuestion.options.length) {
-        alert("Opción no válida.")
-        return
-      }
-
-      conditionValue = parentQuestion.options[idx]
-    }
-
-    this.questionForm.patchValue({
-      conditionalLogic: {
-        parentQuestionId: parentQuestion.id,
-        showOnValue: conditionValue,
-      },
-    })
-
-    this.showNotification("Lógica condicional configurada")
-  }
-
-  clearConditionalLogic() {
-    this.questionForm.patchValue({ conditionalLogic: null })
-    this.showNotification("Lógica condicional eliminada")
-  }
-
-  addSurvey() {
-    if (this.surveyForm.invalid) {
-      this.markFormGroupTouched(this.surveyForm)
-      this.showNotification("Por favor complete todos los campos obligatorios", "error")
-      return
-    }
-
-    const formValue = this.surveyForm.value
-
-    if (!formValue.questions || formValue.questions.length === 0) {
-      this.showNotification("Debe agregar al menos una pregunta a la encuesta", "error")
-      return
-    }
-
-    const newSurvey = this.surveyService.addSurvey({
-      title: formValue.title,
-      description: formValue.description,
-      category: formValue.category,
-      questions: formValue.questions,
-      active: formValue.active,
-      createdAt: new Date(),
-      theme: formValue.theme,
-      expirationDate: formValue.expirationDate,
-      targetAudience: formValue.targetAudience,
-    })
-
-    // Actualizar la lista de encuestas
-    this.surveys.set(this.surveyService.getSurveys()())
-
-    localStorage.removeItem("draftSurvey")
-    this.isDirty.set(false)
-    this.resetSurveyForm()
-    this.setActiveTab("list")
-
-    // Mostrar notificación de éxito
-    this.showNotification("Encuesta creada exitosamente")
-  }
-
-  startEdit(survey: Survey) {
-    this.editingSurvey = JSON.parse(JSON.stringify(survey)) // Deep copy
-
-    // Crear formulario para edición
     this.editForm = this.fb.group({
-      title: [survey.title, Validators.required],
-      description: [survey.description, Validators.required],
-      category: [survey.category, Validators.required],
-      theme: [survey.theme, Validators.required],
-      expirationDate: [survey.expirationDate],
-      targetAudience: [survey.targetAudience || []],
-      active: [survey.active],
-    })
+      id: [''],
+      title: ['', Validators.required],
+      description: ['', Validators.required],
+      category: ['satisfaccion', Validators.required],
+      theme: ['default', Validators.required],
+      expirationDate: [null],
+      questions: this.fb.array([]),
+      active: [true],
+    });
 
-    this.setActiveTab("edit")
+    this.editQuestionForm = this.fb.group({
+      id: [uuidv4()],
+      text: ['', Validators.required],
+      description: [''],
+      type: ['text', Validators.required],
+      required: [false],
+      options: this.fb.array([]),
+      // conditionalLogic: [null], // Eliminado
+    });
+
+    this.templateForm = this.fb.group({
+      id: [''],
+      name: ['', Validators.required],
+      description: ['', Validators.required],
+      category: ['satisfaccion', Validators.required],
+      questions: this.fb.array([]),
+    });
+
+    this.templateQuestionForm = this.fb.group({
+      id: [uuidv4()],
+      text: ['', Validators.required],
+      description: [''],
+      type: ['text', Validators.required],
+      required: [false],
+      options: this.fb.array([]),
+      // conditionalLogic: [null], // Eliminado
+    });
   }
 
-  saveEdit() {
-    if (!this.editingSurvey || !this.editForm) return
+  private createQuestionFormGroup(question: IQuestion | any): FormGroup {
+    const optionsArray = Array.isArray(question.options) ? question.options : [];
+    return this.fb.group({
+      id: [question.id || uuidv4()],
+      text: [question.text, Validators.required],
+      description: [question.description || ''],
+      type: [question.type, Validators.required],
+      required: [question.required || false],
+      options: this.fb.array(optionsArray.map((o: string) => this.fb.control(o))),
+    });
+  }
 
-    if (this.editForm.invalid) {
-      this.markFormGroupTouched(this.editForm)
-      this.showNotification("Por favor complete todos los campos obligatorios", "error")
-      return
+  getOptionsFormArray(questionForm: FormGroup): FormArray {
+    return questionForm.get('options') as FormArray;
+  }
+
+  asFormControl(control: AbstractControl): FormControl {
+    return control as FormControl;
+  }
+
+  // === Getters para FormArrays de Preguntas de Encuestas ===
+  get questionsFormArray(): FormArray {
+    return this.surveyForm.get('questions') as FormArray;
+  }
+
+  get editQuestionsFormArray(): FormArray {
+    return this.editForm.get('questions') as FormArray;
+  }
+
+  get questionOptionsFormArray(): FormArray {
+    return this.questionForm.get('options') as FormArray;
+  }
+
+  get editQuestionOptionsFormArray(): FormArray {
+    return this.editQuestionForm.get('options') as FormArray;
+  }
+
+  // === Getters para FormArrays de Preguntas de Plantillas ===
+  get templateQuestionsFormArray(): FormArray {
+    return this.templateForm.get('questions') as FormArray;
+  }
+
+  get templateQuestionOptionsFormArray(): FormArray {
+    return this.templateQuestionForm.get('options') as FormArray;
+  }
+
+  // === Métodos para Opciones de Preguntas ===
+  addOptionToQuestion(formType: 'add' | 'edit' = 'add'): void {
+    const optionsArray = formType === 'add' ? this.questionOptionsFormArray : this.editQuestionOptionsFormArray;
+    optionsArray.push(this.fb.control(''));
+    this.lastSaved.set(new Date());
+    console.log(`Opciones actuales (${formType}):`, optionsArray.value);
+  }
+
+  removeOptionFromQuestion(index: number, formType: 'add' | 'edit' = 'add'): void {
+    const optionsArray = formType === 'add' ? this.questionOptionsFormArray : this.editQuestionOptionsFormArray;
+    optionsArray.removeAt(index);
+    this.lastSaved.set(new Date());
+    console.log(`Opciones actuales (${formType}) después de eliminar:`, optionsArray.value);
+  }
+
+  addOptionToTemplateQuestion(): void {
+    this.templateQuestionOptionsFormArray.push(this.fb.control(''));
+    this.lastSaved.set(new Date());
+    console.log('Opciones actuales de la plantilla:', this.templateQuestionOptionsFormArray.value);
+  }
+
+  removeOptionFromTemplateQuestion(index: number): void {
+    this.templateQuestionOptionsFormArray.removeAt(index);
+    this.lastSaved.set(new Date());
+    console.log('Opciones actuales de la plantilla después de eliminar:', this.templateQuestionOptionsFormArray.value);
+  }
+
+  // === Métodos para Añadir/Eliminar Preguntas ===
+  addQuestion(formType: 'add' | 'edit' = 'add'): void {
+    let sourceQuestionForm: FormGroup;
+    let targetQuestionsArray: FormArray;
+
+    if (formType === 'add') {
+      sourceQuestionForm = this.questionForm;
+      targetQuestionsArray = this.questionsFormArray;
+    } else {
+      sourceQuestionForm = this.editQuestionForm;
+      targetQuestionsArray = this.editQuestionsFormArray;
     }
 
-    const formValue = this.editForm.value
+    sourceQuestionForm.markAllAsTouched();
 
-    // Actualizar la encuesta con los valores del formulario
-    this.editingSurvey.title = formValue.title
-    this.editingSurvey.description = formValue.description
-    this.editingSurvey.category = formValue.category
-    this.editingSurvey.theme = formValue.theme
-    this.editingSurvey.expirationDate = formValue.expirationDate
-    this.editingSurvey.targetAudience = formValue.targetAudience
-    this.editingSurvey.active = formValue.active
+    if (sourceQuestionForm.valid) {
+      const newQuestionData = sourceQuestionForm.value as IQuestion;
+      console.log(`Datos de la NUEVA pregunta (${formType}) ANTES de añadir al FormArray:`, JSON.parse(JSON.stringify(newQuestionData)));
+      const newQuestionGroup = this.createQuestionFormGroup(newQuestionData);
+      targetQuestionsArray.push(newQuestionGroup);
 
-    // Guardar los cambios
-    this.surveyService.updateSurvey(this.editingSurvey)
+      sourceQuestionForm.reset({
+        id: uuidv4(),
+        text: '',
+        description: '',
+        type: 'text',
+        required: false,
+      });
+      (sourceQuestionForm.get('options') as FormArray).clear();
 
-    // Actualizar la lista de encuestas
-    this.surveys.set(this.surveyService.getSurveys()())
-
-    localStorage.removeItem("editingSurvey")
-    this.isDirty.set(false)
-    this.editingSurvey = null
-    this.editForm = null
-    this.setActiveTab("list")
-
-    // Mostrar notificación de éxito
-    this.showNotification("Encuesta actualizada exitosamente")
-  }
-
-  toggleActive(survey: Survey) {
-    this.surveyService.toggleSurveyActive(survey.id)
-
-    // Actualizar la lista de encuestas
-    this.surveys.set(this.surveyService.getSurveys()())
-
-    // Mostrar notificación
-    const message = survey.active ? "Encuesta desactivada" : "Encuesta activada"
-    this.showNotification(message)
-  }
-
-  deleteSurvey(surveyId: number) {
-    if (confirm("¿Está seguro de que desea eliminar esta encuesta? Esta acción no se puede deshacer.")) {
-      this.surveyService.deleteSurvey(surveyId)
-
-      // Actualizar la lista de encuestas
-      this.surveys.set(this.surveyService.getSurveys()())
-
-      this.showNotification("Encuesta eliminada")
+      this.lastSaved.set(new Date());
+      console.log(`Preguntas actuales en ${formType} form (después de añadir):`, targetQuestionsArray.value);
+    } else {
+      this.showErrorMessage('Validación de Pregunta', 'Por favor, completa el texto y tipo de la pregunta antes de añadirla.');
+      if (this.questionsFormArray.length === 0) {
+        console.warn('Intento de añadir encuesta sin preguntas.');
+      }
     }
   }
 
-  duplicateSurvey(survey: Survey) {
-    const duplicatedSurvey = this.surveyService.duplicateSurvey(survey.id)
-
-    if (duplicatedSurvey) {
-      // Actualizar la lista de encuestas
-      this.surveys.set(this.surveyService.getSurveys()())
-      this.showNotification("Encuesta duplicada exitosamente")
+  removeQuestion(index: number, formType: 'add' | 'edit' = 'add'): void {
+    const targetQuestionsArray = formType === 'add' ? this.questionsFormArray : this.editQuestionsFormArray;
+    if (targetQuestionsArray.length > 0) {
+      targetQuestionsArray.removeAt(index);
+      this.lastSaved.set(new Date());
+      console.log(`Pregunta eliminada. Preguntas restantes (${formType}):`, targetQuestionsArray.value);
     }
   }
 
-  previewSurvey(survey: any) {
-    // CAMBIO: Ahora maneja tanto encuestas existentes como nuevas desde el formulario
-    if (this.activeTab() === "add") {
-      const formValue = this.surveyForm.value
-      this.previewingSurvey = {
-        id: 0, // ID temporal
-        title: formValue.title || "Nueva Encuesta",
-        description: formValue.description || "Descripción de la encuesta",
-        category: formValue.category || "finalizacion",
-        questions: formValue.questions || [],
+  duplicateQuestion(question: IQuestion, formType: 'add' | 'edit' = 'add'): void {
+    const duplicatedQuestion: IQuestion = { ...question, id: uuidv4() };
+    if (duplicatedQuestion.options) {
+      duplicatedQuestion.options = [...duplicatedQuestion.options];
+    }
+
+    const targetQuestionsArray = formType === 'add' ? this.questionsFormArray : this.editQuestionsFormArray;
+    targetQuestionsArray.push(this.createQuestionFormGroup(duplicatedQuestion));
+
+    this.lastSaved.set(new Date());
+    console.log(`Pregunta duplicada. Preguntas actuales (${formType}):`, targetQuestionsArray.value);
+  }
+
+  dropQuestion(event: CdkDragDrop<IQuestion[]>, formType: 'add' | 'edit' = 'add'): void {
+    const targetQuestionsArray = formType === 'add' ? this.questionsFormArray : this.editQuestionsFormArray;
+
+    const questionsAsArray = targetQuestionsArray.controls.map(control => control.value as IQuestion);
+    moveItemInArray(questionsAsArray, event.previousIndex, event.currentIndex);
+
+    targetQuestionsArray.clear();
+    questionsAsArray.forEach((q: IQuestion) => {
+      targetQuestionsArray.push(this.createQuestionFormGroup(q));
+    });
+
+    this.lastSaved.set(new Date());
+    console.log(`Orden de preguntas cambiado (${formType}):`, targetQuestionsArray.value);
+  }
+
+  addTemplateQuestion(): void {
+    this.templateQuestionForm.markAllAsTouched();
+
+    if (this.templateQuestionForm.valid) {
+      const newQuestionData = this.templateQuestionForm.value as IQuestion;
+      console.log('Datos de la NUEVA pregunta (plantilla) ANTES de añadir al FormArray:', JSON.parse(JSON.stringify(newQuestionData)));
+      const newQuestionGroup = this.createQuestionFormGroup(newQuestionData);
+      this.templateQuestionsFormArray.push(newQuestionGroup);
+
+      this.templateQuestionForm.reset({
+        id: uuidv4(),
+        text: '',
+        description: '',
+        type: 'text',
+        required: false,
+      });
+      this.templateQuestionOptionsFormArray.clear();
+
+      this.lastSaved.set(new Date());
+      console.log('Preguntas actuales de la plantilla (después de añadir):', this.templateQuestionsFormArray.value);
+    } else {
+      this.showErrorMessage('Validación de Pregunta', 'Por favor, completa el texto y tipo de la pregunta antes de añadirla a la plantilla.');
+    }
+  }
+
+  removeTemplateQuestion(index: number): void {
+    if (this.templateQuestionsFormArray.length > 0) {
+      this.templateQuestionsFormArray.removeAt(index);
+      this.lastSaved.set(new Date());
+      console.log('Plantilla: Pregunta eliminada. Preguntas restantes:', this.templateQuestionsFormArray.value);
+    }
+  }
+
+  duplicateTemplateQuestion(question: IQuestion): void {
+    const duplicatedQuestion: IQuestion = { ...question, id: uuidv4() };
+    if (duplicatedQuestion.options) {
+      duplicatedQuestion.options = [...duplicatedQuestion.options];
+    }
+    this.templateQuestionsFormArray.push(this.createQuestionFormGroup(duplicatedQuestion));
+    this.lastSaved.set(new Date());
+    console.log('Plantilla: Pregunta duplicada. Preguntas actuales:', this.templateQuestionsFormArray.value);
+  }
+
+  dropTemplateQuestion(event: CdkDragDrop<IQuestion[]>): void {
+    const questionsAsArray = this.templateQuestionsFormArray.controls.map(control => control.value as IQuestion);
+    moveItemInArray(questionsAsArray, event.previousIndex, event.currentIndex);
+
+    this.templateQuestionsFormArray.clear();
+    questionsAsArray.forEach((q: IQuestion) => {
+      this.templateQuestionsFormArray.push(this.createQuestionFormGroup(q));
+    });
+    this.lastSaved.set(new Date());
+    console.log('Plantilla: Orden de preguntas cambiado:', this.templateQuestionsFormArray.value);
+  }
+
+
+  // === Reset de Formularios ===
+  resetAddForm(): void {
+    this.surveyForm.reset({
+      title: '',
+      description: '',
+      category: 'satisfaccion',
+      theme: 'default',
+      expirationDate: null,
+      questions: [],
+    });
+    this.questionsFormArray.clear();
+
+    this.questionForm.reset({
+      id: uuidv4(),
+      text: '',
+      description: '',
+      type: 'text',
+      required: false,
+    });
+    this.questionOptionsFormArray.clear();
+
+    this.lastSaved.set(null);
+    console.log('Formulario de creación de encuesta reiniciado.');
+  }
+
+  resetAddTemplateForm(): void {
+    this.templateForm.reset({
+      id: '',
+      name: '',
+      description: '',
+      category: 'satisfaccion',
+      questions: [],
+    });
+    this.templateQuestionsFormArray.clear();
+
+    this.templateQuestionForm.reset({
+      id: uuidv4(),
+      text: '',
+      description: '',
+      type: 'text',
+      required: false,
+    });
+    this.templateQuestionOptionsFormArray.clear();
+
+    this.editingTemplate = null;
+    this.lastSaved.set(null);
+    console.log('Formulario de creación de plantilla reiniciado.');
+  }
+
+  // === Métodos de CRUD para Encuestas ===
+  addSurvey(): void {
+    this.surveyForm.markAllAsTouched();
+    if (this.surveyForm.valid && this.questionsFormArray.length > 0) {
+      this.loading.set(true);
+      this.error.set(null);
+      const newSurveyData: ISurvey = {
+        ...this.surveyForm.value,
         active: true,
-        createdAt: new Date(),
-        theme: formValue.theme || "default",
-        targetAudience: formValue.targetAudience || [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        id: uuidv4()
+      };
+
+      console.log('Datos COMPLETOS de la encuesta ANTES de enviar a crear (AdminSurveysComponent):', JSON.parse(JSON.stringify(newSurveyData)));
+      this.surveyService.createSurvey(newSurveyData).subscribe({
+        next: (response: ISurvey) => {
+          this.showSuccessMessage('Éxito', 'Encuesta creada exitosamente!');
+          this.resetAddForm();
+          this.setActiveTab('list');
+          this.loading.set(false);
+          console.log('Respuesta de creación de encuesta (AdminSurveysComponent):', response);
+        },
+        error: (err: any) => {
+          console.error('Error al crear encuesta (AdminSurveysComponent):', err);
+          this.error.set('Error al crear la encuesta. Por favor, inténtalo de nuevo.');
+          this.showErrorMessage('Error de Creación', 'Error al crear la encuesta. Por favor, inténtalo de nuevo.');
+          this.loading.set(false);
+        },
+      });
+    } else {
+      this.showErrorMessage('Error de Formulario', 'Por favor, completa todos los campos obligatorios y añade al menos una pregunta.');
+      if (this.questionsFormArray.length === 0) {
+        console.warn('Intento de añadir encuesta sin preguntas.');
+      }
+    }
+  }
+
+  startEdit(survey: ISurvey): void {
+    this.editingSurvey = { ...survey };
+    console.log('Encuesta SELECCIONADA para editar (AdminSurveysComponent):', JSON.parse(JSON.stringify(survey)));
+    this.editForm.patchValue({
+      id: survey.id,
+      title: survey.title,
+      description: survey.description,
+      category: survey.category,
+      theme: survey.theme,
+      expirationDate: survey.expirationDate ? new Date(survey.expirationDate).toISOString().split('T')[0] : null,
+      active: survey.active,
+    });
+
+    const editQuestions = this.editForm.get('questions') as FormArray;
+    editQuestions.clear();
+    survey.questions?.forEach((q) => {
+      editQuestions.push(this.createQuestionFormGroup(q));
+    });
+    console.log('Preguntas en formulario de edición (AdminSurveysComponent) después de cargar:', editQuestions.value);
+
+    this.editQuestionForm.reset({
+      id: uuidv4(),
+      text: '',
+      description: '',
+      type: 'text',
+      required: false,
+    });
+    (this.editQuestionForm.get('options') as FormArray).clear();
+
+    this.setActiveTab('edit');
+  }
+
+  saveEdit(): void {
+    this.editForm.markAllAsTouched();
+    if (this.editForm.valid && this.editQuestionsFormArray.length > 0) {
+      this.loading.set(true);
+      this.error.set(null);
+      const updatedSurveyData: Partial<ISurvey> = {
+        ...this.editForm.value,
+        updatedAt: new Date().toISOString(),
+        expirationDate: this.editForm.get('expirationDate')?.value ?
+          new Date(this.editForm.get('expirationDate')?.value).toISOString() : null,
+      };
+      const surveyId = updatedSurveyData.id;
+      delete updatedSurveyData.id;
+
+      if (!surveyId) {
+        this.showErrorMessage('Error de Edición', 'No se encontró el ID de la encuesta para actualizar.');
+        this.loading.set(false);
+        return;
+      }
+      console.log('Datos COMPLETOS de la encuesta ANTES de enviar a actualizar (AdminSurveysComponent):', JSON.parse(JSON.stringify(updatedSurveyData)));
+      this.surveyService.updateSurvey(surveyId, updatedSurveyData).subscribe({
+        next: (response: ISurvey) => {
+          this.showSuccessMessage('Éxito', 'Encuesta actualizada exitosamente!');
+          this.editingSurvey = null;
+          this.setActiveTab('list');
+          this.loading.set(false);
+          console.log('Respuesta de actualización de encuesta (AdminSurveysComponent):', response);
+        },
+        error: (err: any) => {
+          console.error('Error al actualizar encuesta (AdminSurveysComponent):', err);
+          this.error.set('Error al actualizar la encuesta. Por favor, inténtalo de nuevo.');
+          this.showErrorMessage('Error de Actualización', 'Error al actualizar la encuesta. Por favor, inténtalo de nuevo.');
+          this.loading.set(false);
+        },
+      });
+    } else {
+      this.showErrorMessage('Error de Edición', 'Por favor, completa todos los campos obligatorios y asegúrate de tener preguntas.');
+      if (this.editQuestionsFormArray.length === 0) {
+        console.warn('Intento de guardar encuesta sin preguntas en edición.');
+      }
+    }
+  }
+
+  cancelEdit(): void {
+    this.editingSurvey = null;
+    this.setActiveTab('list');
+    console.log('Edición de encuesta cancelada.');
+  }
+
+  toggleActive(survey: ISurvey): void {
+    this.loading.set(true);
+    this.error.set(null);
+    const newStatus = !survey.active;
+    this.surveyService.toggleSurveyStatus(survey.id!, newStatus).subscribe({
+      next: (response: any) => {
+          this.showSuccessMessage('Estado Actualizado', `Encuesta ${newStatus ? 'activada' : 'desactivada'} exitosamente!`);
+          this.loadSurveys();
+          this.loading.set(false);
+          console.log(`Estado de encuesta toggled. ID: ${survey.id}, Nuevo estado: ${newStatus}`);
+      },
+      error: (err: any) => {
+          console.error('Error al cambiar estado (AdminSurveysComponent):', err);
+          this.error.set('Error al cambiar el estado de la encuesta.');
+          this.showErrorMessage('Error de Estado', 'Error al cambiar el estado de la encuesta.');
+          this.loading.set(false);
+      },
+    });
+  }
+
+  isDeleteSurveyModalOpen(): boolean {
+    return this.showDeleteConfirmationModal && this.surveyToDelete !== null;
+  }
+
+  isDeleteTemplateModalOpen(): boolean {
+    return this.showDeleteConfirmationModal && this.templateToDelete !== null;
+  }
+
+  showDeleteConfirm(survey: ISurvey): void {
+    this.surveyToDelete = survey;
+    this.templateToDelete = null; // Asegúrate de que solo uno esté activo
+    this.deleteConfirmationMessage = `¿Estás seguro de que deseas eliminar la encuesta '${survey.title}'? Esta acción no se puede deshacer.`;
+    this.showDeleteConfirmationModal = true;
+    console.log('Modal de confirmación de eliminación de encuesta mostrado.');
+  }
+
+  confirmDeleteSurvey(): void {
+    if (this.surveyToDelete) {
+      this.loading.set(true);
+      this.error.set(null);
+      this.surveyService.deleteSurvey(this.surveyToDelete.id!).subscribe({
+        next: () => {
+          this.showSuccessMessage('Éxito', 'Encuesta eliminada exitosamente.');
+          this.loadSurveys();
+          this.loading.set(false);
+          this.surveyToDelete = null;
+          this.deleteConfirmationMessage = '';
+          console.log('Encuesta eliminada.');
+        },
+        error: (err: any) => {
+          console.error('Error al eliminar encuesta (AdminSurveysComponent):', err);
+          this.error.set('Error al eliminar la encuesta. Por favor, inténtalo de nuevo.');
+          this.showErrorMessage('Error de Eliminación', 'Error al eliminar la encuesta. Por favor, inténtalo de nuevo.');
+          this.loading.set(false);
+        },
+      });
+    } else if (this.templateToDelete) { // Lógica para eliminar plantilla
+      this.loading.set(true);
+      this.error.set(null);
+      this.surveyService.deleteTemplate(this.templateToDelete.id!).subscribe({
+        next: () => {
+          this.showSuccessMessage('Éxito', 'Plantilla eliminada exitosamente.');
+          this.loadTemplates();
+          this.loading.set(false);
+          this.templateToDelete = null;
+          this.deleteConfirmationMessage = '';
+          console.log('Plantilla eliminada.');
+        },
+        error: (err: any) => {
+          console.error('Error al eliminar plantilla (AdminSurveysComponent):', err);
+          this.error.set('Error al eliminar la plantilla. Inténtalo de nuevo.');
+          this.showErrorMessage('Error de Eliminación', 'Error al eliminar la plantilla. Inténtalo de nuevo.');
+          this.loading.set(false);
+        },
+      });
+    }
+    this.showDeleteConfirmationModal = false;
+  }
+
+  cancelDeleteSurvey(): void {
+    this.showDeleteConfirmationModal = false;
+    this.surveyToDelete = null;
+    this.templateToDelete = null; // Clear both just in case
+    this.deleteConfirmationMessage = '';
+    console.log('Eliminación de encuesta/plantilla cancelada.');
+  }
+
+  // === Métodos de CRUD para Plantillas ===
+  startAddTemplate(): void {
+    this.resetAddTemplateForm();
+    this.setActiveTab('addTemplate');
+    console.log('Iniciando adición de nueva plantilla.');
+  }
+
+  startEditTemplate(template: ITemplate): void {
+    this.editingTemplate = { ...template };
+    console.log('Plantilla SELECCIONADA para editar (AdminSurveysComponent):', JSON.parse(JSON.stringify(template)));
+    this.templateForm.patchValue({
+      id: template.id,
+      name: template.name,
+      description: template.description,
+      category: template.category,
+    });
+
+    this.templateQuestionsFormArray.clear();
+    template.questions?.forEach((q) => {
+      this.templateQuestionsFormArray.push(this.createQuestionFormGroup(q));
+    });
+    console.log('Preguntas en formulario de edición de plantilla (AdminSurveysComponent) después de cargar:', this.templateQuestionsFormArray.value);
+
+    this.templateQuestionForm.reset({
+      id: uuidv4(),
+      text: '',
+      description: '',
+      type: 'text',
+      required: false,
+    });
+    this.templateQuestionOptionsFormArray.clear();
+
+    this.setActiveTab('editTemplate');
+  }
+
+  saveTemplate(): void {
+    this.templateForm.markAllAsTouched();
+    if (this.templateForm.valid && this.templateQuestionsFormArray.length > 0) {
+      this.loading.set(true);
+      this.error.set(null);
+
+      const templateData: Partial<ITemplate> = {
+        ...this.templateForm.value,
+        questions: this.templateQuestionsFormArray.value,
+      };
+
+      if (this.editingTemplate?.id) {
+        const templateId = this.editingTemplate.id;
+        templateData.updatedAt = new Date().toISOString();
+        delete templateData.id;
+
+        console.log('Datos COMPLETOS de la plantilla ANTES de enviar a actualizar (AdminSurveysComponent):', JSON.parse(JSON.stringify(templateData)));
+        this.surveyService.updateTemplate(templateId, templateData).subscribe({
+          next: (response: ITemplate) => {
+            this.showSuccessMessage('Éxito', 'Plantilla actualizada exitosamente!');
+            this.editingTemplate = null;
+            this.setActiveTab('templates');
+            this.loadTemplates();
+            this.loading.set(false);
+            console.log('Respuesta de actualización de plantilla (AdminSurveysComponent):', response);
+          },
+          error: (err: any) => {
+            console.error('Error al actualizar plantilla (AdminSurveysComponent):', err);
+            this.error.set('Error al actualizar la plantilla. Inténtalo de nuevo.');
+            this.showErrorMessage('Error de Actualización', 'Error al actualizar la plantilla. Inténtalo de nuevo.');
+            this.loading.set(false);
+          },
+        });
+      } else {
+        const newTemplateData: Omit<ITemplate, 'id' | 'createdAt' | 'updatedAt'> = {
+          name: templateData.name!,
+          description: templateData.description!,
+          category: templateData.category!,
+          questions: templateData.questions!,
+        };
+        console.log('Datos COMPLETOS de la plantilla ANTES de enviar a crear (AdminSurveysComponent):', JSON.parse(JSON.stringify(newTemplateData)));
+        this.surveyService.createTemplate(newTemplateData).subscribe({
+          next: (response: ITemplate) => {
+            this.showSuccessMessage('Éxito', 'Plantilla creada exitosamente!');
+            this.resetAddTemplateForm();
+            this.setActiveTab('templates');
+            this.loadTemplates();
+            this.loading.set(false);
+            console.log('Respuesta de creación de plantilla (AdminSurveysComponent):', response);
+          },
+          error: (err: any) => {
+            console.error('Error al crear plantilla (AdminSurveysComponent):', err);
+            this.error.set('Error al crear la plantilla. Inténtalo de nuevo.');
+            this.showErrorMessage('Error de Creación', 'Error al crear la plantilla. Inténtalo de nuevo.');
+            this.loading.set(false);
+          },
+        });
       }
     } else {
-      // CAMBIO: Copia profunda para evitar modificar la encuesta original
-      this.previewingSurvey = JSON.parse(JSON.stringify(survey))
-    }
-
-    // CAMBIO: Reiniciar respuestas para la previsualización
-    this.previewResponses = {}
-
-    // Cambiar a la pestaña de previsualización
-    this.setActiveTab("preview")
-
-    // CAMBIO: Registro para depuración
-    console.log("Previsualizando encuesta:", this.previewingSurvey)
-  }
-
-  // Método para mostrar el panel de análisis
-  showAnalytics(survey: Survey) {
-    this.analyticsSurvey = JSON.parse(JSON.stringify(survey))
-    this.setActiveTab("analytics")
-  }
-
-  // Método para reordenar preguntas
-  dropQuestion(event: CdkDragDrop<SurveyQuestion[]>) {
-    if (this.activeTab() === "add") {
-      const questions = this.surveyForm.value.questions || []
-      moveItemInArray(questions, event.previousIndex, event.currentIndex)
-      this.surveyForm.patchValue({ questions })
-      this.markAsDirty()
-    } else if (this.activeTab() === "edit" && this.editingSurvey) {
-      moveItemInArray(this.editingSurvey.questions, event.previousIndex, event.currentIndex)
-      this.markAsDirty()
+      this.showErrorMessage('Error de Formulario', 'Por favor, completa todos los campos obligatorios y añade al menos una pregunta a la plantilla.');
     }
   }
 
-  // Método para aplicar una plantilla
-  applyTemplate(template: SurveyTemplate) {
-    if (confirm("¿Desea aplicar esta plantilla? Se reemplazarán las preguntas actuales.")) {
-      // Crear preguntas con IDs únicos
-      const questions: SurveyQuestion[] = template.questions.map((q, index) => ({
-        id: index + 1,
-        text: q.text || "",
-        type: q.type || "checkbox",
-        options: q.options,
-        required: q.required || false,
-        description: q.description,
-        conditionalLogic: q.conditionalLogic,
-      }))
+  cancelTemplateEdit(): void {
+    this.editingTemplate = null;
+    this.resetAddTemplateForm();
+    this.setActiveTab('templates');
+    console.log('Edición de plantilla cancelada.');
+  }
 
-      if (this.activeTab() === "add") {
-        this.surveyForm.patchValue({
-          category: template.category,
-          questions: questions,
-        })
-      } else if (this.activeTab() === "edit" && this.editingSurvey) {
-        this.editingSurvey.category = template.category
-        this.editingSurvey.questions = questions
-        if (this.editForm) {
-          this.editForm.patchValue({ category: template.category })
-        }
+  showDeleteTemplateConfirm(template: ITemplate): void {
+    this.templateToDelete = template;
+    this.surveyToDelete = null; // Asegúrate de que solo uno esté activo
+    this.deleteConfirmationMessage = `¿Estás seguro de que deseas eliminar la plantilla '${template.name}'? Esto no afectará a las encuestas ya creadas con ella.`;
+    this.showDeleteConfirmationModal = true;
+    console.log('Modal de confirmación de eliminación de plantilla mostrado.');
+  }
+
+  // === Métodos de Previsualización ===
+  previewSurvey(surveyData: any): void {
+    this.previewingSurvey = { ...surveyData };
+    this.previewResponses = {};
+
+    this.sourceTabForPreview = this.activeTab();
+    this.activeTab.set('preview');
+    console.log('Datos de la encuesta en PREVISUALIZACIÓN (AdminSurveysComponent):', JSON.parse(JSON.stringify(this.previewingSurvey)));
+    console.log('Preguntas en PREVISUALIZACIÓN (AdminSurveysComponent):', JSON.parse(JSON.stringify(this.previewingSurvey?.questions)));
+  }
+
+  // shouldShowQuestion método eliminado (ya no hay lógica condicional)
+  shouldShowQuestion(question: IQuestion, responses: { [key: string]: any }): boolean {
+    return true; // Si no hay lógica condicional, la pregunta siempre se muestra
+  }
+
+  // === Aplicar Plantilla a Encuesta ===
+  applyTemplate(template: ITemplate, isEdit: boolean = false): void {
+    this.modalInputTitle = 'Confirmar Aplicación de Plantilla';
+    this.modalInputMessage = `¿Estás seguro de que quieres aplicar la plantilla '${template.name}'? Se reemplazarán TODAS las preguntas actuales de la encuesta.`;
+    this.modalInputPlaceholder = ''; // Eliminamos el placeholder
+    this.modalInputCurrentValue = ''; // Aseguramos que el valor esté vacío al abrir
+    this.showModalInput = true;
+
+    this.modalInputCallback = (confirmationValue: string | null) => {
+      // Si confirmationValue es null (del botón de Cancelar), entonces cancela.
+      // Si es cualquier otro valor (del botón de Confirmar), entonces procede.
+      if (confirmationValue === null) {
+        this.showInfoMessage('Cancelado', 'Aplicación de plantilla cancelada.');
+      } else {
+        const targetForm = isEdit ? this.editForm : this.surveyForm;
+        const currentQuestions = (targetForm.get('questions') as FormArray);
+        currentQuestions.clear();
+
+        template.questions.forEach(q => {
+          const questionToAdd: IQuestion = { ...q, id: uuidv4() };
+          currentQuestions.push(this.createQuestionFormGroup(questionToAdd));
+        });
+
+        this.lastSaved.set(new Date());
+        this.showInfoMessage('Plantilla Aplicada', `Plantilla "${template.name}" aplicada exitosamente.`);
+        console.log(`Plantilla "${template.name}" aplicada. Preguntas en formulario:`, currentQuestions.value);
+
+        const questionFormToReset = isEdit ? this.editQuestionForm : this.questionForm;
+        questionFormToReset.reset({
+          id: uuidv4(),
+          text: '',
+          description: '',
+          type: 'text',
+          required: false,
+
+        });
+        (questionFormToReset.get('options') as FormArray).clear();
       }
+      this.showModalInput = false; // Cierra el modal
+      this.modalInputCallback = null; // Limpia el callback
+    };
+  }
 
-      this.markAsDirty()
+  handleModalInputConfirm(): void {
+    if (this.modalInputCallback) {
+      this.modalInputCallback('confirmed'); 
     }
   }
 
-  // Método para exportar resultados
-  exportResults(survey: Survey) {
-    const csvContent = this.surveyService.exportSurveyResultsAsCsv(survey.id)
-
-    if (!csvContent) {
-      this.showNotification("No hay respuestas para exportar", "warning")
-      return
-    }
-
-    // Crear un enlace de descarga
-    const filename = `resultados_${survey.title.toLowerCase().replace(/\s+/g, "_")}.csv`
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.setAttribute("href", url)
-    link.setAttribute("download", filename)
-    link.style.visibility = "hidden"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-
-    this.showNotification("Resultados exportados exitosamente")
-  }
-
-  // Exportar encuesta como JSON
-  exportSurvey(survey: Survey) {
-    const surveyJson = this.surveyService.exportSurveyAsJson(survey.id)
-    const filename = `encuesta_${survey.title.toLowerCase().replace(/\s+/g, "_")}.json`
-
-    const blob = new Blob([surveyJson], { type: "application/json;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.setAttribute("href", url)
-    link.setAttribute("download", filename)
-    link.style.visibility = "hidden"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-
-    this.showNotification("Encuesta exportada exitosamente")
-  }
-
-  // Importar encuesta desde JSON
-  importSurvey() {
-    this.importError = ""
-    this.importSuccess = ""
-
-    try {
-      if (!this.importData) {
-        this.importError = "Por favor ingrese datos JSON válidos"
-        return
-      }
-
-      const newSurvey = this.surveyService.importSurveyFromJson(this.importData)
-
-      if (!newSurvey) {
-        this.importError = "El formato JSON no es válido. Debe contener title, description y un array de questions."
-        return
-      }
-
-      // Actualizar la lista de encuestas
-      this.surveys.set(this.surveyService.getSurveys()())
-
-      this.importSuccess = "Encuesta importada exitosamente"
-      this.importData = ""
-
-      setTimeout(() => {
-        this.setActiveTab("list")
-      }, 1500)
-    } catch (error) {
-      this.importError = "Error al procesar el JSON: " + (error as Error).message
+  handleModalInputCancel(): void {
+    if (this.modalInputCallback) {
+      this.modalInputCallback(null);
     }
   }
 
-  // Inicializar gráficos para análisis
-  initCharts() {
-    if (!this.analyticsSurvey) return
-
-    // Limpiar gráficos existentes
-    Object.values(this.charts).forEach((chart) => chart.destroy())
-    this.charts = {}
-
-    // Obtener respuestas para esta encuesta
-    const responses = this.surveyService.getSurveyResponsesBySurveyId(this.analyticsSurvey.id)
-
-    if (responses.length === 0) {
-      return
-    }
-
-    // Gráfico de completitud
-    this.createCompletionChart(responses)
-
-    // Gráficos para cada pregunta
-    this.analyticsSurvey.questions.forEach((question) => {
-      this.createQuestionChart(question, responses)
-    })
+  // === Métodos de Modal de Mensajes ===
+  showSuccessMessage(title: string, message: string): void {
+    this.modalMessageTitle = title;
+    this.modalMessage = message;
+    this.showMessageModal = true;
+    console.log(`Mensaje de Éxito: ${title} - ${message}`);
   }
 
-  // Crear gráfico de completitud
-  createCompletionChart(responses: SurveyResponse[]) {
-    const completed = responses.filter((r) => !r.partiallyCompleted).length
-    const partial = responses.filter((r) => r.partiallyCompleted).length
-
-    const canvas = document.getElementById("completionChart") as HTMLCanvasElement
-    if (!canvas) return
-
-    this.charts["completion"] = new Chart(canvas, {
-      type: "doughnut",
-      data: {
-        labels: ["Completadas", "Parciales"],
-        datasets: [
-          {
-            data: [completed, partial],
-            backgroundColor: ["#4CAF50", "#FFC107"],
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: "bottom",
-          },
-          title: {
-            display: true,
-            text: "Estado de Completitud",
-          },
-        },
-      },
-    })
+  showErrorMessage(title: string, message: string): void {
+    this.modalMessageTitle = title;
+    this.modalMessage = message;
+    this.showMessageModal = true;
+    console.error(`Mensaje de Error: ${title} - ${message}`);
   }
 
-  // Crear gráfico para una pregunta específica
-  createQuestionChart(question: SurveyQuestion, responses: SurveyResponse[]) {
-    const canvas = document.getElementById(`question_${question.id}_chart`) as HTMLCanvasElement
-    if (!canvas) return
-
-    // Obtener respuestas para esta pregunta
-    const answers = responses
-      .filter((r) => r.answers[question.id] !== undefined && r.answers[question.id] !== null)
-      .map((r) => r.answers[question.id])
-
-    if (answers.length === 0) return
-
-    let chartType: "bar" | "pie" | "line"
-    let labels: string[]
-    let data: number[]
-
-    if (question.type === "checkbox") {
-      // Para preguntas de sí/no
-      const yesCount = answers.filter((a) => a === true).length
-      const noCount = answers.filter((a) => a === false).length
-
-      labels = ["Sí", "No"]
-      data = [yesCount, noCount]
-      chartType = "pie"
-    } else if (question.type === "radio" || question.type === "select") {
-      // Para preguntas de opción múltiple
-      const optionCounts: { [key: string]: number } = {}
-
-      question.options?.forEach((option) => {
-        optionCounts[option] = 0
-      })
-
-      answers.forEach((answer) => {
-        if (typeof answer === "string" && optionCounts[answer] !== undefined) {
-          optionCounts[answer]++
-        }
-      })
-
-      labels = Object.keys(optionCounts)
-      data = Object.values(optionCounts)
-      chartType = "bar"
-    } else if (question.type === "rating") {
-      // Para preguntas de calificación
-      const ratingCounts = [0, 0, 0, 0, 0]
-
-      answers.forEach((answer) => {
-        if (typeof answer === "number" && answer >= 1 && answer <= 5) {
-          ratingCounts[answer - 1]++
-        }
-      })
-
-      labels = ["1", "2", "3", "4", "5"]
-      data = ratingCounts
-      chartType = "bar"
-    } else {
-      // Para otros tipos de preguntas, no crear gráfico
-      return
-    }
-
-    const colors = [
-      "#4CAF50",
-      "#2196F3",
-      "#FFC107",
-      "#FF5722",
-      "#9C27B0",
-      "#3F51B5",
-      "#E91E63",
-      "#009688",
-      "#795548",
-      "#607D8B",
-    ]
-
-    this.charts[`question_${question.id}`] = new Chart(canvas, {
-      type: chartType,
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: "Respuestas",
-            data: data,
-            backgroundColor: colors.slice(0, data.length),
-            borderWidth: 1,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: chartType !== "bar",
-            position: "bottom",
-          },
-          title: {
-            display: true,
-            text: question.text,
-          },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            display: chartType === "bar",
-          },
-        },
-      },
-    })
-  }
-
-  // Simular envío de notificaciones
-  sendNotifications(survey: Survey) {
-    if (!this.notificationSettings.enabled) {
-      this.showNotification("Las notificaciones están desactivadas", "warning")
-      return
-    }
-
-    if (!survey.active) {
-      this.showNotification("La encuesta debe estar activa para enviar notificaciones", "warning")
-      return
-    }
-
-    const notificationsSent = survey.notificationsSent || 0
-
-    if (notificationsSent >= this.notificationSettings.maxReminders) {
-      this.showNotification("Se ha alcanzado el límite máximo de notificaciones", "warning")
-      return
-    }
-
-    // Simular envío
-    this.surveys.update((surveys) =>
-      surveys.map((s) => {
-        if (s.id === survey.id) {
-          return {
-            ...s,
-            notificationsSent: (s.notificationsSent || 0) + 1,
-            lastNotificationDate: new Date(),
-          }
-        }
-        return s
-      }),
-    )
-
-    this.showNotification(`Notificaciones enviadas a ${survey.targetAudience?.length || 0} destinatarios`)
-  }
-
-  // Filtrar encuestas
-  get filteredSurveys() {
-    return this.surveys().filter((survey) => {
-      // Filtrar por término de búsqueda
-      const matchesSearch =
-        this.searchTerm() === "" ||
-        survey.title.toLowerCase().includes(this.searchTerm().toLowerCase()) ||
-        survey.description.toLowerCase().includes(this.searchTerm().toLowerCase())
-
-      // Filtrar por categoría
-      const matchesCategory = !this.categoryFilter() || survey.category === this.categoryFilter()
-
-      // Filtrar por estado
-      const matchesStatus =
-        !this.statusFilter() ||
-        (this.statusFilter() === "active" && survey.active) ||
-        (this.statusFilter() === "inactive" && !survey.active)
-
-      return matchesSearch && matchesCategory && matchesStatus
-    })
-  }
-
-  // Método para mostrar notificaciones
-  showNotification(message: string, type: "success" | "warning" | "error" = "success") {
-    // Implementación simple de notificación
-    const notification = document.createElement("div")
-    notification.textContent = message
-    notification.className = `fixed bottom-4 left-4 py-2 px-4 rounded shadow-lg z-50 notification-fade`
-
-    // Aplicar color según tipo
-    if (type === "success") {
-      notification.classList.add("bg-green-500", "text-white")
-    } else if (type === "warning") {
-      notification.classList.add("bg-yellow-500", "text-white")
-    } else if (type === "error") {
-      notification.classList.add("bg-red-500", "text-white")
-    }
-
-    document.body.appendChild(notification)
-
-    // Eliminar después de 3 segundos
-    setTimeout(() => {
-      notification.classList.add("opacity-0")
-      setTimeout(() => {
-        document.body.removeChild(notification)
-      }, 500)
-    }, 3000)
-  }
-
- // Método para simular respuestas en la previsualización
-  setPreviewResponse(questionId: number, value: any) {
-    // CAMBIO: Agregado registro para depuración
-    console.log(`Respuesta para pregunta ${questionId}:`, value)
-    this.previewResponses[questionId] = value
-
-    // CAMBIO: Actualizar las preguntas condicionales que dependen de esta respuesta
-    if (this.previewingSurvey) {
-      // CAMBIO: Forzar actualización de la vista
-      this.previewingSurvey = { ...this.previewingSurvey }
-    }
-  }
-
-   // Agregar un método para probar la encuesta en la vista de egresados
-   testSurveyAsGraduate(survey: Survey) {
-    // CAMBIO: Guardar la encuesta en localStorage para que esté disponible en la vista de egresados
-    localStorage.setItem("testSurvey", JSON.stringify(survey))
-
-    // CAMBIO: Navegar a la ruta de encuestas de egresados en una nueva pestaña
-    window.open("/encuestas", "_blank")
-
-    this.showNotification("Encuesta abierta en la vista de egresados (nueva pestaña)")
-  }
-
-  // Verificar si una pregunta condicional debe mostrarse
-  shouldShowQuestion(question: SurveyQuestion): boolean {
-    if (!question.conditionalLogic) return true
-
-    const { parentQuestionId, showOnValue } = question.conditionalLogic
-
-    // CAMBIO: Si la pregunta padre no tiene respuesta, no mostrar
-    if (this.previewResponses[parentQuestionId] === undefined) return false
-
-    const parentResponse = this.previewResponses[parentQuestionId]
-    // CAMBIO: Agregado registro para depuración
-    console.log(`Evaluando condición: ${parentResponse} === ${showOnValue}`)
-
-    // CAMBIO: Comparar con el valor esperado (manejo especial para booleanos)
-    if (typeof showOnValue === "boolean") {
-      return parentResponse === showOnValue
-    } else if (typeof showOnValue === "string") {
-      return String(parentResponse) === showOnValue
-    } else {
-      return parentResponse === showOnValue
-    }
-  }
-
-  // Marcar todos los campos de un formulario como tocados para mostrar errores
-  markFormGroupTouched(formGroup: FormGroup) {
-    Object.values(formGroup.controls).forEach((control) => {
-      control.markAsTouched()
-      if ((control as FormGroup).controls) {
-        this.markFormGroupTouched(control as FormGroup)
-      }
-    })
+  showInfoMessage(title: string, message: string): void {
+    this.modalMessageTitle = title;
+    this.modalMessage = message;
+    this.showMessageModal = true;
+    console.log(`Mensaje de Información: ${title} - ${message}`);
   }
 }

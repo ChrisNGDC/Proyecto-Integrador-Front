@@ -1,0 +1,96 @@
+
+
+<div class="min-h-screen bg-gray-100 p-6 sm:p-10 flex flex-col items-center">
+  <!-- Botón "Volver a la lista de encuestas" -->
+  <div class="w-full max-w-7xl flex justify-start mb-6">
+    <button (click)="goBackToList()"
+            class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105">
+      <!-- SVG de flecha izquierda (directamente en línea) -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Volver a la lista de encuestas
+    </button>
+  </div>
+
+  <div class="w-full max-w-7xl bg-white rounded-lg shadow-xl p-8 mb-8">
+    <ng-container *ngIf="isLoading">
+      <div class="flex flex-col items-center justify-center py-10">
+        <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 mb-4"></div>
+        <p class="text-gray-600 text-lg">Cargando resultados de la encuesta...</p>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="errorMessage">
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong class="font-bold">¡Error!</strong>
+        <span class="block sm:inline"> {{ errorMessage }}</span>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="!isLoading && !errorMessage && survey">
+      <h1 class="text-4xl font-extrabold text-gray-900 mb-4 text-center">{{ survey.title }}</h1>
+      <p class="text-gray-600 text-lg mb-6 text-center">{{ survey.description }}</p>
+
+      <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <p class="text-xl font-semibold text-gray-800">
+          Total de Respuestas: <span class="text-indigo-600">{{ responses.length }}</span>
+        </p>
+        <div class="flex space-x-4">
+          <button (click)="refreshData()"
+                  class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 0020 13a8 8 0 00-6.162-7.818M2 12a10 10 0 0115.356-8A10 10 0 0122 12h-2m-2 0a8 8 0 00-6.162 7.818M20 20v-5h-.582m0 0a8.001 8.001 0 00-15.356-2A8.001 8.001 0 004 11a8 8 0 006.162 7.818" />
+            </svg>
+            Actualizar Datos
+          </button>
+          <button (click)="exportToExcel()"
+                  class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Exportar a Excel
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="responses.length === 0" class="text-center py-10 text-gray-600 text-lg">
+        <p>Aún no hay respuestas para esta encuesta.</p>
+        <p>¡Comparte el enlace de la encuesta para empezar a recolectar respuestas!</p>
+      </div>
+
+      <div *ngIf="responses.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <ng-container *ngFor="let question of survey.questions">
+          <div *ngIf="processedQuestionResults[question.id]"
+               class="bg-gray-50 p-6 rounded-lg shadow-md flex flex-col justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-gray-800 mb-4">{{ question.text }}</h2>
+              <p class="text-sm text-gray-500 mb-4">Tipo: {{ processedQuestionResults[question.id].type | titlecase }}</p>
+
+              <div *ngIf="processedQuestionResults[question.id].chartType !== 'none'" class="h-64 mb-4 flex items-center justify-center">
+                <canvas [id]="'chart-' + question.id"></canvas>
+              </div>
+
+              <div *ngIf="processedQuestionResults[question.id].type === 'rating' && processedQuestionResults[question.id].averageRating" class="text-center mt-4">
+                <p class="text-lg font-semibold text-gray-700">
+                  Calificación Promedio:
+                  <span class="text-indigo-600">{{ processedQuestionResults[question.id].averageRating }}</span>
+                  <span class="text-yellow-500">⭐</span>
+                </p>
+              </div>
+
+              <div *ngIf="processedQuestionResults[question.id].type === 'text' || processedQuestionResults[question.id].type === 'date'"
+                   class="mt-4 max-h-48 overflow-y-auto border border-gray-200 rounded-md p-3 bg-white">
+                <p class="font-semibold text-gray-700 mb-2">Respuestas:</p>
+                <ul class="list-disc list-inside text-gray-600">
+                  <li *ngIf="processedQuestionResults[question.id].rawData.length === 0">No hay respuestas de texto/fecha.</li>
+                  <li *ngFor="let answer of processedQuestionResults[question.id].rawData">{{ answer }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </ng-container>
+  </div>
+</div>

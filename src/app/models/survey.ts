@@ -1,45 +1,46 @@
-export interface SurveyQuestion {
-  id: number
-  text: string
-  type: "checkbox" | "radio" | "text" | "rating" | "select" | "date"
-  options?: string[]
-  required: boolean
-  conditionalLogic?: {
-    parentQuestionId: number
-    showOnValue: any
-  }
-  description?: string
+
+
+export interface IQuestion {
+  id: string;
+  text: string;
+  description?: string;
+  type: 'checkbox' | 'radio' | 'select' | 'text' | 'rating' | 'date';
+  required?: boolean; // Hago required opcional, ya que en el form se maneja con Validators
+  options?: string[];
+  
 }
 
-export interface Survey {
-  id: number
-  title: string
-  description: string
-  category: "finalizacion" | "empleabilidad" | "satisfaccion" | "otro"
-  questions: SurveyQuestion[]
-  active: boolean
-  createdAt: Date
-  expirationDate?: Date
-  theme: "default" | "blue" | "green" | "purple" | "dark"
-  targetAudience?: string[]
-  responseCount?: number
-  completionRate?: number
-  notificationsSent?: number
-  lastNotificationDate?: Date
+export interface ISurvey {
+  id?: string;         // Hago ID opcional para cuando se crea una nueva encuesta (aún sin ID)
+  title: string;
+  description?: string; 
+  category?: string;   
+  theme?: string;     
+  expirationDate?: string;
+  targetAudience?: string[];
+  questions: IQuestion[];
+  active?: boolean;    
+  createdAt?: string;   
+  updatedAt?: string;   
+  // NUEVA PROPIEDAD: Indica si el usuario actual ya ha respondido a esta encuesta
+  hasRespondedForCurrentUser?: boolean;
 }
 
-export interface SurveyResponse {
-  id: number
-  surveyId: number
-  respondentId: string
-  completedAt: Date
-  answers: { [questionId: number]: any }
-  partiallyCompleted: boolean
+export interface ISurveyResponse {
+  id: string;          // Esto es el surveyId en DynamoDB (clave de partición)
+  responseId?: string; // Esto es el ID único de cada respuesta (clave de ordenación), opcional al crear
+  userId?: string;     
+  answers: { [questionId: string]: any }; // Las respuestas: clave=ID de pregunta, valor=respuesta
+  submittedAt?: string;
 }
 
-export interface SurveyTemplate {
-  name: string
-  description: string
-  category: "finalizacion" | "empleabilidad" | "satisfaccion" | "otro"
-  questions: Partial<SurveyQuestion>[]
+// === NUEVA INTERFAZ PARA PLANTILLAS ===
+export interface ITemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  questions: IQuestion[]; // Las plantillas también tienen preguntas
+  createdAt?: string;
+  updatedAt?: string;
 }

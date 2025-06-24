@@ -13,9 +13,10 @@ import { EgresadosComponent } from './components/egresados/egresados.component';
 import { AdminSurveysComponent } from './components/admin-surveys-component/admin-surveys-component.component';
 import { AdminOpportunitiesComponent } from './components/admin-opportunities-component/admin-opportunities-component.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
+import { SurveyResultsComponent } from './components/survey-results/survey-results.component'; // <-- NUEVA IMPORTACIÓN
 
 export const routes: Routes = [
-  
+
   { path: '', component: LoginComponent, outlet: 'primary' },
   {
     path: 'admin-dashboard',
@@ -32,14 +33,17 @@ export const routes: Routes = [
         component: EgresadosComponent,
       },
       {
-        path: 'encuestas',
+        path: 'admin/encuestas',
         component: AdminSurveysComponent,
+      },
+      {
+        path: 'admin/encuestas/results/:id', // <-- NUEVA RUTA DE RESULTADOS DENTRO DE ADMIN
+        component: SurveyResultsComponent,
       },
       {
         path: 'oportunidades',
         component: AdminOpportunitiesComponent,
       },
-      
     ]
   },
   {
@@ -61,6 +65,10 @@ export const routes: Routes = [
         component: SurveysComponent,
       },
       {
+        path: 'encuestas/:id', // <-- RUTA PARA DETALLE DE ENCUESTA PÚBLICA
+        component: SurveysComponent,
+      },
+      {
         path: 'oportunidades',
         component: OpportunitiesComponent,
       },
@@ -71,6 +79,10 @@ export const routes: Routes = [
     path: 'login',
     component: LoginComponent,
   },
+  // Rutas públicas que no están anidadas en dashboards (si las necesitas, como el login)
+  // Las rutas de encuestas públicas ya están manejadas dentro de user-dashboard
+  // { path: "encuestas", component: SurveysComponent }, // Ya está en user-dashboard
+  // { path: "encuestas/:id", component: SurveysComponent }, // Ya está en user-dashboard
+
   { path: '**', redirectTo: '/login', outlet: 'primary' },
 ];
-

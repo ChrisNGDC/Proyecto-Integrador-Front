@@ -1,0 +1,118 @@
+
+.modal-overlay {
+    position: fixed; /* Fija el modal en la ventana */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); 
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    z-index: 1000; 
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 25px 30px;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    min-width: 320px;
+    max-width: 550px;
+    width: 90%; /* Ancho responsivo */
+    position: relative;
+    transform: translateY(-20px); 
+    animation: fadeIn 0.3s ease-out forwards; 
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .modal-header h2 {
+    margin: 0;
+    font-size: 1.6em;
+    color: #333;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.2s ease-in-out;
+  }
+  
+  .close-button:hover {
+    color: #333;
+  }
+  
+  .modal-body {
+    margin-bottom: 25px;
+    line-height: 1.7;
+    color: #555;
+    font-size: 1.05em;
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end; 
+    gap: 15px; 
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.05em;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    font-weight: 500;
+  }
+  
+  .btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+  }
+  
+  .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+  }
+  
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: 1px solid #6c757d;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .modal-content {
+      margin: 0 15px;
+      padding: 20px;
+    }
+    .modal-footer {
+      flex-direction: column; 
+      gap: 10px;
+    }
+    .btn {
+      width: 100%;
+    }
+  }
