@@ -380,3 +380,90 @@ button[disabled] {
   color: #1a5276; 
   justify-content: center;
 }
+
+body, html {
+  background-color: #f5f9ff;
+  font-family: 'Inter', sans-serif;
+}
+
+h1 {
+  color: #1d3557;
+}
+
+.login-title,
+.recovery-title {
+  font-weight: 600;
+  font-size: 1.6rem;
+  color: #1d3557;
+}
+
+.login-card { 
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.login-card input {
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  border-radius: 10px;
+}
+
+.login-card input:focus {
+  border-color: #2d6cdf;
+  box-shadow: 0 0 0 3px rgba(45, 108, 223, 0.2);
+}
+
+.login-card button {
+  background-color: #2d6cdf;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.login-card button:hover {
+  background-color: #1c4fbf;
+}
+
+.forgot-password-link {
+  color: #2d6cdf;
+  justify-content: right;
+  font-weight: 500;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+  color: #1c4fbf;
+}
+
+.error-message {
+  background-color: #fdecea;
+  border-color: #f5c6cb;
+  color: #c0392b;
+}
+
+.success-message {
+  background-color: #e6f4ea;
+  border-color: #b5e0c7;
+  color: #2ecc71;
+}
+
+.hero-title {
+  color: #2d6cdf;
+  font-weight: 600;
+}
+
+.hero-subtitle {
+  color: #5e6e7e;
+}
+
+.toggle-password {
+  color: #7b8a9e;
+}
+
+.toggle-password:hover {
+  color: #2d6cdf;
+}
+

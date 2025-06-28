@@ -1,7 +1,7 @@
-<div class="py-6">
-  <div class="flex border-b mb-6">
+<div class="py-6 px-20">
+  <div class="flex border-b mb-6 ">
     <button
-      class="py-2 px-4 border-b-2 mr-4"
+      class="py-2 px-4 border-b-2 mr-4 "
       [class.border-blue-500]="activeTab() === 'view'"
       [class.font-medium]="activeTab() === 'view'"
       (click)="setActiveTab('view')">
@@ -26,45 +26,47 @@
 
   <div *ngIf="activeTab() === 'publish'" class="flex gap-4 mb-6">
     <button
-      class="px-4 py-2 rounded border"
-      [class.bg-blue-500]="publicationType() === 'vacante'"
+      class="btn rounded border  "
+      [class.btn-primary]="publicationType() === 'vacante'"
       [class.text-white]="publicationType() === 'vacante'"
       (click)="publicationType.set('vacante')">
       Vacante
     </button>
     <button
-      class="px-4 py-2 rounded border"
-      [class.bg-blue-500]="publicationType() === 'servicio'"
+      class="btn rounded border"
+      [class.btn-primary]="publicationType() === 'servicio'"
       [class.text-white]="publicationType() === 'servicio'"
       (click)="publicationType.set('servicio')">
       Servicio
     </button>
   </div>
 
-  <div *ngIf="activeTab() === 'view'" class="bg-gray-100 p-4 rounded">
-    <div class="flex flex-wrap gap-2 mb-6">
+  <div *ngIf="activeTab() === 'view'" class="bg-white-100 p-4 rounded">
+    <div class="flex flex-wrap gap-6 mb-6">
       @for (category of categories(); track category) {
         <button
-          class="border border-gray-800 rounded px-4 py-1 bg-white hover:bg-gray-50"
-          [class.bg-gray-200]="opportunityService.selectedCategory() === category"
-          (click)="opportunityService.filterByCategory(category)">
-          {{ category }}
-        </button>
+        class="btn rounded border btn-xs p-1"
+        [class.bg-[#2D6CDF]]="opportunityService.selectedCategory() === category"      
+        [class.text-white]="opportunityService.selectedCategory() === category"
+        [class.border-[#2D6CDF]]="opportunityService.selectedCategory() === category"
+        (click)="opportunityService.filterByCategory(category)">
+        {{ category }}
+      </button>
       }
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 ">
       @for (job of filteredJobs(); track job.id) {
         <app-job-card [job]="job" (viewDetails)="viewJobDetails($event)"></app-job-card>
       }
     </div>
 
-    <div *ngIf="filteredJobs().length === 0" class="text-center py-8 bg-gray-50 rounded-lg mt-4">
+    <div *ngIf="filteredJobs().length === 0" class="text-center py-8  rounded-lg mt-4">
       <p class="text-gray-500">No se encontraron oportunidades laborales que coincidan con los criterios de búsqueda.</p>
     </div>
   </div>
 
-  <div *ngIf="activeTab() === 'detail' && selectedOpportunity()" class="bg-gray-100 p-6 rounded">
+  <div *ngIf="activeTab() === 'detail' && selectedOpportunity()" class="fondo-fafa p-6 rounded">
     <h2 class="text-2xl font-bold mb-4">Detalles de la Oportunidad</h2>
     <div class="space-y-2">
       <p>
@@ -80,33 +82,33 @@
       <p><span class="font-medium">Tipo:</span> {{ selectedOpportunity()?.type === 'vacante' ? 'Vacante' : 'Servicio' }}</p>
       <p><span class="font-medium">Contacto: </span> {{ selectedOpportunity()?.contactEmail }}</p>
     </div>
-    <button (click)="setActiveTab('view')" class="mt-6 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+    <button (click)="setActiveTab('view')" class="btn btn-secondary mt-6">
       Volver a la lista
     </button>
   </div>
 
-  <div *ngIf="activeTab() === 'publish' && publicationType() === 'vacante'" class="bg-gray-100 p-6 rounded max-w-3xl">
+  <div *ngIf="activeTab() === 'publish' && publicationType() === 'vacante'" class="bg-white p-6 rounded-lg shadow-sm border">
     <form [formGroup]="form" (ngSubmit)="submitForm()" novalidate>
       <div class="space-y-4">
         <div>
           <label for="company-vacante" class="block font-medium mb-1">Empresa</label>
-          <input type="text" id="company-vacante" formControlName="company" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('company')">
+          <input type="text" id="company-vacante" formControlName="company" class="w-full sombra border rounded p-2" [class.border-red-500]="isInvalid('company')">
           <div *ngIf="isInvalid('company')" class="text-red-600 text-sm mt-1">El nombre de la empresa es obligatorio.</div>
         </div>
         <div>
           <label for="title-vacante" class="block font-medium mb-1">Rol solicitado</label>
-          <input type="text" id="title-vacante" formControlName="title" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('title')">
+          <input type="text" id="title-vacante" formControlName="title" class="w-full sombra border rounded p-2" [class.border-red-500]="isInvalid('title')">
           <div *ngIf="isInvalid('title')" class="text-red-600 text-sm mt-1">El rol es obligatorio.</div>
         </div>
         <div>
           <label for="modality-vacante" class="block font-medium mb-1">Modalidad</label>
-          <select id="modality-vacante" formControlName="modality" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('modality')">
+          <select id="modality-vacante" formControlName="modality" class="w-full sombra border rounded p-2" [class.border-red-500]="isInvalid('modality')">
             <option *ngFor="let modality of modalities()" [value]="modality">{{ modality }}</option>
           </select>
         </div>
         <div>
           <label for="category-vacante" class="block font-medium mb-1">Categoría</label>
-          <select id="category-vacante" formControlName="category" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('category')">
+          <select id="category-vacante" formControlName="category" class="w-full sombra border rounded p-2" [class.border-red-500]="isInvalid('category')">
             <option value="" disabled>Selecciona una categoría</option>
             <option *ngFor="let cat of categories().slice(1)" [value]="cat">{{ cat }}</option>
           </select>
@@ -114,37 +116,37 @@
         </div>
         <div>
           <label for="description-vacante" class="block font-medium mb-1">Descripción de la vacante (Opcional)</label>
-          <textarea id="description-vacante" formControlName="description" rows="4" class="w-full border rounded p-2"></textarea>
+          <textarea id="description-vacante" formControlName="description" rows="4" class="w-full sombra border rounded p-2"></textarea>
         </div>
         <div>
           <label for="email-vacante" class="block font-medium mb-1">Email de Contacto</label>
-          <input type="email" id="email-vacante" formControlName="contactEmail" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('contactEmail')">
+          <input type="email" id="email-vacante" formControlName="contactEmail" class="w-full sombra border rounded p-2" [class.border-red-500]="isInvalid('contactEmail')">
           <div *ngIf="isInvalid('contactEmail')" class="text-red-600 text-sm mt-1">
             <span *ngIf="form.get('contactEmail')?.errors?.['required']">El email es obligatorio.</span>
             <span *ngIf="form.get('contactEmail')?.errors?.['email']">El formato del email no es válido.</span>
           </div>
         </div>
       </div>
-      <button type="submit" class="mt-6 w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Publicar Vacante</button>
+      <button type="submit" class="btn btn-primary ">Publicar Vacante</button>
     </form>
   </div>
 
-  <div *ngIf="activeTab() === 'publish' && publicationType() === 'servicio'" class="bg-gray-100 p-6 rounded max-w-3xl">
+  <div *ngIf="activeTab() === 'publish' && publicationType() === 'servicio'" class="fondo-fafa p-6 rounded max-w-3xl centrado">
     <form [formGroup]="form" (ngSubmit)="submitForm()" novalidate>
       <div class="space-y-4">
         <div>
           <label for="company-servicio" class="block font-medium mb-1">Nombre</label>
-          <input type="text" id="company-servicio" formControlName="company" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('company')">
+          <input type="text" id="company-servicio" formControlName="company" class="w-full sombra border rounded p-2" [class.border-red-500]="isInvalid('company')">
           <div *ngIf="isInvalid('company')" class="text-red-600 text-sm mt-1">Tu nombre o el de tu empresa es obligatorio.</div>
         </div>
         <div>
           <label for="title-servicio" class="block font-medium mb-1">Servicio ofrecido</label>
-          <input type="text" id="title-servicio" formControlName="title" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('title')">
+          <input type="text" id="title-servicio" formControlName="title" class="w-full sombra border rounded p-2" [class.border-red-500]="isInvalid('title')">
           <div *ngIf="isInvalid('title')" class="text-red-600 text-sm mt-1">El servicio es obligatorio.</div>
         </div>
         <div>
           <label for="category-servicio" class="block font-medium mb-1">Categoría</label>
-          <select id="category-servicio" formControlName="category" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('category')">
+          <select id="category-servicio" formControlName="category" class="w-full sombra border rounded p-2" [class.border-red-500]="isInvalid('category')">
             <option value="" disabled>Selecciona una categoría</option>
             <option *ngFor="let cat of categories().slice(1)" [value]="cat">{{ cat }}</option>
           </select>
@@ -152,18 +154,18 @@
         </div>
         <div>
           <label for="description-servicio" class="block font-medium mb-1">Descripción del servicio (Opcional)</label>
-          <textarea id="description-servicio" formControlName="description" rows="4" class="w-full border rounded p-2"></textarea>
+          <textarea id="description-servicio" formControlName="description" rows="4" class="w-full sombra border rounded p-2"></textarea>
         </div>
         <div>
           <label for="email-servicio" class="block font-medium mb-1">Email de Contacto</label>
-          <input type="email" id="email-servicio" formControlName="contactEmail" class="w-full border rounded p-2" [class.border-red-500]="isInvalid('contactEmail')">
+          <input type="email" id="email-servicio" formControlName="contactEmail" class="w-full sombra border rounded p-2" [class.border-red-500]="isInvalid('contactEmail')">
           <div *ngIf="isInvalid('contactEmail')" class="text-red-600 text-sm mt-1">
             <span *ngIf="form.get('contactEmail')?.errors?.['required']">El email es obligatorio.</span>
             <span *ngIf="form.get('contactEmail')?.errors?.['email']">El formato del email no es válido.</span>
           </div>
         </div>
       </div>
-      <button type="submit" class="mt-6 w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Publicar Servicio</button>
+      <button type="submit" class="btn btn-primary">Publicar Servicio</button>
     </form>
   </div>
 </div>

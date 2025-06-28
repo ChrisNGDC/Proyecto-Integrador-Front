@@ -35,7 +35,8 @@ export class OpportunitiesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.opportunityService.loadOpportunities();
+    this.opportunityService.loadOpportunities();    
+    this.opportunityService.filterByCategory("Todos");       
   }
 
   // --- Getters para acceder a los datos del servicio ---
