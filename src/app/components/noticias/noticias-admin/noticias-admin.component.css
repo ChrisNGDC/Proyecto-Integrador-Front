@@ -262,6 +262,7 @@
 
 #btns {
   display: flex;
+  flex-direction: row;
   gap: 0.5rem;
   justify-content: center;
   margin-top: 0.5rem;
@@ -433,6 +434,16 @@
   .grid-container {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
+
+  #btns {
+    flex-direction: column;
+  }
+}
+
+@media only screen and (max-width: 609px) {
+  #btns {
+    flex-direction: row;
+  }
 }
 
 @media only screen and (max-width: 480px) {
@@ -444,5 +455,11 @@
   .grid-container {
     margin: 0.5rem;
     gap: 1rem;
+  }
+}
+
+@media only screen and (max-width: 415px) {
+  #btns {
+    flex-direction: column;
   }
 }
