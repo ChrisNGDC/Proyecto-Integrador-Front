@@ -26,6 +26,7 @@ export class NoticiasAdminComponent {
   constructor(private neService: NewsEventsService) {
     this.getEventos();
   }
+
   async getEventos() {
     this.eventos = [];
     this.eventosFiltrados = [];
@@ -200,5 +201,10 @@ export class NoticiasAdminComponent {
         });
       })
       .catch((error: any) => console.log(error));
+  }
+  actualizarAltura(event: any) {
+    const newHeight = event.target.querySelector('.card-img')!.clientHeight;
+    const imgOverlay = event.target.querySelector('.img-overlay');
+    imgOverlay.style.height = `${newHeight}px`;
   }
 }
