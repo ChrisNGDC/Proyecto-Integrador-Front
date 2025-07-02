@@ -1,4 +1,5 @@
 .modal-body {
+  position: relative;
   padding: 2rem;
   background-color: #FAFAFA;
 }
@@ -48,21 +49,20 @@
 
 #cerrarModal {
   position: absolute;
-  top: -.75rem;
-  right: -.75rem;
-  background-color: rgb(249, 62, 62);
-  color: #000000;
+  top: 0;
+  right: 0;
+  background-color: #BDC3C7;
+  color: #ffffff;
   border-width: 0;
-  border-radius: 0.375rem;
-  font-size: .9rem;
+  border-radius: 0 0 0 0.375rem;
+  font-size: 1.5rem;
   font-weight: 700;
   transition: all .2s ease-in-out;
-  padding: .1rem .5rem;
+  padding: 0 .5rem;
 
   &:hover {
     cursor: pointer;
-    color: #ffffff;
-    transform: scale(1.05);
+    background-color: #AEB6BF;
   }
 }
 
@@ -152,6 +152,11 @@
     padding: 1.5rem;
   }
 
+  #cerrarModal {
+    font-size: 1.125rem;
+    padding: 0 0.375rem;
+  }
+
   .card {
     min-height: auto;
   }
@@ -197,6 +202,11 @@
 @media (max-width: 576px) {
   .modal-body {
     padding: 1rem;
+  }
+
+  #cerrarModal {
+    font-size: 0.75rem;
+    padding: 0 0.25rem;
   }
 
   .card-body {
