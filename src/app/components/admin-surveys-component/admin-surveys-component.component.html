@@ -1,4 +1,4 @@
-<div class="py-6">
+<div class="py-6 mx-20">
   <div class="flex border-b mb-6 overflow-x-auto">
     <button 
       class="py-2 px-4 border-b-2 mr-4 whitespace-nowrap" 
@@ -72,8 +72,8 @@
         
         <button 
           (click)="setActiveTab('add')" 
-          class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 flex items-center">
-          <span class="mr-1">+</span> Nueva Encuesta
+          class="btn btn-primary  ">
+          + Nueva Encuesta
         </button>
       </div>
     </div>
@@ -88,7 +88,7 @@
           <div class="flex justify-between items-start mb-2">
             <h3 class="text-lg font-semibold">{{ survey.title }}</h3>
             <span 
-              [class]="survey.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+              [class]="survey.active ? 'bg-green-100 text-green-800 tag' : 'bg-red-100 text-red-800 tag'"
               class="px-2 py-1 rounded text-xs font-medium">
               {{ survey.active ? 'Activa' : 'Inactiva' }}
             </span>
@@ -106,7 +106,7 @@
             <p class="text-sm font-medium text-gray-700 mb-1">Audiencia:</p>
             <div class="flex flex-wrap gap-1">
               <span *ngFor="let audience of survey.targetAudience" 
-                    class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
+                    class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded tag">
                 {{ audience }}
               </span>
             </div>
@@ -128,13 +128,13 @@
           <div class="flex flex-wrap gap-2 mt-3">
             <button 
               (click)="startEdit(survey)" 
-              class="bg-yellow-500 text-white py-1 px-3 rounded text-sm hover:bg-yellow-600">
+              class="btn btn-primary btn-xs">
               Editar
             </button>
             <button 
               (click)="toggleActive(survey)" 
-              [class]="survey.active ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'"
-              class="text-white py-1 px-3 rounded text-sm">
+              [class]="survey.active ? 'btn btn-warning btn-xs' : 'btn btn-success btn-xs'"
+              class=" py-1 px-3 rounded text-sm">
               {{ survey.active ? 'Desactivar' : 'Activar' }}
             </button>
            <!--  <button 
@@ -164,7 +164,7 @@
             </button> -->
             <button 
               (click)="deleteSurvey(survey.id)" 
-              class="bg-gray-500 text-white py-1 px-3 rounded text-sm hover:bg-gray-600">
+              class="text-white py-1 px-3 rounded text-sm btn btn-danger btn-xs">
               Eliminar
             </button>
           </div>
@@ -471,7 +471,7 @@
                 (click)="addQuestion()" 
                 [disabled]="questionForm.invalid"
                 [class.opacity-50]="questionForm.invalid"
-                class="bg-blue-500 text-white py-1 px-4 rounded hover:bg-blue-600">
+                class="btn btn-primary">
                 Agregar Pregunta
               </button>
             </div>
@@ -484,7 +484,7 @@
             (click)="previewSurvey(surveyForm.value)" 
             [disabled]="!surveyForm.value.title || !surveyForm.value.description || !surveyForm.value.questions?.length"
             [class.opacity-50]="!surveyForm.value.title || !surveyForm.value.description || !surveyForm.value.questions?.length"
-            class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+            class="btn btn-tertiary ">
             Previsualizar
           </button>
           
@@ -492,14 +492,14 @@
             <button 
               type="button"
               (click)="setActiveTab('list')" 
-              class="bg-gray-300 text-gray-800 py-2 px-4 rounded mr-2 hover:bg-gray-400">
+              class="btn btn-secondary mr-2">
               Cancelar
             </button>
             <button 
               type="submit"
               [disabled]="surveyForm.invalid || !surveyForm.value.questions?.length"
               [class.opacity-50]="surveyForm.invalid || !surveyForm.value.questions?.length"
-              class="bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-700">
+              class="btn btn-primary">
               Guardar Encuesta
             </button>
           </div>
@@ -593,10 +593,10 @@
           <div class="mt-6 pt-4 border-t flex justify-between">
             <button 
               (click)="setActiveTab(activeTab() === 'add' ? 'add' : 'edit')" 
-              class="bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400">
-              Volver a Editar
+              class="btn btn-secondary">
+              Volver
             </button>
-            <button class="bg-blue-500 text-white py-2 px-6 rounded hover:bg-blue-600">
+            <button class="btn btn-info">
               Simular Envío
             </button>
           </div>
@@ -703,7 +703,7 @@
           <button 
             type="button"
             (click)="previewSurvey(editingSurvey)" 
-            class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+            class="btn btn-tertiary">
             Previsualizar
           </button>
           
@@ -711,14 +711,14 @@
             <button 
               type="button"
               (click)="setActiveTab('list')" 
-              class="bg-gray-300 text-gray-800 py-2 px-4 rounded mr-2 hover:bg-gray-400">
+              class="btn btn-secondary mr-2">
               Cancelar
             </button>
             <button 
               type="submit"
               [disabled]="editForm.invalid || !editingSurvey.questions.length"
               [class.opacity-50]="editForm.invalid || !editingSurvey.questions.length"
-              class="bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-700">
+              class="btn btn-primary">
               Guardar Cambios
             </button>
           </div>

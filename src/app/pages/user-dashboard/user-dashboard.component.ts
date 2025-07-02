@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-user-dashboard',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, RouterLink],
+  imports: [RouterOutlet, CommonModule, RouterLink, RouterModule],
   templateUrl: './user-dashboard.component.html',
   styleUrls: ['./user-dashboard.component.css']
 })
@@ -15,7 +15,7 @@ export class UserDashboardComponent {
 
   async ngOnInit() {
     try {
-      const user = await this.authService;
+      const user = await this.authService.getCurrentUser();
       console.log('Usuario actual:', user);
     } catch (error) {
       console.error('Error obteniendo usuario:', error);

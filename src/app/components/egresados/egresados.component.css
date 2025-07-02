@@ -1,15 +1,10 @@
-/* Estilos generales */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  
-  /* Pestañas de navegación */
+
   .tabs {
     display: flex;
     margin-bottom: 20px;
     border-bottom: 1px solid #ddd;
+    font-weight: 500;
+    color: #6E6E6E;
   }
   
   .tabs button {
@@ -19,20 +14,19 @@
     cursor: pointer;
     font-size: 16px;
     border-bottom: 3px solid transparent;
-    transition: all 0.3s;
+    transition: all 0.3s;   
   }
   
   .tabs button.active {
-    border-bottom-color: #2196F3;
-    color: #2196F3;
-    font-weight: bold;
+    border-bottom-color: #2D6CDF;
+    color: #2D6CDF;
+    font-weight: 600;  
   }
   
   .tabs button:hover:not(.active) {
     background-color: #f5f5f5;
   }
-  
-  /* Lista de egresados */
+
   .search-bar {
     margin-bottom: 20px;
   }
@@ -57,6 +51,9 @@
     padding: 15px;
     background-color: white;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;   
   }
   
   .card-header {
@@ -69,13 +66,15 @@
   .card-header h3 {
     margin: 0;
     color: #333;
+    font-weight: 500;
   }
   
   .nro-alumno {
-    background-color: #f0f0f0;
+    background-color: rgba(45, 108, 223, 0.7);
     padding: 3px 8px;
     border-radius: 4px;
     font-size: 14px;
+    color: white;
   }
   
   .card-body p {
@@ -88,36 +87,108 @@
     display: flex;
     gap: 10px;
     margin-top: 15px;
+    justify-content: end;
+
   }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-align: center;
+  min-width: 100px;
+}
+
+.btn-primary {
+  background-color: #2D6CDF;
+  color: white;
+  border: 1px solid #2D6CDF
+}
+
+.btn-primary:hover {
+  background-color: #1A4FB3;
+}
+
+.btn-secondary {
+  background-color: #BDC3C7;
+  color: white;
+}
+.btn-secondary:hover {
+  background-color: #AEB6BF;
+}
+
+.btn-tertiary {
+  background-color: transparent;
+  color: #6E6E6E;
+  border: 1px solid #838282;
+}
+
+.btn-tertiary:hover {
+  background-color: #efefef; 
+}
+
+.btn-danger {
+  background-color: #F44336;
+  color: white;
+  border: 1px solid #E53935
+}
+
+.btn-danger:hover {
+  background-color: #E53935;
   
-  .btn-edit, .btn-deactivate, .btn-save, .btn-cancel {
-    padding: 8px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s;
-  }
-  
-  .btn-edit {
-    background-color: #4CAF50;
-    color: white;
-  }
-  
-  .btn-edit:hover {
-    background-color: #45a049;
-  }
-  
-  .btn-deactivate {
-    background-color: #f44336;
-    color: white;
-  }
-  
-  .btn-deactivate:hover {
-    background-color: #d32f2f;
-  }
-  
-  /* Formulario */
+}
+
+.btn-success {
+  background-color: #4CAF50;
+  color: white;
+  border: 1px solid #4CAF50
+}
+
+.btn-success:hover {
+  background-color: #43A047;
+}
+.btn-warning {
+  background-color: #F39C12;
+  color: white;
+}
+.btn-warning:hover {
+  background-color: #D68910;
+}
+
+.bg-purple-500{
+  border: 1px solid purple;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+}
+.btn-xs {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-icon {
+  margin-right: 0.5rem;
+}
   .form-container {
     background-color: white;
     padding: 20px;
@@ -217,4 +288,80 @@
   color: red;
   font-size: 0.8rem;
   margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .tabs {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .tabs button {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .egresados-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .tabs button {
+    flex: 1 1 auto;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .search-bar input {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .egresado-card {
+    padding: 12px;
+  }
+
+  .card-header h3 {
+    font-size: 1rem;
+  }
+
+  .card-body p {
+    font-size: 13px;
+  }
+
+  .form-container {
+    padding: 15px;
+  }
+
+  .form-group input, 
+  .form-group select {
+    font-size: 13px;
+    padding: 6px;
+  }
+
+  .btn-sm,
+  .btn-xs {
+    width: 100%;
+    padding: 0.4rem 0.75rem;
+  }
+
+  .btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+  }
 }

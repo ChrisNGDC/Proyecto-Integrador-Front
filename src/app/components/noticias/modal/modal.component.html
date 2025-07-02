@@ -1,15 +1,15 @@
 <div class="modal-body">
   <div class="card mb-3">
     <div class="row g-0">
-      <div class="col-md-5 imagen">
-        <img [src]="evento.s3key" class="card-img" />
-      </div>
-      <div class="col-md-7">
+      <div class="col-md-12">
         <div class="card-body">
-          <button id="cerrarModal" (click)="cerrarModal()" >X</button>
           <div class="datos">
-            <h5 class="card-title">{{ evento.titulo }}</h5>
+            <button id="cerrarModal" (click)="cerrarModal()" >X</button>
+            <h5 class="card-title text-center">{{ evento.titulo }}</h5>
             <h6 class="card-text">{{ evento.resumen }}</h6>
+            <div class="col-md-12 imagen">
+              <img [src]="evento.s3key" class="card-img" />
+            </div>
             <div id="description" [innerHTML]="evento.descripcion"></div>
           </div>
           <p class="card-text">

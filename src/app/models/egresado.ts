@@ -1,6 +1,7 @@
 export interface Egresado {
   id: string;
   mail: string;
+  dni: string;
   nombre: string;
   apellido: string;
   genero?: string;
