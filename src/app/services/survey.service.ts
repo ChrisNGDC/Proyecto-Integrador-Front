@@ -17,57 +17,57 @@ interface SubmitResponsePayload {
   providedIn: 'root'
 })
 export class SurveyService {
-  private apiUrl = 'https://ny0vljaa9i.execute-api.us-east-1.amazonaws.com'; // ¡Verifica esta URL!
+  private apiUrl = 'https://swjifhivjl.execute-api.us-east-1.amazonaws.com'; // ¡Verifica esta URL!
 
   constructor(private http: HttpClient) {}
 
   // --- Métodos de administración para Encuestas (Surveys) ---
   getSurveys(): Observable<ISurvey[]> {
-    console.log('[DEBUG SERVICE] Solicitando encuestas a:', `${this.apiUrl}/admin/surveys`);
-    return this.http.get<ISurvey[]>(`${this.apiUrl}/admin/surveys`).pipe(
+    console.log('[DEBUG SERVICE] Solicitando encuestas a:', `${this.apiUrl}/admin/encuestas`);
+    return this.http.get<ISurvey[]>(`${this.apiUrl}/admin/encuestas`).pipe(
       tap(surveys => console.log('[DEBUG SERVICE] Encuestas recibidas:', surveys)), // LOG AÑADIDO
       catchError(this.handleError)
     );
   }
 
   createSurvey(surveyData: ISurvey): Observable<ISurvey> {
-    console.log('[DEBUG SERVICE] Enviando para crear encuesta. URL:', `${this.apiUrl}/admin/surveys`, 'Payload:', surveyData);
-    return this.http.post<ISurvey>(`${this.apiUrl}/admin/surveys`, surveyData).pipe(
+    console.log('[DEBUG SERVICE] Enviando para crear encuesta. URL:', `${this.apiUrl}/admin/encuestas`, 'Payload:', surveyData);
+    return this.http.post<ISurvey>(`${this.apiUrl}/admin/encuestas`, surveyData).pipe(
       tap(response => console.log('[DEBUG SERVICE] Respuesta de creación de encuesta:', response)), // LOG AÑADIDO
       catchError(this.handleError)
     );
   }
 
   updateSurvey(surveyId: string, surveyData: Partial<ISurvey>): Observable<ISurvey> {
-    console.log('[DEBUG SERVICE] Enviando para actualizar encuesta. URL:', `${this.apiUrl}/admin/surveys/${surveyId}`, 'Payload:', surveyData);
-    return this.http.put<ISurvey>(`${this.apiUrl}/admin/surveys/${surveyId}`, surveyData).pipe(
+    console.log('[DEBUG SERVICE] Enviando para actualizar encuesta. URL:', `${this.apiUrl}/admin/encuestas/${surveyId}`, 'Payload:', surveyData);
+    return this.http.put<ISurvey>(`${this.apiUrl}/admin/encuestas/${surveyId}`, surveyData).pipe(
       tap(response => console.log('[DEBUG SERVICE] Respuesta de actualización de encuesta:', response)), // LOG AÑADIDO
       catchError(this.handleError)
     );
   }
 
   toggleSurveyStatus(surveyId: string, active: boolean): Observable<any> {
-    return this.http.patch<any>(`${this.apiUrl}/admin/surveys/${surveyId}/status`, { active }).pipe(
+    return this.http.patch<any>(`${this.apiUrl}/admin/encuestas/${surveyId}/status`, { active }).pipe(
       catchError(this.handleError)
     );
   }
 
   deleteSurvey(surveyId: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/admin/surveys/${surveyId}`).pipe(
+    return this.http.delete<any>(`${this.apiUrl}/admin/encuestas/${surveyId}`).pipe(
       catchError(this.handleError)
     );
   }
 
   getSurveyById(surveyId: string): Observable<ISurvey> {
-    console.log('[DEBUG SERVICE] Solicitando encuesta por ID:', `${this.apiUrl}/admin/surveys/${surveyId}`);
-    return this.http.get<ISurvey>(`${this.apiUrl}/admin/surveys/${surveyId}`).pipe(
+    console.log('[DEBUG SERVICE] Solicitando encuesta por ID:', `${this.apiUrl}/admin/encuestas/${surveyId}`);
+    return this.http.get<ISurvey>(`${this.apiUrl}/admin/encuestas/${surveyId}`).pipe(
       tap(survey => console.log('[DEBUG SERVICE] Encuesta por ID recibida:', survey)), // LOG AÑADIDO
       catchError(this.handleError)
     );
   }
 
   getSurveyResponses(surveyId: string): Observable<ISurveyResponse[]> {
-    return this.http.get<ISurveyResponse[]>(`${this.apiUrl}/admin/surveys/${surveyId}/responses`).pipe(
+    return this.http.get<ISurveyResponse[]>(`${this.apiUrl}/admin/encuestas/${surveyId}/responses`).pipe(
       catchError(this.handleError)
     );
   }
@@ -119,16 +119,16 @@ export class SurveyService {
 
   // --- Métodos para el uso público ---
   getAvailableSurveys(): Observable<ISurvey[]> {
-    console.log('[DEBUG SERVICE] Solicitando encuestas públicas a:', `${this.apiUrl}/public/surveys`);
-    return this.http.get<ISurvey[]>(`${this.apiUrl}/public/surveys`).pipe(
+    console.log('[DEBUG SERVICE] Solicitando encuestas públicas a:', `${this.apiUrl}/public/encuestas`);
+    return this.http.get<ISurvey[]>(`${this.apiUrl}/public/encuestas`).pipe(
       tap(surveys => console.log('[DEBUG SERVICE] Encuestas públicas disponibles recibidas:', surveys)), // LOG AÑADIDO
       catchError(this.handleError)
     );
   }
 
   getPublicSurveyById(surveyId: string): Observable<ISurvey> {
-    console.log('[DEBUG SERVICE] Solicitando encuesta pública por ID:', `${this.apiUrl}/public/surveys/${surveyId}`);
-    return this.http.get<ISurvey>(`${this.apiUrl}/public/surveys/${surveyId}`).pipe(
+    console.log('[DEBUG SERVICE] Solicitando encuesta pública por ID:', `${this.apiUrl}/public/encuestas/${surveyId}`);
+    return this.http.get<ISurvey>(`${this.apiUrl}/public/encuestas/${surveyId}`).pipe(
       tap(survey => console.log('[DEBUG SERVICE] Encuesta pública por ID recibida:', survey)), // LOG AÑADIDO
       catchError(this.handleError)
     );
@@ -136,7 +136,7 @@ export class SurveyService {
 
   checkIfUserResponded(surveyId: string, userId: string): Observable<{ hasResponded: boolean, message?: string }> {
     return this.http.get<{ hasResponded: boolean, message?: string }>(
-      `${this.apiUrl}/public/surveys/${surveyId}/responses/${userId}`
+      `${this.apiUrl}/public/encuestas/${surveyId}/responses/${userId}`
     ).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 404) {
@@ -150,7 +150,7 @@ export class SurveyService {
   }
 
   submitSurveyResponse(surveyId: string, payload: SubmitResponsePayload): Observable<any> {
-    return this.http.post(`${this.apiUrl}/public/surveys/${surveyId}/responses`, payload).pipe(
+    return this.http.post(`${this.apiUrl}/public/encuestas/${surveyId}/responses`, payload).pipe(
       catchError(this.handleError)
     );
   }
