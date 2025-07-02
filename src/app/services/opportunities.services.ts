@@ -39,7 +39,7 @@ export class OpportunityService {
     ).subscribe(jobs => {
       this.jobs.set(jobs);
       this.filteredJobs.set(jobs);
-    });
+    });   
   }
 
   // ... el resto de tus métodos (addOpportunity, updateOpportunity, filterByCategory)
@@ -66,8 +66,9 @@ export class OpportunityService {
 
   filterByCategory(category: string) {
     if (category === 'Todos') {
-      this.selectedCategory.set(null);
-      this.filteredJobs.set(this.jobs());
+    //this.selectedCategory.set(null);
+      this.selectedCategory.set("Todos");      
+      this.filteredJobs.set(this.jobs());       
     } else {
       this.selectedCategory.set(category);
       this.filteredJobs.set(this.jobs().filter(job => job.category === category));

@@ -1,4 +1,4 @@
-<div class="container">
+<div class="mx-20 py-6">
     <!-- Navegación interna -->
     <nav class="tabs">
       <button 
@@ -33,14 +33,14 @@
               </div>
               
               <div class="card-body">
-                <p><strong>Carrera:</strong>{{ egresado.carrera }}</p>
-                <p><strong>Año de egreso:</strong>{{ egresado.anioEgreso }}</p>
-                <p><strong>Contacto:</strong> {{ egresado.mail }} | {{ egresado.telefono }}</p>
+                <p><strong>Carrera: </strong>{{ egresado.carrera }}</p>
+                <p><strong>Año de egreso: </strong>{{ egresado.anioEgreso }}</p>
+                <p><strong>Contacto: </strong> {{ egresado.mail }} | {{ egresado.telefono }}</p>
               </div>
               
               <div class="card-actions">
-                <button class="btn-edit" (click)="editarEgresado(egresado)">Editar</button>
-                <button class="btn-deactivate" (click)="desactivarEgresado(egresado.id)">Desactivar</button>
+                <button class="btn btn-primary btn-xs " (click)="editarEgresado(egresado)">Editar</button>
+                <button class="btn btn-warning btn-xs" (click)="desactivarEgresado(egresado.id)">Desactivar</button>
               </div>
             </div>
           } @empty {
@@ -163,10 +163,10 @@
         </div>
   
           <div class="form-actions">
-            <button type="button" class="btn-save" (click)="guardarEgresado()">
+            <button type="button" class="btn btn-primary" (click)="guardarEgresado()">
               {{ editMode() ? 'Actualizar' : 'Guardar' }}
             </button>
-            <button type="button" class="btn-cancel" (click)="setActiveTab('lista')">
+            <button type="button" class="btn btn-secondary" (click)="setActiveTab('lista')">
               Cancelar
             </button>
           </div>

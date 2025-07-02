@@ -1,13 +1,16 @@
 <nav class="navbar">
-    <div class="logo">
-        <img src="assets/logo.jpg" alt="">
+  <div class="logo">
+    <img src="assets/logoNextStep.jpg" class="image-logo" alt="">       
+    <div class="">
+        <h1 class="text-logo">NextStep</h1>
     </div>
-    <ul class="nav-links">
-      <li><a routerLink="/user-dashboard/noticias">Noticias</a></li>
-      <li><a routerLink="/user-dashboard/oportunidades">Oportunidades</a></li>
-      <li><a routerLink="/user-dashboard/encuestas">Encuestas</a></li>
-      <li><a routerLink="/user-dashboard/perfil">Perfil</a></li>
-      <li><a (click)="logout()">Logout</a></li>
-    </ul>
-  </nav>
+  </div>  
+  <ul class="nav-links">
+    <li><a routerLink="/user-dashboard/noticias"  routerLinkActive="active" >Noticias</a></li>
+    <li><a routerLink="/user-dashboard/oportunidades" routerLinkActive="active">Oportunidades</a></li>
+    <li><a routerLink="/user-dashboard/encuestas" routerLinkActive="active">Encuestas</a></li>
+    <li><a routerLink="/user-dashboard/perfil" routerLinkActive="active">Perfil</a></li>
+    <li><a (click)="logout()">Logout</a></li>
+  </ul>
+</nav>
 <router-outlet></router-outlet>
