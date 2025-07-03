@@ -17,7 +17,7 @@
           id="fileUpload"
           #fileUpload
         />
-        <div id="img-overlay" (click)="fileUpload.click()">Subir Imagen</div>
+        <div id="img-overlay" [ngStyle]="{ 'pointer-events': saving ? 'none' : 'auto' }" (click)="fileUpload.click()">Subir Imagen</div>
         <p id="errorMessage">
           La imagen no debe superar los {{ this.maxAllowedSize / 1024 }}KB y
           debe ser .png, .jpg o .jpeg.
@@ -50,13 +50,18 @@
                 [rows]="this.rows"
                 [(ngModel)]="eventoModal.descripcion"
               ></textarea>
+              <div id="previsualizacion"></div>
             </label>
+            <div class="btns">
+              <button id="editar-descripcion" (click)="editarDescripcion($event)">Editar</button>
+              <button id="previsualizar-descripcion" (click)="previsualizarDescripcion($event)">Previsualizar</button>
+            </div>
           </div>
           <div class="card-text">
             <small class="text-muted">Publicado {{ eventoModal.fecha }}</small>
             <div class="btns">
-              <button id="save" (click)="save()">Guardar</button>
-              <button id="cancel" (click)="cancel()">Cancelar</button>
+              <button id="save" [attr.disabled]="saving" (click)="save()">Save</button>
+              <button id="cancel" [attr.disabled]="saving" (click)="cancel()">Cancel</button>
             </div>
           </div>
         </div>

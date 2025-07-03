@@ -12,13 +12,7 @@ export class ModalComponent{
 
 	@Input() evento: any;
 
-  loadDescription(): void {
-    let links = document.getElementById('description')?.getElementsByTagName('a');
-    if (links) {
-      for (let i = 0; i < links.length; i++) {
-        links[i].style.textDecoration = 'none';
-        links[i].style.color = 'blue';
-      }
-    }
+  cerrarModal() {
+    this.activeModal.close();
   }
 }

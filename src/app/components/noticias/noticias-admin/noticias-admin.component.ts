@@ -26,6 +26,7 @@ export class NoticiasAdminComponent {
   constructor(private neService: NewsEventsService) {
     this.getEventos();
   }
+
   async getEventos() {
     this.eventos = [];
     this.eventosFiltrados = [];
@@ -58,9 +59,18 @@ export class NoticiasAdminComponent {
     });
     modalRef.componentInstance.evento = evento;
   }
-  filtrar() {
+  convertdate(date: Date) {
+    let nextDayDate = new Date(date);
+    nextDayDate.setDate(nextDayDate.getDate() + 2);
+    nextDayDate.setHours(0, 0, 0, 0);
+    return nextDayDate.toLocaleDateString('en-CA', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+    });
+  }
+  filtroPorBusqueda() {
     let buscadosPalabras: any[] = [];
-    let buscadosFechas: any[] = [];
     if (this.busqueda != '') {
       this.eventos.forEach((evento: any) => {
         if (
@@ -77,35 +87,42 @@ export class NoticiasAdminComponent {
           buscadosPalabras.push(evento);
         }
       });
+      return buscadosPalabras;
     } else {
-      this.eventosFiltrados = this.eventos;
+      return this.eventos;
     }
+  }
+  filtroPorFechas() {
+    let buscadosFechasMin: any[] = [];
+    let buscadosFechasMax: any[] = [];
+    this.fechas.fin = new Date(this.fechas.fin);
     if (this.fechas.inicio != null) {
       this.eventos.forEach((evento: any) => {
-        if (
-          evento['fecha'] >= this.fechas.inicio! &&
-          evento['fecha'] <=
-            this.fechas.fin.getFullYear() +
-              '-' +
-              this.fechas.fin.getMonth() +
-              '-' +
-              this.fechas.fin.getDate()
-        ) {
-          buscadosFechas.push(evento);
+        if (evento['fecha'] >= this.fechas.inicio!) {
+          buscadosFechasMin.push(evento);
         }
       });
+    } else {
+      buscadosFechasMin = this.eventos;
     }
-    if (this.busqueda != '') {
-      if (this.fechas.inicio != null) {
-        this.eventosFiltrados = buscadosPalabras.filter((item) =>
-          buscadosFechas.includes(item)
-        );
-      } else {
-        this.eventosFiltrados = buscadosPalabras;
-      }
-    } else if (this.fechas.inicio != null) {
-      this.eventosFiltrados = buscadosFechas;
+    if (this.fechas.fin != null) {
+      this.eventos.forEach((evento: any) => {
+        if (evento['fecha'] < this.convertdate(this.fechas.fin)) {
+          buscadosFechasMax.push(evento);
+        }
+      });
+    } else {
+      buscadosFechasMax = this.eventos;
     }
+    return buscadosFechasMax.filter((item) => buscadosFechasMin.includes(item));
+  }
+  filtrar() {
+    let buscadosPalabras: any[] = this.filtroPorBusqueda();
+    let buscadosFechas: any[] = this.filtroPorFechas();
+
+    this.eventosFiltrados = buscadosPalabras.filter((item) =>
+      buscadosFechas.includes(item)
+    );
     this.eventosFiltrados.sort(
       (a: any, b: any) =>
         new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
@@ -128,7 +145,7 @@ export class NoticiasAdminComponent {
       .subscribe(() => this.getEventos());
   }
   editarEvento(evento: any) {
-    console.log(evento)
+    console.log(evento);
     const modalRef = this.modalService.open(ModalEdicionComponent, {
       size: 'xl',
       centered: true,
@@ -144,11 +161,7 @@ export class NoticiasAdminComponent {
         delete evento.s3keyvalue;
         evento.s3key = `noticiasYeventos/${id}.${filetype}`;
         this.neService
-          .saveImage(
-            'noticiasYeventos',
-            `${id}.${filetype}`,
-            filecontent
-          )
+          .saveImage('noticiasYeventos', `${id}.${filetype}`, filecontent)
           .subscribe(() => {
             this.neService
               .patchNewsAndEvents(id, JSON.stringify(evento))
@@ -181,16 +194,17 @@ export class NoticiasAdminComponent {
         evento.s3key = `${filetype}`;
         this.neService.putNewsAndEvents(evento).subscribe((id) => {
           this.neService
-            .saveImage(
-              'noticiasYeventos',
-              `${id}.${filetype}`,
-              filecontent
-            )
+            .saveImage('noticiasYeventos', `${id}.${filetype}`, filecontent)
             .subscribe(() => {
               this.getEventos();
             });
         });
       })
       .catch((error: any) => console.log(error));
+  }
+  actualizarAltura(event: any) {
+    const newHeight = event.target.querySelector('.card-img')!.clientHeight;
+    const imgOverlay = event.target.querySelector('.img-overlay');
+    imgOverlay.style.height = `${newHeight}px`;
   }
 }
