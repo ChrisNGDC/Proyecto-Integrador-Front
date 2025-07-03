@@ -358,7 +358,6 @@
 .add-news-content {
   padding: 2rem;
   text-align: center;
-  z-index: 1;
   transition: all 0.3s ease;
 }
 
