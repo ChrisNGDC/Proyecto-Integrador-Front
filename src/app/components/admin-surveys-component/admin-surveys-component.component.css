@@ -368,6 +368,16 @@
   background-color: #D68910;
 }
 
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid #2D6CDF;
+  color: #2D6CDF!important;
+}
+.btn-outline:hover {
+  background-color: #F5F8FF;
+}
+
+
 .btn-info {
   background-color: #3498DB;
   color: white;
