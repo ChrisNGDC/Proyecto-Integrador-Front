@@ -1,55 +1,66 @@
-<div class="py-6 mx-20">
-  <div class="flex border-b mb-6 overflow-x-auto">
-    <button 
-      class="py-2 px-4 border-b-2 mr-4 whitespace-nowrap" 
-      [class.border-blue-500]="activeTab() === 'list'"
-      [class.font-medium]="activeTab() === 'list'"
-      (click)="setActiveTab('list')">
-      Gestionar Encuestas
+
+<div class="p-6 bg-gray-100 min-h-screen font-inter">
+  <!-- Tab Navigation -->
+  <div class="flex border-b-2 border-gray-200 mb-8 overflow-x-auto bg-white rounded-xl shadow-sm">
+    <button
+      class="flex-1 py-3 px-6 text-lg font-semibold text-center transition-colors duration-200 ease-in-out whitespace-nowrap
+            hover:bg-indigo-50 hover:text-indigo-700 rounded-tl-xl rounded-bl-xl"
+      [class.border-indigo-600]="activeTab() === 'list'"
+      [class.text-indigo-600]="activeTab() === 'list'"
+      [class.border-transparent]="activeTab() !== 'list'"
+      (click)="setActiveTab('list')"
+    >
+      <i class="fas fa-clipboard-list mr-2"></i> Gestionar Encuestas
+
     </button>
-    <button 
-      class="py-2 px-4 border-b-2 mr-4 whitespace-nowrap" 
-      [class.border-blue-500]="activeTab() === 'add'"
-      [class.font-medium]="activeTab() === 'add'"
-      (click)="setActiveTab('add')">
-      Agregar Encuesta
+    <button
+      class="flex-1 py-3 px-6 text-lg font-semibold text-center transition-colors duration-200 ease-in-out whitespace-nowrap
+            hover:bg-indigo-50 hover:text-indigo-700"
+      [class.border-indigo-600]="activeTab() === 'add'"
+      [class.text-indigo-600]="activeTab() === 'add'"
+      [class.border-transparent]="activeTab() !== 'add'"
+      (click)="setActiveTab('add')"
+    >
+      <i class="fas fa-plus-circle mr-2"></i> Agregar Encuesta
     </button>
-   <!--  <button 
-      class="py-2 px-4 border-b-2 mr-4 whitespace-nowrap" 
-      [class.border-blue-500]="activeTab() === 'import'"
-      [class.font-medium]="activeTab() === 'import'"
-      (click)="setActiveTab('import')">
-      Importar/Exportar
+    <!-- NUEVA PESTAÑA: Gestionar Plantillas -->
+    <button
+      class="flex-1 py-3 px-6 text-lg font-semibold text-center transition-colors duration-200 ease-in-out whitespace-nowrap
+            hover:bg-indigo-50 hover:text-indigo-700 rounded-tr-xl rounded-br-xl"
+      [class.border-indigo-600]="activeTab() === 'templates'"
+      [class.text-indigo-600]="activeTab() === 'templates'"
+      [class.border-transparent]="activeTab() !== 'templates'"
+      (click)="setActiveTab('templates')"
+    >
+      <i class="fas fa-layer-group mr-2"></i> Gestionar Plantillas
     </button>
-    <button 
-      class="py-2 px-4 border-b-2 mr-4 whitespace-nowrap"
-      [class.border-blue-500]="activeTab() === 'settings'"
-      [class.font-medium]="activeTab() === 'settings'"
-      (click)="setActiveTab('settings')">
-      Configuración
-    </button> -->
   </div>
 
-  <!-- Lista de encuestas con filtros y estadísticas -->
+  <!-- List Surveys Tab -->
   <div *ngIf="activeTab() === 'list'" class="mt-4">
-    <div class="bg-white p-4 rounded-lg shadow-sm border mb-6">
-      <div class="flex flex-wrap gap-4 items-end">
-        <div class="flex-1">
-          <label for="searchTerm" class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
-          <input 
-            type="text" 
-            id="searchTerm" 
-            [(ngModel)]="searchTerm" 
-            class="w-full p-2 border rounded"
-            placeholder="Buscar por título o descripción">
+    <div class="bg-white p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Listado de Encuestas</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+        <div class="col-span-full lg:col-span-1">
+          <label for="searchTerm" class="block text-sm font-semibold text-gray-700 mb-1">Buscar</label>
+          <input
+            type="text"
+            id="searchTerm"
+            [(ngModel)]="searchTerm"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            placeholder="Título o descripción"
+            (input)="applyFilters()"
+          />
         </div>
-        
-        <div class="w-48">
-          <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-          <select 
-            id="categoryFilter" 
-            [(ngModel)]="categoryFilter" 
-            class="w-full p-2 border rounded">
+
+        <div>
+          <label for="categoryFilter" class="block text-sm font-semibold text-gray-700 mb-1">Categoría</label>
+          <select
+            id="categoryFilter"
+            [(ngModel)]="categoryFilter"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            (change)="applyFilters()"
+          >
             <option [ngValue]="null">Todas</option>
             <option value="finalizacion">Finalización de Carrera</option>
             <option value="empleabilidad">Empleabilidad</option>
@@ -57,207 +68,198 @@
             <option value="otro">Otro</option>
           </select>
         </div>
-        
-        <div class="w-48">
-          <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-          <select 
-            id="statusFilter" 
-            [(ngModel)]="statusFilter" 
-            class="w-full p-2 border rounded">
+
+        <div>
+          <label for="statusFilter" class="block text-sm font-semibold text-gray-700 mb-1">Estado</label>
+          <select
+            id="statusFilter"
+            [(ngModel)]="statusFilter"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            (change)="applyFilters()"
+          >
             <option [ngValue]="null">Todos</option>
             <option value="active">Activas</option>
             <option value="inactive">Inactivas</option>
           </select>
         </div>
-        
-        <button 
-          (click)="setActiveTab('add')" 
-          class="btn btn-primary  ">
-          + Nueva Encuesta
+
+
+        <button
+          (click)="setActiveTab('add')"
+          class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md
+                hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200"
+        >
+          <i class="fas fa-plus"></i> Nueva Encuesta
         </button>
       </div>
     </div>
-    
-    <!-- Tarjetas de encuestas -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div *ngFor="let survey of filteredSurveys" 
-           class="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow"
-           [class.border-green-300]="survey.active"
-           [class.border-gray-300]="!survey.active">
-        <div class="p-4">
-          <div class="flex justify-between items-start mb-2">
-            <h3 class="text-lg font-semibold">{{ survey.title }}</h3>
-            <span 
-              [class]="survey.active ? 'bg-green-100 text-green-800 tag' : 'bg-red-100 text-red-800 tag'"
-              class="px-2 py-1 rounded text-xs font-medium">
+
+    <div *ngIf="loading()" class="text-center py-8 text-indigo-600 text-lg font-medium">
+      <i class="fas fa-spinner fa-spin mr-2"></i> Cargando encuestas...
+    </div>
+    <div *ngIf="error()" class="text-center py-8 text-rose-600 text-lg font-medium">{{ error() }}</div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div
+        *ngFor="let survey of filteredSurveys()"
+        class="bg-white rounded-xl shadow-md border overflow-hidden transition-all duration-200 ease-in-out
+               hover:shadow-lg hover:scale-[1.01]"
+        [class.border-emerald-400]="survey.active"
+        [class.border-rose-400]="!survey.active"
+      >
+        <div class="p-6">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-xl font-bold text-gray-800">{{ survey.title }}</h3>
+            <span
+              [class]="survey.active ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-rose-800 border border-rose-200'"
+              class="px-3 py-1 rounded-full text-xs font-semibold"
+            >
               {{ survey.active ? 'Activa' : 'Inactiva' }}
             </span>
           </div>
-          
-          <p class="text-gray-600 text-sm mb-3">{{ survey.description }}</p>
-          
-          <div class="flex justify-between text-sm text-gray-500 mb-3">
-            <span>{{ survey.questions.length }} preguntas</span>
-            <span>Creada: {{ survey.createdAt | date:'dd/MM/yyyy' }}</span>
+
+          <p class="text-gray-600 text-sm mb-4">{{ survey.description }}</p>
+
+          <div class="flex justify-between text-sm text-gray-500 mb-4 border-t border-gray-100 pt-3">
+            <span><i class="fas fa-question-circle mr-1"></i> {{ survey.questions.length || 0 }} preguntas</span>
+            <span><i class="fas fa-calendar-alt mr-1"></i> Creada: {{ survey.createdAt | date : 'dd/MM/yyyy' }}</span>
           </div>
-          
-          <!-- Audiencia objetivo -->
-          <div *ngIf="survey.targetAudience && survey.targetAudience.length > 0" class="mb-3">
-            <p class="text-sm font-medium text-gray-700 mb-1">Audiencia:</p>
-            <div class="flex flex-wrap gap-1">
-              <span *ngFor="let audience of survey.targetAudience" 
-                    class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded tag">
-                {{ audience }}
-              </span>
-            </div>
-          </div>
-          
-          <!-- Estadísticas -->
-      <!--     <div class="bg-gray-50 p-3 rounded mb-3">
-            <div class="flex justify-between mb-1">
-              <span class="text-sm font-medium">Respuestas:</span>
-              <span class="text-sm">{{ survey.responseCount }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-sm font-medium">Tasa de completitud:</span>
-              <span class="text-sm">{{ survey.completionRate }}%</span>
-            </div>
-          </div> -->
-          
-          <!-- Acciones -->
-          <div class="flex flex-wrap gap-2 mt-3">
-            <button 
-              (click)="startEdit(survey)" 
-              class="btn btn-primary btn-xs">
-              Editar
+
+
+          <div class="flex flex-wrap gap-3 mt-4 border-t border-gray-100 pt-4">
+            <button
+              (click)="startEdit(survey)"
+              class="inline-flex items-center px-4 py-2 bg-indigo-500 text-white font-semibold rounded-lg text-sm
+                     hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition-colors duration-200"
+            >
+              <i class="fas fa-edit mr-2"></i> Editar
             </button>
-            <button 
-              (click)="toggleActive(survey)" 
-              [class]="survey.active ? 'btn btn-warning btn-xs' : 'btn btn-success btn-xs'"
-              class=" py-1 px-3 rounded text-sm">
-              {{ survey.active ? 'Desactivar' : 'Activar' }}
+            <button
+              (click)="toggleActive(survey)"
+              [class]="survey.active ? 'bg-rose-600 hover:bg-rose-700 focus:ring-rose-500' : 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500'"
+              class="inline-flex items-center px-4 py-2 text-white font-semibold rounded-lg text-sm
+                     focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200"
+            >
+              <i class="fas fa-power-off mr-2"></i> {{ survey.active ? 'Desactivar' : 'Activar' }}
             </button>
-           <!--  <button 
-              (click)="previewSurvey(survey)" 
-              class="bg-blue-500 text-white py-1 px-3 rounded text-sm hover:bg-blue-600">
-              Previsualizar
-            </button> -->
-            <!-- <button 
-              (click)="showAnalytics(survey)" 
-              class="bg-purple-500 text-white py-1 px-3 rounded text-sm hover:bg-purple-600">
-              Análisis
-            </button> -->
-           <!--  <button 
-              (click)="duplicateSurvey(survey)" 
-              class="bg-indigo-500 text-white py-1 px-3 rounded text-sm hover:bg-indigo-600">
-              Duplicar
-            </button> -->
-           <!--  <button 
-              (click)="exportSurvey(survey)" 
-              class="bg-teal-500 text-white py-1 px-3 rounded text-sm hover:bg-teal-600">
-              Exportar
-            </button> -->
-           <!--  <button 
-              (click)="sendNotifications(survey)" 
-              class="bg-blue-700 text-white py-1 px-3 rounded text-sm hover:bg-blue-800">
-              Notificar
-            </button> -->
-            <button 
-              (click)="deleteSurvey(survey.id)" 
-              class="text-white py-1 px-3 rounded text-sm btn btn-danger btn-xs">
-              Eliminar
+            <button
+              (click)="previewSurvey(survey)"
+              class="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg text-sm
+                     hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-200"
+            >
+              <i class="fas fa-eye mr-2"></i> Previsualizar
+
             </button>
+            <button
+              (click)="showDeleteConfirm(survey)"
+              class="inline-flex items-center px-4 py-2 bg-rose-700 text-white font-semibold rounded-lg text-sm
+                     hover:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2 transition-colors duration-200"
+            >
+              <i class="fas fa-trash-alt mr-2"></i> Eliminar
+            </button>
+            <a
+              [routerLink]="['/admin-dashboard/encuestas/results', survey.id]"
+              class="inline-flex items-center justify-content-center px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg text-sm
+                     hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200"
+              title="Ver resultados de la encuesta"
+            >
+              <i class="fas fa-chart-bar mr-2"></i> Resultados
+            </a>
           </div>
         </div>
       </div>
     </div>
-    
-    <!-- Mensaje si no hay encuestas -->
-    <div *ngIf="filteredSurveys.length === 0" class="text-center py-8 bg-gray-50 rounded-lg mt-4">
-      <p class="text-gray-500">No se encontraron encuestas que coincidan con los criterios de búsqueda.</p>
-      <button 
-        (click)="setActiveTab('add')" 
-        class="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-        Crear Nueva Encuesta
+
+    <div *ngIf="filteredSurveys().length === 0 && !loading()" class="text-center py-12 bg-white rounded-xl shadow-lg mt-8 border border-gray-200">
+      <p class="text-gray-600 text-lg mb-6">No se encontraron encuestas que coincidan con los criterios de búsqueda.</p>
+      <button
+        (click)="setActiveTab('add')"
+        class="inline-flex items-center justify-content-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md
+               hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200"
+      >
+        <i class="fas fa-plus"></i> Crear Nueva Encuesta
       </button>
     </div>
   </div>
 
-  <!-- Formulario para agregar encuesta con mejoras UX -->
+  <!-- Add Survey Tab -->
   <div *ngIf="activeTab() === 'add'" class="mt-4">
-    <div class="bg-white p-6 rounded-lg shadow-sm border">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-semibold">Crear Nueva Encuesta</h2>
-        
-        <!-- Indicador de guardado automático -->
+    <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold text-gray-800">Crear Nueva Encuesta</h2>
         <div *ngIf="lastSaved()" class="text-sm text-gray-500">
-          Guardado automático: {{ lastSaved() | date:'HH:mm:ss' }}
+          Guardado automático: {{ lastSaved() | date : 'HH:mm:ss' }}
         </div>
       </div>
-      
-      <!-- Plantillas predefinidas -->
-      <div class="mb-6 bg-blue-50 p-4 rounded-lg">
-        <h3 class="font-medium mb-2">Plantillas Disponibles</h3>
-        <p class="text-sm text-gray-600 mb-3">Selecciona una plantilla para comenzar rápidamente:</p>
-        
-        <div class="flex flex-wrap gap-2">
-          <button 
+
+      <!-- Template Selection for Add Form -->
+      <div class="mb-8 p-6 bg-indigo-50 rounded-xl border border-indigo-200 shadow-inner">
+        <h3 class="text-xl font-semibold text-indigo-800 mb-3 flex items-center">
+          <i class="fas fa-paste mr-3"></i> Plantillas Disponibles
+        </h3>
+        <p class="text-indigo-700 mb-4">Selecciona una plantilla para comenzar rápidamente con preguntas predefinidas:</p>
+        <div *ngIf="surveyTemplates().length === 0" class="text-indigo-600 italic">
+          No hay plantillas disponibles. Crea algunas en la sección de administración de plantillas.
+        </div>
+        <div *ngIf="surveyTemplates().length > 0" class="flex flex-wrap gap-3">
+          <button
             *ngFor="let template of surveyTemplates()"
-            (click)="applyTemplate(template)"
-            class="bg-white border border-blue-300 text-blue-700 py-2 px-3 rounded text-sm hover:bg-blue-100">
-            {{ template.name }}
+            (click)="applyTemplate(template, false)"
+            class="inline-flex items-center justify-center px-4 py-2 bg-white border border-indigo-400 text-indigo-700 font-medium rounded-lg text-sm shadow-sm
+                   hover:bg-indigo-100 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200"
+          >
+            <i class="fas fa-file-alt mr-2"></i> {{ template.name }}
           </button>
         </div>
       </div>
-      
+      <!-- End Template Selection -->
+
       <form [formGroup]="surveyForm" (ngSubmit)="addSurvey()">
-        <div class="mb-4">
-          <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Título de la Encuesta *</label>
-          <input 
-            type="text" 
-            id="title" 
-            formControlName="title" 
-            class="w-full p-2 border rounded"
-            placeholder="Ej: Encuesta de Satisfacción Académica"
-            [class.border-red-500]="surveyForm.get('title')?.invalid && surveyForm.get('title')?.touched">
-          <div *ngIf="surveyForm.get('title')?.invalid && surveyForm.get('title')?.touched" class="text-red-500 text-sm mt-1">
-            El título es obligatorio
-          </div>
-        </div>
-        
-        <div class="mb-4">
-          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Descripción *</label>
-          <textarea 
-            id="description" 
-            formControlName="description" 
-            class="w-full p-2 border rounded h-24"
-            placeholder="Breve descripción del propósito de esta encuesta"
-            [class.border-red-500]="surveyForm.get('description')?.invalid && surveyForm.get('description')?.touched"></textarea>
-          <div *ngIf="surveyForm.get('description')?.invalid && surveyForm.get('description')?.touched" class="text-red-500 text-sm mt-1">
-            La descripción es obligatoria
-          </div>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
-            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
-            <select 
-              id="category" 
-              formControlName="category" 
-              class="w-full p-2 border rounded">
+            <label for="title" class="block text-sm font-semibold text-gray-700 mb-1">Título de la Encuesta *</label>
+            <input
+              type="text"
+              id="title"
+              formControlName="title"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              placeholder="Ej: Encuesta de Satisfacción Académica"
+              [class.border-red-500]="surveyForm.get('title')?.invalid && surveyForm.get('title')?.touched"
+            />
+            <div *ngIf="surveyForm.get('title')?.invalid && surveyForm.get('title')?.touched" class="text-rose-600 text-sm mt-1">
+              El título es obligatorio.
+            </div>
+          </div>
+
+          <div>
+            <label for="category" class="block text-sm font-semibold text-gray-700 mb-1">Categoría *</label>
+            <select id="category" formControlName="category" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
               <option value="finalizacion">Finalización de Carrera</option>
               <option value="empleabilidad">Empleabilidad</option>
               <option value="satisfaccion">Satisfacción</option>
               <option value="otro">Otro</option>
             </select>
           </div>
-          
+        </div>
+
+        <div class="mb-6">
+          <label for="description" class="block text-sm font-semibold text-gray-700 mb-1">Descripción *</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            class="w-full p-3 border border-gray-300 rounded-lg h-28 resize-y focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            placeholder="Breve descripción del propósito de esta encuesta"
+            [class.border-red-500]="surveyForm.get('description')?.invalid && surveyForm.get('description')?.touched"
+          ></textarea>
+          <div *ngIf="surveyForm.get('description')?.invalid && surveyForm.get('description')?.touched" class="text-rose-600 text-sm mt-1">
+            La descripción es obligatoria.
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
-            <label for="theme" class="block text-sm font-medium text-gray-700 mb-1">Tema Visual *</label>
-            <select 
-              id="theme" 
-              formControlName="theme" 
-              class="w-full p-2 border rounded">
+            <label for="theme" class="block text-sm font-semibold text-gray-700 mb-1">Tema Visual *</label>
+            <select id="theme" formControlName="theme" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
               <option value="default">Estándar</option>
               <option value="blue">Azul</option>
               <option value="green">Verde</option>
@@ -265,132 +267,103 @@
               <option value="dark">Oscuro</option>
             </select>
           </div>
-        </div>
-        
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Expiración (opcional)</label>
-          <input 
-            type="date" 
-            formControlName="expirationDate" 
-            class="w-full p-2 border rounded">
-        </div>
-        
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Audiencia Objetivo</label>
-          <div class="flex flex-wrap gap-2 mb-2">
-            <div *ngFor="let audience of availableAudiences()" class="flex items-center">
-              <input 
-                type="checkbox" 
-                [id]="'audience_' + audience" 
-                [checked]="surveyForm.get('targetAudience')?.value?.includes(audience)"
-                (change)="toggleAudienceSelection(audience, $event)"
-                class="mr-1">
-              <label [for]="'audience_' + audience" class="text-sm">{{ audience }}</label>
-            </div>
+          <div>
+            <label for="expirationDate" class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Expiración (opcional)</label>
+            <input type="date" id="expirationDate" formControlName="expirationDate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
           </div>
         </div>
-        
-        <div class="border-t pt-4 mb-4">
-          <h3 class="text-lg font-medium mb-4">Preguntas</h3>
-          
-          <!-- Lista de preguntas con drag and drop -->
-          <div *ngIf="surveyForm.value.questions && surveyForm.value.questions.length > 0" class="mb-6">
-            <div cdkDropList (cdkDropListDropped)="dropQuestion($event)">
-              <div *ngFor="let question of surveyForm.value.questions" 
-                   cdkDrag
-                   class="bg-gray-50 p-3 rounded mb-2 flex justify-between items-start border border-gray-200 hover:border-gray-300">
-                <div class="flex-1">
-                  <div class="flex items-start">
-                    <div cdkDragHandle class="cursor-move mr-2 text-gray-400 hover:text-gray-600 mt-1">
-                      ⋮⋮
-                    </div>
-                    <div>
-                      <p class="font-medium">{{ question.text }}</p>
-                      <div class="flex flex-wrap items-center text-sm text-gray-500 mt-1">
-                        <span class="mr-3">Tipo: {{ question.type }}</span>
-                        <span class="mr-3" *ngIf="question.required">Obligatoria</span>
-                        <span class="mr-3" *ngIf="question.conditionalLogic">Condicional</span>
-                      </div>
-                      <div *ngIf="question.description" class="text-sm text-gray-500 mt-1 italic">
-                        {{ question.description }}
-                      </div>
-                      <div *ngIf="question.conditionalLogic" class="text-sm text-blue-500 mt-1">
-                        Depende de la pregunta #{{ question.conditionalLogic.parentQuestionId }}
-                      </div>
-                      <div *ngIf="question.options && question.options.length > 0" class="mt-1">
-                        <p class="text-sm text-gray-500">Opciones:</p>
-                        <ul class="list-disc pl-5 text-sm">
-                          <li *ngFor="let option of question.options">{{ option }}</li>
-                        </ul>
-                      </div>
-                    </div>
+
+        <div class="border-t border-gray-200 pt-8 mt-8">
+          <h3 class="text-xl font-bold text-gray-800 mb-6">Preguntas de la Encuesta</h3>
+
+          <div *ngIf="questionsFormArray.controls.length > 0" class="mb-8">
+            <div cdkDropList (cdkDropListDropped)="dropQuestion($event)" class="space-y-4">
+              <div
+                *ngFor="let questionGroup of questionsFormArray.controls; let i = index"
+                cdkDrag
+                class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 relative
+                       hover:shadow-md transition-shadow duration-200 ease-in-out"
+              >
+                <div cdkDragHandle class="absolute top-2 right-2 text-gray-400 hover:text-gray-600 cursor-grab text-xl">
+                  <i class="fas fa-grip-vertical"></i>
+                </div>
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-3">
+                  <p class="font-bold text-lg text-gray-800 mb-2 md:mb-0">{{ i + 1 }}. {{ questionGroup.get('text')?.value }}</p>
+                  <div class="flex flex-wrap gap-2 text-sm text-gray-500">
+                    <span class="px-2 py-1 bg-gray-100 rounded-full">Tipo: {{ questionGroup.get('type')?.value }}</span>
+                    <span *ngIf="questionGroup.get('required')?.value" class="px-2 py-1 bg-rose-100 text-rose-700 rounded-full">Obligatoria</span>
                   </div>
                 </div>
-             <!--    
-              <button 
-              <button type="button" (click)="previewSurvey(surveyForm.value)"
-                [disabled]="!surveyForm.value.title || !surveyForm.value.description || !surveyForm.value.questions?.length"
-                [class.opacity-50]="!surveyForm.value.title || !surveyForm.value.description || !surveyForm.value.questions?.length"
-                class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-                Previsualizar
-              </button> -->
 
-              <div class="flex space-x-2">
-               <button 
-                  type="button"
-                  (click)="duplicateQuestion(question)" 
-                  class="text-blue-500 hover:text-blue-700"
-                  title="Duplicar pregunta">
-                  Duplicar
-                </button> 
-                <button 
+                <p *ngIf="questionGroup.get('description')?.value" class="text-sm text-gray-600 italic mb-3">{{ questionGroup.get('description')?.value }}</p>
+
+
+                <div *ngIf="questionGroup.get('options')?.value?.length > 0" class="mt-3">
+                  <p class="text-sm font-medium text-gray-700 mb-1">Opciones:</p>
+                  <ul class="list-disc pl-5 text-sm text-gray-600">
+                    <li *ngFor="let option of questionGroup.get('options')?.value">{{ option }}</li>
+                  </ul>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-4 pt-3 border-t border-gray-100">
+                  <button
                     type="button"
-                    (click)="removeQuestion(question.id)" 
-                    class="text-red-500 hover:text-red-700"
-                    title="Eliminar pregunta">
-                    Eliminar
+                    (click)="duplicateQuestion(questionGroup.value)"
+                    class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition-colors"
+                    title="Duplicar pregunta"
+                  >
+                    <i class="fas fa-copy mr-2"></i> Duplicar
+                  </button>
+                  <button
+                    type="button"
+                    (click)="removeQuestion(i)"
+                    class="inline-flex items-center px-3 py-1.5 bg-rose-700 text-white text-sm rounded-md hover:bg-rose-800 transition-colors"
+                    title="Eliminar pregunta"
+                  >
+                    <i class="fas fa-trash-alt mr-2"></i> Eliminar
                   </button>
                 </div>
               </div>
             </div>
           </div>
-          
-          <!-- Formulario para agregar nueva pregunta -->
-          <div class="bg-gray-50 p-4 rounded">
-            <h4 class="font-medium mb-3">Agregar Nueva Pregunta</h4>
-            
+          <div *ngIf="questionsFormArray.controls.length === 0" class="p-5 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-center text-lg font-medium">
+            <i class="fas fa-exclamation-triangle mr-2"></i> ¡Aún no hay preguntas añadidas!
+          </div>
+
+          <div class="mt-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
+            <h4 class="text-xl font-bold text-gray-800 mb-5">Agregar Nueva Pregunta</h4>
+
             <div [formGroup]="questionForm">
-              <div class="mb-3">
-                <label for="questionText" class="block text-sm font-medium text-gray-700 mb-1">Texto de la Pregunta *</label>
-                <input 
-                  type="text" 
-                  id="questionText" 
-                  formControlName="text" 
-                  class="w-full p-2 border rounded"
+              <div class="mb-4">
+                <label for="questionText" class="block text-sm font-semibold text-gray-700 mb-1">Texto de la Pregunta *</label>
+                <input
+                  type="text"
+                  id="questionText"
+                  formControlName="text"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                   placeholder="Ej: ¿Cómo calificarías tu experiencia académica?"
-                  [class.border-red-500]="questionForm.get('text')?.invalid && questionForm.get('text')?.touched">
-                <div *ngIf="questionForm.get('text')?.invalid && questionForm.get('text')?.touched" class="text-red-500 text-sm mt-1">
-                  El texto de la pregunta es obligatorio
+                  [class.border-red-500]="questionForm.get('text')?.invalid && questionForm.get('text')?.touched"
+                />
+                <div *ngIf="questionForm.get('text')?.invalid && questionForm.get('text')?.touched" class="text-rose-600 text-sm mt-1">
+                  El texto de la pregunta es obligatorio.
                 </div>
               </div>
-              
-              <div class="mb-3">
-                <label for="questionDescription" class="block text-sm font-medium text-gray-700 mb-1">Descripción (opcional)</label>
-                <input 
-                  type="text" 
-                  id="questionDescription" 
-                  formControlName="description" 
-                  class="w-full p-2 border rounded"
-                  placeholder="Texto de ayuda para el usuario">
+
+              <div class="mb-4">
+                <label for="questionDescription" class="block text-sm font-semibold text-gray-700 mb-1">Descripción (opcional)</label>
+                <input
+                  type="text"
+                  id="questionDescription"
+                  formControlName="description"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                  placeholder="Texto de ayuda para el usuario"
+                />
               </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                 <div>
-                  <label for="questionType" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Pregunta *</label>
-                  <select 
-                    id="questionType" 
-                    formControlName="type" 
-                    class="w-full p-2 border rounded">
+                  <label for="questionType" class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Pregunta *</label>
+                  <select id="questionType" formControlName="type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                     <option value="checkbox">Checkbox (Sí/No)</option>
                     <option value="radio">Opción Múltiple</option>
                     <option value="select">Lista Desplegable</option>
@@ -399,108 +372,102 @@
                     <option value="date">Fecha</option>
                   </select>
                 </div>
-                
-                <div class="flex items-center">
-                  <input 
-                    type="checkbox" 
-                    id="questionRequired" 
-                    formControlName="required" 
-                    class="mr-2">
-                  <label for="questionRequired" class="text-sm font-medium text-gray-700">Pregunta obligatoria</label>
+
+                <div class="flex items-center pt-7">
+                  <input
+                    type="checkbox"
+                    id="questionRequired"
+                    formControlName="required"
+                    class="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  <label for="questionRequired" class="ml-2 text-sm font-medium text-gray-700">Pregunta obligatoria</label>
                 </div>
               </div>
-              
-              <div *ngIf="questionForm.get('type')?.value === 'radio' || questionForm.get('type')?.value === 'select'" class="mb-3">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Opciones</label>
-                
-                <div *ngFor="let option of questionForm.get('options')?.value; let i = index" class="flex items-center mb-2">
-                  <input 
-                    type="text" 
-                    [(ngModel)]="questionForm.get('options')?.value[i]" 
-                    [ngModelOptions]="{standalone: true}"
-                    class="flex-1 p-2 border rounded"
-                    placeholder="Texto de la opción">
-                  <button 
+
+              <div
+                *ngIf="questionForm.get('type')?.value === 'radio' || questionForm.get('type')?.value === 'select'"
+                class="mb-4 p-4 bg-gray-100 rounded-lg border border-gray-200"
+              >
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Opciones</label>
+
+                <div *ngFor="let optionControl of getOptionsFormArray(questionForm).controls; let i = index"
+                  class="flex items-center mb-3">
+                  <input
+                    type="text"
+                    [formControl]="asFormControl(optionControl)"
+                    class="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                    placeholder="Texto de la opción"
+                  />
+                  <button
                     type="button"
-                    (click)="removeOptionFromQuestion(i)" 
-                    class="ml-2 text-red-500 hover:text-red-700">
-                    Eliminar
+                    (click)="removeOptionFromQuestion(i)"
+                    class="ml-3 inline-flex items-center px-3 py-1.5 bg-rose-700 text-white text-sm rounded-md hover:bg-rose-800 transition-colors"
+                  >
+                    <i class="fas fa-times-circle mr-2"></i> Eliminar
                   </button>
                 </div>
-                
-                <button 
+
+                <button
                   type="button"
-                  (click)="addOptionToQuestion()" 
-                  class="text-blue-500 hover:text-blue-700 text-sm">
-                  + Agregar Opción
+                  (click)="addOptionToQuestion()"
+                  class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition-colors"
+                >
+                  <i class="fas fa-plus mr-2"></i> Agregar Opción
                 </button>
               </div>
-              
-              <!-- Lógica condicional -->
-              <div class="mb-3 border-t pt-3 mt-3">
-                <div class="flex justify-between items-center mb-2">
-                  <label class="block text-sm font-medium text-gray-700">Lógica Condicional</label>
-                  <div>
-                    <button 
-                      type="button"
-                      (click)="setConditionalLogic()" 
-                      class="text-blue-500 hover:text-blue-700 text-sm mr-2">
-                      Configurar
-                    </button>
-                    <button 
-                      type="button"
-                      *ngIf="questionForm.get('conditionalLogic')?.value"
-                      (click)="clearConditionalLogic()" 
-                      class="text-red-500 hover:text-red-700 text-sm">
-                      Eliminar
-                    </button>
-                  </div>
-                </div>
-                
-                <div *ngIf="questionForm.get('conditionalLogic')?.value" class="bg-blue-50 p-2 rounded text-sm">
-                  <p>Esta pregunta se mostrará cuando la pregunta #{{ questionForm.get('conditionalLogic')?.value.parentQuestionId }} 
-                     tenga el valor: <strong>{{ questionForm.get('conditionalLogic')?.value.showOnValue }}</strong></p>
-                </div>
-                <div *ngIf="!questionForm.get('conditionalLogic')?.value" class="text-sm text-gray-500">
-                  Opcional: Configura cuándo mostrar esta pregunta basado en respuestas anteriores.
-                </div>
-              </div>
-              
-              <button 
+
+            
+              <button
                 type="button"
-                (click)="addQuestion()" 
+                (click)="addQuestion()"
                 [disabled]="questionForm.invalid"
                 [class.opacity-50]="questionForm.invalid"
-                class="btn btn-primary">
-                Agregar Pregunta
+
+                class="inline-flex items-center justify-content-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md
+                       hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200"
+              >
+                <i class="fas fa-plus-circle mr-2"></i> Agregar Pregunta
+
               </button>
             </div>
           </div>
         </div>
-        
-        <div class="flex justify-between mt-6">
-          <button 
+
+        <div class="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+          <button
             type="button"
-            (click)="previewSurvey(surveyForm.value)" 
-            [disabled]="!surveyForm.value.title || !surveyForm.value.description || !surveyForm.value.questions?.length"
-            [class.opacity-50]="!surveyForm.value.title || !surveyForm.value.description || !surveyForm.value.questions?.length"
-            class="btn btn-tertiary ">
-            Previsualizar
+
+            (click)="previewSurvey(surveyForm.value)"
+            [disabled]="!surveyForm.value.title || !surveyForm.value.description || !questionsFormArray.length"
+            [class.opacity-50]="!surveyForm.value.title || !surveyForm.value.description || !questionsFormArray.length"
+            class="inline-flex items-center justify-content-center px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg shadow-md
+                   hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-200"
+          >
+            <i class="fas fa-eye mr-2"></i> Previsualizar
+
           </button>
-          
-          <div>
-            <button 
+
+          <div class="flex space-x-4">
+            <button
               type="button"
-              (click)="setActiveTab('list')" 
-              class="btn btn-secondary mr-2">
-              Cancelar
+
+              (click)="setActiveTab('list')"
+              class="inline-flex items-center justify-content-center px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow-md
+                     hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors duration-200"
+            >
+              <i class="fas fa-times-circle mr-2"></i> Cancelar
+
             </button>
-            <button 
+            <button
               type="submit"
-              [disabled]="surveyForm.invalid || !surveyForm.value.questions?.length"
-              [class.opacity-50]="surveyForm.invalid || !surveyForm.value.questions?.length"
-              class="btn btn-primary">
-              Guardar Encuesta
+
+              [disabled]="surveyForm.invalid || !questionsFormArray.length"
+              [class.opacity-50]="surveyForm.invalid || !questionsFormArray.length"
+              class="inline-flex items-center justify-content-center px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg shadow-md
+                     hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors duration-200"
+            >
+              <i class="fas fa-save mr-2"></i> Guardar Encuesta
+
             </button>
           </div>
         </div>
@@ -508,105 +475,84 @@
     </div>
   </div>
 
-  <!-- Formulario para editar encuesta -->
+  <!-- Edit Survey Tab -->
   <div *ngIf="activeTab() === 'edit' && editingSurvey && editForm" class="mt-4">
-    <div class="bg-white p-6 rounded-lg shadow-sm border">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-semibold">Editar Encuesta</h2>
-        
-        <!-- Previsualización de encuesta -->
-<div *ngIf="activeTab() === 'preview' && previewingSurvey" class="mt-4">
-  <div class="bg-white p-6 rounded-lg shadow-sm border"
-       [ngClass]="{
-         'border-blue-200 bg-blue-50': previewingSurvey.theme === 'blue',
-         'border-green-200 bg-green-50': previewingSurvey.theme === 'green',
-         'border-purple-200 bg-purple-50': previewingSurvey.theme === 'purple',
-         'border-gray-800 bg-gray-900 text-white': previewingSurvey.theme === 'dark'
-       }">
-    <!-- Contenido de la previsualización -->
-    ...
-  </div>
-</div>
-
-        <!-- Indicador de guardado automático -->
+    <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold text-gray-800">Editar Encuesta</h2>
         <div *ngIf="lastSaved()" class="text-sm text-gray-500">
-          Guardado automático: {{ lastSaved() | date:'HH:mm:ss' }}
+          Guardado automático: {{ lastSaved() | date : 'HH:mm:ss' }}
         </div>
       </div>
-      
-      <!-- Plantillas predefinidas -->
-      <div class="mb-6 bg-blue-50 p-4 rounded-lg">
-        <h3 class="font-medium mb-2">Plantillas Disponibles</h3>
-        <p class="text-sm text-gray-600 mb-3">Selecciona una plantilla para reemplazar las preguntas actuales:</p>
-        
-        <div class="flex flex-wrap gap-2">
-          <button 
+
+      <!-- Template Selection for Edit Form -->
+      <div class="mb-8 p-6 bg-indigo-50 rounded-xl border border-indigo-200 shadow-inner">
+        <h3 class="text-xl font-semibold text-indigo-800 mb-3 flex items-center">
+          <i class="fas fa-paste mr-3"></i> Aplicar Plantilla
+        </h3>
+        <p class="text-indigo-700 mb-4">Selecciona una plantilla para reemplazar las preguntas actuales de esta encuesta:</p>
+        <div *ngIf="surveyTemplates().length === 0" class="text-indigo-600 italic">
+          No hay plantillas disponibles. Crea algunas en la sección de administración de plantillas.
+        </div>
+        <div *ngIf="surveyTemplates().length > 0" class="flex flex-wrap gap-3">
+          <button
             *ngFor="let template of surveyTemplates()"
-            (click)="applyTemplate(template)"
-            class="bg-white border border-blue-300 text-blue-700 py-2 px-3 rounded text-sm hover:bg-blue-100">
-            {{ template.name }}
+            (click)="applyTemplate(template, true)"
+            class="inline-flex items-center justify-center px-4 py-2 bg-white border border-indigo-400 text-indigo-700 font-medium rounded-lg text-sm shadow-sm
+                   hover:bg-indigo-100 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200"
+          >
+            <i class="fas fa-file-alt mr-2"></i> {{ template.name }}
           </button>
         </div>
       </div>
-      
+      <!-- End Template Selection -->
+
       <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
-        <div class="mb-4">
-          <label for="edit-title" class="block text-sm font-medium text-gray-700 mb-1">Título de la Encuesta *</label>
-          <input 
-            type="text" 
-            id="edit-title" 
-            formControlName="title" 
-            class="w-full p-2 border rounded"
-            [class.border-red-500]="editForm.get('title')?.invalid && editForm.get('title')?.touched">
-          <div *ngIf="editForm.get('title')?.invalid && editForm.get('title')?.touched" class="text-red-500 text-sm mt-1">
-            El título es obligatorio
-          </div>
-        </div>
-        
-        <div class="mb-4">
-          <label for="edit-description" class="block text-sm font-medium text-gray-700 mb-1">Descripción *</label>
-          <textarea 
-            id="edit-description" 
-            formControlName="description" 
-            class="w-full p-2 border rounded h-24"
-            [class.border-red-500]="editForm.get('description')?.invalid && editForm.get('description')?.touched"></textarea>
-          <div *ngIf="editForm.get('description')?.invalid && editForm.get('description')?.touched" class="text-red-500 text-sm mt-1">
-            La descripción es obligatoria
-          </div>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
-            <label for="edit-category" class="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
-            <select 
-              id="edit-category" 
-              formControlName="category" 
-              class="w-full p-2 border rounded">
+            <label for="edit-title" class="block text-sm font-semibold text-gray-700 mb-1">Título de la Encuesta *</label>
+            <input
+              type="text"
+              id="edit-title"
+              formControlName="title"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              [class.border-red-500]="editForm.get('title')?.invalid && editForm.get('title')?.touched"
+            />
+            <div *ngIf="editForm.get('title')?.invalid && editForm.get('title')?.touched" class="text-rose-600 text-sm mt-1">
+              El título es obligatorio.
+            </div>
+          </div>
+
+          <div>
+            <label for="edit-category" class="block text-sm font-semibold text-gray-700 mb-1">Categoría *</label>
+            <select id="edit-category" formControlName="category" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
               <option value="finalizacion">Finalización de Carrera</option>
               <option value="empleabilidad">Empleabilidad</option>
               <option value="satisfaccion">Satisfacción</option>
               <option value="otro">Otro</option>
             </select>
           </div>
-          
+        </div>
 
-          <div class="mt-6 pt-4 border-t flex justify-between">
-            <button 
-              (click)="setActiveTab(activeTab() === 'add' ? 'add' : 'edit')" 
-              class="btn btn-secondary">
-              Volver
-            </button>
-            <button class="btn btn-info">
-              Simular Envío
-            </button>
+
+        <div class="mb-6">
+          <label for="edit-description" class="block text-sm font-semibold text-gray-700 mb-1">Descripción *</label>
+          <textarea
+            id="edit-description"
+            formControlName="description"
+            class="w-full p-3 border border-gray-300 rounded-lg h-28 resize-y focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            [class.border-red-500]="editForm.get('description')?.invalid && editForm.get('description')?.touched"
+          ></textarea>
+          <div *ngIf="editForm.get('description')?.invalid && editForm.get('description')?.touched" class="text-rose-600 text-sm mt-1">
+            La descripción es obligatoria.
+
           </div>
-          
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
-            <label for="edit-theme" class="block text-sm font-medium text-gray-700 mb-1">Tema Visual *</label>
-            <select 
-              id="edit-theme" 
-              formControlName="theme" 
-              class="w-full p-2 border rounded">
+            <label for="edit-theme" class="block text-sm font-semibold text-gray-700 mb-1">Tema Visual *</label>
+            <select id="edit-theme" formControlName="theme" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
               <option value="default">Estándar</option>
               <option value="blue">Azul</option>
               <option value="green">Verde</option>
@@ -614,116 +560,661 @@
               <option value="dark">Oscuro</option>
             </select>
           </div>
-        </div>
-        
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Expiración (opcional)</label>
-          <input 
-            type="date" 
-            formControlName="expirationDate" 
-            class="w-full p-2 border rounded">
-        </div>
-        
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Audiencia Objetivo</label>
-          <div class="flex flex-wrap gap-2 mb-2">
-            <div *ngFor="let audience of availableAudiences()" class="flex items-center">
-              <input 
-                type="checkbox" 
-                [id]="'edit_audience_' + audience" 
-                [checked]="editForm.get('targetAudience')?.value?.includes(audience)"
-                (change)="toggleEditAudienceSelection(audience, $event)"
-                class="mr-1">
-              <label [for]="'edit_audience_' + audience" class="text-sm">{{ audience }}</label>
-            </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Expiración (opcional)</label>
+            <input type="date" formControlName="expirationDate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
           </div>
         </div>
-        
-        <div class="border-t pt-4 mb-4">
-          <h3 class="text-lg font-medium mb-4">Preguntas</h3>
-          
-          <!-- Lista de preguntas con drag and drop -->
-          <div *ngIf="editingSurvey.questions && editingSurvey.questions.length > 0" class="mb-6">
-            <div cdkDropList (cdkDropListDropped)="dropQuestion($event)">
-              <div *ngFor="let question of editingSurvey.questions" 
-                   cdkDrag
-                   class="bg-gray-50 p-3 rounded mb-2 flex justify-between items-start border border-gray-200 hover:border-gray-300">
-                <div class="flex-1">
-                  <div class="flex items-start">
-                    <div cdkDragHandle class="cursor-move mr-2 text-gray-400 hover:text-gray-600 mt-1">
-                      ⋮⋮
-                    </div>
-                    <div>
-                      <p class="font-medium">{{ question.text }}</p>
-                      <div class="flex flex-wrap items-center text-sm text-gray-500 mt-1">
-                        <span class="mr-3">Tipo: {{ question.type }}</span>
-                        <span class="mr-3" *ngIf="question.required">Obligatoria</span>
-                        <span class="mr-3" *ngIf="question.conditionalLogic">Condicional</span>
-                      </div>
-                      <div *ngIf="question.description" class="text-sm text-gray-500 mt-1 italic">
-                        {{ question.description }}
-                      </div>
-                      <div *ngIf="question.conditionalLogic" class="text-sm text-blue-500 mt-1">
-                        Depende de la pregunta #{{ question.conditionalLogic.parentQuestionId }}
-                      </div>
-                      <div *ngIf="question.options && question.options.length > 0" class="mt-1">
-                        <p class="text-sm text-gray-500">Opciones:</p>
-                        <ul class="list-disc pl-5 text-sm">
-                          <li *ngFor="let option of question.options">{{ option }}</li>
-                        </ul>
-                      </div>
-                    </div>
+
+        <div class="border-t border-gray-200 pt-8 mt-8">
+          <h3 class="text-xl font-bold text-gray-800 mb-6">Preguntas de la Encuesta</h3>
+
+          <div *ngIf="editQuestionsFormArray.controls.length > 0" class="mb-8">
+            <div cdkDropList (cdkDropListDropped)="dropQuestion($event, 'edit')" class="space-y-4">
+              <div
+                *ngFor="let questionGroup of editQuestionsFormArray.controls; let i = index"
+                cdkDrag
+                class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 relative
+                       hover:shadow-md transition-shadow duration-200 ease-in-out"
+              >
+                <div cdkDragHandle class="absolute top-2 right-2 text-gray-400 hover:text-gray-600 cursor-grab text-xl">
+                  <i class="fas fa-grip-vertical"></i>
+                </div>
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-3">
+                  <p class="font-bold text-lg text-gray-800 mb-2 md:mb-0">{{ i + 1 }}. {{ questionGroup.get('text')?.value }}</p>
+                  <div class="flex flex-wrap gap-2 text-sm text-gray-500">
+                    <span class="px-2 py-1 bg-gray-100 rounded-full">Tipo: {{ questionGroup.get('type')?.value }}</span>
+                    <span *ngIf="questionGroup.get('required')?.value" class="px-2 py-1 bg-rose-100 text-rose-700 rounded-full">Obligatoria</span>
                   </div>
                 </div>
-                <div class="flex space-x-2">
-                  <button 
+
+                <p *ngIf="questionGroup.get('description')?.value" class="text-sm text-gray-600 italic mb-3">{{ questionGroup.get('description')?.value }}</p>
+
+               
+
+                <div *ngIf="questionGroup.get('options')?.value?.length > 0" class="mt-3">
+                  <p class="text-sm font-medium text-gray-700 mb-1">Opciones:</p>
+                  <ul class="list-disc pl-5 text-sm text-gray-600">
+                    <li *ngFor="let option of questionGroup.get('options')?.value">{{ option }}</li>
+                  </ul>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-4 pt-3 border-t border-gray-100">
+                  <button
                     type="button"
-                    (click)="duplicateQuestion(question)" 
-                    class="text-blue-500 hover:text-blue-700"
-                    title="Duplicar pregunta">
-                    Duplicar
+                    (click)="duplicateQuestion(questionGroup.value, 'edit')"
+                    class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition-colors"
+                    title="Duplicar pregunta"
+                  >
+                    <i class="fas fa-copy mr-2"></i> Duplicar
                   </button>
-                  <button 
+                  <button
                     type="button"
-                    (click)="removeQuestion(question.id)" 
-                    class="text-red-500 hover:text-red-700"
-                    title="Eliminar pregunta">
-                    Eliminar
+                    (click)="removeQuestion(i, 'edit')"
+                    class="inline-flex items-center px-3 py-1.5 bg-rose-700 text-white text-sm rounded-md hover:bg-rose-800 transition-colors"
+                    title="Eliminar pregunta"
+                  >
+                    <i class="fas fa-trash-alt mr-2"></i> Eliminar
                   </button>
                 </div>
               </div>
             </div>
           </div>
-          
-          <!-- Resto del formulario y botones -->
-          <!-- ... -->
+          <div *ngIf="editQuestionsFormArray.controls.length === 0" class="p-5 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-center text-lg font-medium">
+            <i class="fas fa-exclamation-triangle mr-2"></i> ¡Aún no hay preguntas añadidas!
+          </div>
+
+          <div class="mt-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
+            <h4 class="text-xl font-bold text-gray-800 mb-5">Agregar Nueva Pregunta (Editar)</h4>
+            <div [formGroup]="editQuestionForm">
+              <div class="mb-4">
+                <label for="editQuestionText" class="block text-sm font-semibold text-gray-700 mb-1">Texto de la Pregunta *</label>
+                <input
+                  type="text"
+                  id="editQuestionText"
+                  formControlName="text"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                  placeholder="Ej: ¿Cómo calificarías tu experiencia académica?"
+                  [class.border-red-500]="editQuestionForm.get('text')?.invalid && editQuestionForm.get('text')?.touched"
+                />
+                <div
+                  *ngIf="editQuestionForm.get('text')?.invalid && editQuestionForm.get('text')?.touched"
+                  class="text-rose-600 text-sm mt-1"
+                >
+                  El texto de la pregunta es obligatorio.
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label for="editQuestionDescription" class="block text-sm font-semibold text-gray-700 mb-1">Descripción (opcional)</label>
+                <input
+                  type="text"
+                  id="editQuestionDescription"
+                  formControlName="description"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                  placeholder="Texto de ayuda para el usuario"
+                />
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div>
+                  <label for="editQuestionType" class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Pregunta *</label>
+                  <select id="editQuestionType" formControlName="type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                    <option value="checkbox">Checkbox (Sí/No)</option>
+                    <option value="radio">Opción Múltiple</option>
+                    <option value="select">Lista Desplegable</option>
+                    <option value="text">Texto Libre</option>
+                    <option value="rating">Calificación (1-5)</option>
+                    <option value="date">Fecha</option>
+                  </select>
+                </div>
+
+                <div class="flex items-center pt-7">
+                  <input
+                    type="checkbox"
+                    id="editQuestionRequired"
+                    formControlName="required"
+                    class="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  <label for="editQuestionRequired" class="ml-2 text-sm font-medium text-gray-700">Pregunta obligatoria</label>
+                </div>
+              </div>
+
+              <div
+                *ngIf="editQuestionForm.get('type')?.value === 'radio' || editQuestionForm.get('type')?.value === 'select'"
+                class="mb-4 p-4 bg-gray-100 rounded-lg border border-gray-200"
+              >
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Opciones</label>
+
+                <div *ngFor="let optionControl of getOptionsFormArray(editQuestionForm).controls; let i = index"
+                  class="flex items-center mb-3">
+                  <input
+                    type="text"
+                    [formControl]="asFormControl(optionControl)"
+                    class="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                    placeholder="Texto de la opción"
+                  />
+                  <button
+                    type="button"
+                    (click)="removeOptionFromQuestion(i, 'edit')"
+                    class="ml-3 inline-flex items-center px-3 py-1.5 bg-rose-700 text-white text-sm rounded-md hover:bg-rose-800 transition-colors"
+                  >
+                    <i class="fas fa-times-circle mr-2"></i> Eliminar
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  (click)="addOptionToQuestion('edit')"
+                  class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition-colors"
+                >
+                  <i class="fas fa-plus mr-2"></i> Agregar Opción
+                </button>
+              </div>
+
+            
+
+              <button
+                type="button"
+                (click)="addQuestion('edit')"
+                [disabled]="editQuestionForm.invalid"
+                [class.opacity-50]="editQuestionForm.invalid"
+                class="inline-flex items-center justify-content-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md
+                       hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200"
+              >
+                <i class="fas fa-plus-circle mr-2"></i> Agregar Pregunta
+              </button>
+            </div>
+          </div>
         </div>
-        
-        <div class="flex justify-between mt-6">
-          <button 
+
+        <div class="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+          <button
             type="button"
-            (click)="previewSurvey(editingSurvey)" 
-            class="btn btn-tertiary">
-            Previsualizar
+
+            (click)="previewSurvey(editForm.value)"
+            [disabled]="!editForm.value.title || !editForm.value.description || !editQuestionsFormArray.length"
+            [class.opacity-50]="!editForm.value.title || !editForm.value.description || !editQuestionsFormArray.length"
+            class="inline-flex items-center justify-content-center px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg shadow-md
+                   hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-200"
+          >
+            <i class="fas fa-eye mr-2"></i> Previsualizar
+
           </button>
-          
-          <div>
-            <button 
+
+          <div class="flex space-x-4">
+            <button
               type="button"
-              (click)="setActiveTab('list')" 
-              class="btn btn-secondary mr-2">
-              Cancelar
+
+              (click)="cancelEdit()"
+              class="inline-flex items-center justify-content-center px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow-md
+                     hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors duration-200"
+            >
+              <i class="fas fa-times-circle mr-2"></i> Cancelar
+
             </button>
-            <button 
+            <button
               type="submit"
-              [disabled]="editForm.invalid || !editingSurvey.questions.length"
-              [class.opacity-50]="editForm.invalid || !editingSurvey.questions.length"
-              class="btn btn-primary">
-              Guardar Cambios
+
+              [disabled]="editForm.invalid || !editQuestionsFormArray.length"
+              [class.opacity-50]="editForm.invalid || !editQuestionsFormArray.length"
+              class="inline-flex items-center justify-content-center px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg shadow-md
+                     hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors duration-200"
+            >
+              <i class="fas fa-save mr-2"></i> Guardar Cambios
+
             </button>
           </div>
         </div>
       </form>
     </div>
   </div>
+
+  <!-- NUEVA PESTAÑA: Gestionar Plantillas -->
+  <div *ngIf="activeTab() === 'templates'" class="mt-4">
+    <div class="bg-white p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Gestión de Plantillas de Encuesta</h2>
+      <button
+        (click)="startAddTemplate()"
+        class="inline-flex items-center justify-content-center gap-2 px-5 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md
+               hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200 mb-6"
+      >
+        <i class="fas fa-plus"></i> Crear Nueva Plantilla
+      </button>
+
+      <div *ngIf="loading()" class="text-center py-8 text-indigo-600 text-lg font-medium">
+        <i class="fas fa-spinner fa-spin mr-2"></i> Cargando plantillas...
+      </div>
+      <div *ngIf="error()" class="text-center py-8 text-rose-600 text-lg font-medium">{{ error() }}</div>
+
+      <div *ngIf="surveyTemplates().length > 0 && !loading()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          *ngFor="let template of surveyTemplates()"
+          class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden transition-all duration-200 ease-in-out
+                 hover:shadow-lg hover:scale-[1.01]"
+        >
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">{{ template.name }}</h3>
+            <p class="text-gray-600 text-sm mb-4">{{ template.description }}</p>
+            <div class="flex justify-between text-sm text-gray-500 mb-4 border-t border-gray-100 pt-3">
+              <span><i class="fas fa-list-alt mr-1"></i> Categoría: {{ template.category }}</span>
+              <span><i class="fas fa-question-circle mr-1"></i> {{ template.questions.length || 0 }} preguntas</span>
+            </div>
+            <div class="flex flex-wrap gap-3 mt-4 border-t border-gray-100 pt-4">
+              <button
+                (click)="startEditTemplate(template)"
+                class="inline-flex items-center px-4 py-2 bg-indigo-500 text-white font-semibold rounded-lg text-sm
+                       hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition-colors duration-200"
+              >
+                <i class="fas fa-edit mr-2"></i> Editar
+              </button>
+              <button
+                (click)="showDeleteTemplateConfirm(template)"
+                class="inline-flex items-center px-4 py-2 bg-rose-700 text-white font-semibold rounded-lg text-sm
+                       hover:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2 transition-colors duration-200"
+              >
+                <i class="fas fa-trash-alt mr-2"></i> Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="surveyTemplates().length === 0 && !loading()" class="text-center py-12 bg-white rounded-xl shadow-lg mt-8 border border-gray-200">
+        <p class="text-gray-600 text-lg mb-6">No se encontraron plantillas. ¡Crea tu primera plantilla ahora!</p>
+        <button
+          (click)="startAddTemplate()"
+          class="inline-flex items-center justify-content-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md
+                 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200"
+        >
+          <i class="fas fa-plus"></i> Crear Nueva Plantilla
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Template Form (Reutilizando el formulario de preguntas) -->
+  <div *ngIf="activeTab() === 'addTemplate' || activeTab() === 'editTemplate'" class="mt-4">
+    <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold text-gray-800">
+          {{ activeTab() === 'addTemplate' ? 'Crear Nueva Plantilla' : 'Editar Plantilla' }}
+        </h2>
+        <div *ngIf="lastSaved()" class="text-sm text-gray-500">
+          Guardado automático: {{ lastSaved() | date : 'HH:mm:ss' }}
+        </div>
+      </div>
+
+      <form [formGroup]="templateForm" (ngSubmit)="saveTemplate()">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label for="templateName" class="block text-sm font-semibold text-gray-700 mb-1">Nombre de la Plantilla *</label>
+            <input
+              type="text"
+              id="templateName"
+              formControlName="name"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              placeholder="Ej: Plantilla de Feedback General"
+              [class.border-red-500]="templateForm.get('name')?.invalid && templateForm.get('name')?.touched"
+            />
+            <div *ngIf="templateForm.get('name')?.invalid && templateForm.get('name')?.touched" class="text-rose-600 text-sm mt-1">
+              El nombre es obligatorio.
+            </div>
+          </div>
+          <div>
+            <label for="templateCategory" class="block text-sm font-semibold text-gray-700 mb-1">Categoría *</label>
+            <select id="templateCategory" formControlName="category" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+              <option value="finalizacion">Finalización de Carrera</option>
+              <option value="empleabilidad">Empleabilidad</option>
+              <option value="satisfaccion">Satisfacción</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label for="templateDescription" class="block text-sm font-semibold text-gray-700 mb-1">Descripción *</label>
+          <textarea
+            id="templateDescription"
+            formControlName="description"
+            class="w-full p-3 border border-gray-300 rounded-lg h-28 resize-y focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            placeholder="Describe el propósito de esta plantilla"
+            [class.border-red-500]="templateForm.get('description')?.invalid && templateForm.get('description')?.touched"
+          ></textarea>
+          <div *ngIf="templateForm.get('description')?.invalid && templateForm.get('description')?.touched" class="text-rose-600 text-sm mt-1">
+            La descripción es obligatoria.
+          </div>
+        </div>
+
+        <div class="border-t border-gray-200 pt-8 mt-8">
+          <h3 class="text-xl font-bold text-gray-800 mb-6">Preguntas de la Plantilla</h3>
+
+          <div *ngIf="templateQuestionsFormArray.controls.length > 0" class="mb-8">
+            <div cdkDropList (cdkDropListDropped)="dropTemplateQuestion($event)" class="space-y-4">
+              <div
+                *ngFor="let questionGroup of templateQuestionsFormArray.controls; let i = index"
+                cdkDrag
+                class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 relative
+                       hover:shadow-md transition-shadow duration-200 ease-in-out"
+              >
+                <div cdkDragHandle class="absolute top-2 right-2 text-gray-400 hover:text-gray-600 cursor-grab text-xl">
+                  <i class="fas fa-grip-vertical"></i>
+                </div>
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-3">
+                  <p class="font-bold text-lg text-gray-800 mb-2 md:mb-0">{{ i + 1 }}. {{ questionGroup.get('text')?.value }}</p>
+                  <div class="flex flex-wrap gap-2 text-sm text-gray-500">
+                    <span class="px-2 py-1 bg-gray-100 rounded-full">Tipo: {{ questionGroup.get('type')?.value }}</span>
+                    <span *ngIf="questionGroup.get('required')?.value" class="px-2 py-1 bg-rose-100 text-rose-700 rounded-full">Obligatoria</span>
+                    </div>
+                </div>
+
+                <p *ngIf="questionGroup.get('description')?.value" class="text-sm text-gray-600 italic mb-3">{{ questionGroup.get('description')?.value }}</p>
+
+           
+                <div *ngIf="questionGroup.get('options')?.value?.length > 0" class="mt-3">
+                  <p class="text-sm font-medium text-gray-700 mb-1">Opciones:</p>
+                  <ul class="list-disc pl-5 text-sm text-gray-600">
+                    <li *ngFor="let option of questionGroup.get('options')?.value">{{ option }}</li>
+                  </ul>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-4 pt-3 border-t border-gray-100">
+                  <button
+                    type="button"
+                    (click)="duplicateTemplateQuestion(questionGroup.value)"
+                    class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition-colors"
+                    title="Duplicar pregunta"
+                  >
+                    <i class="fas fa-copy mr-2"></i> Duplicar
+                  </button>
+                  <button
+                    type="button"
+                    (click)="removeTemplateQuestion(i)"
+                    class="inline-flex items-center px-3 py-1.5 bg-rose-700 text-white text-sm rounded-md hover:bg-rose-800 transition-colors"
+                    title="Eliminar pregunta"
+                  >
+                    <i class="fas fa-trash-alt mr-2"></i> Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="templateQuestionsFormArray.controls.length === 0" class="p-5 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-center text-lg font-medium">
+            <i class="fas fa-exclamation-triangle mr-2"></i> ¡Aún no hay preguntas añadidas a la plantilla!
+          </div>
+
+          <div class="mt-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
+            <h4 class="text-xl font-bold text-gray-800 mb-5">Agregar Nueva Pregunta a Plantilla</h4>
+
+            <div [formGroup]="templateQuestionForm">
+              <div class="mb-4">
+                <label for="templateQuestionText" class="block text-sm font-semibold text-gray-700 mb-1">Texto de la Pregunta *</label>
+                <input
+                  type="text"
+                  id="templateQuestionText"
+                  formControlName="text"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                  placeholder="Ej: ¿Cómo calificarías tu experiencia académica?"
+                  [class.border-red-500]="templateQuestionForm.get('text')?.invalid && templateQuestionForm.get('text')?.touched"
+                />
+                <div *ngIf="templateQuestionForm.get('text')?.invalid && templateQuestionForm.get('text')?.touched" class="text-rose-600 text-sm mt-1">
+                  El texto de la pregunta es obligatorio.
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label for="templateQuestionDescription" class="block text-sm font-semibold text-gray-700 mb-1">Descripción (opcional)</label>
+                <input
+                  type="text"
+                  id="templateQuestionDescription"
+                  formControlName="description"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                  placeholder="Texto de ayuda para el usuario"
+                />
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div>
+                  <label for="templateQuestionType" class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Pregunta *</label>
+                  <select id="templateQuestionType" formControlName="type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                    <option value="checkbox">Checkbox (Sí/No)</option>
+                    <option value="radio">Opción Múltiple</option>
+                    <option value="select">Lista Desplegable</option>
+                    <option value="text">Texto Libre</option>
+                    <option value="rating">Calificación (1-5)</option>
+                    <option value="date">Fecha</option>
+                  </select>
+                </div>
+
+                <div class="flex items-center pt-7">
+                  <input
+                    type="checkbox"
+                    id="templateQuestionRequired"
+                    formControlName="required"
+                    class="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  <label for="templateQuestionRequired" class="ml-2 text-sm font-medium text-gray-700">Pregunta obligatoria</label>
+                </div>
+              </div>
+
+              <div
+                *ngIf="templateQuestionForm.get('type')?.value === 'radio' || templateQuestionForm.get('type')?.value === 'select'"
+                class="mb-4 p-4 bg-gray-100 rounded-lg border border-gray-200"
+              >
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Opciones</label>
+
+                <div *ngFor="let optionControl of getOptionsFormArray(templateQuestionForm).controls; let i = index"
+                  class="flex items-center mb-3">
+                  <input
+                    type="text"
+                    [formControl]="asFormControl(optionControl)"
+                    class="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                    placeholder="Texto de la opción"
+                  />
+                  <button
+                    type="button"
+                    (click)="removeOptionFromTemplateQuestion(i)"
+                    class="ml-3 inline-flex items-center px-3 py-1.5 bg-rose-700 text-white text-sm rounded-md hover:bg-rose-800 transition-colors"
+                  >
+                    <i class="fas fa-times-circle mr-2"></i> Eliminar
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  (click)="addOptionToTemplateQuestion()"
+                  class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition-colors"
+                >
+                  <i class="fas fa-plus mr-2"></i> Agregar Opción
+                </button>
+              </div>
+
+        
+
+              <button
+                type="button"
+                (click)="addTemplateQuestion()"
+                [disabled]="templateQuestionForm.invalid"
+                [class.opacity-50]="templateQuestionForm.invalid"
+                class="inline-flex items-center justify-content-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md
+                       hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200"
+              >
+                <i class="fas fa-plus-circle mr-2"></i> Agregar Pregunta a Plantilla
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            (click)="cancelTemplateEdit()"
+            class="inline-flex items-center justify-content-center px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow-md
+                   hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors duration-200"
+          >
+            <i class="fas fa-times-circle mr-2"></i> Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="templateForm.invalid || templateQuestionsFormArray.length === 0"
+            [class.opacity-50]="templateForm.invalid || templateQuestionsFormArray.length === 0"
+            class="inline-flex items-center justify-content-center px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg shadow-md
+                   hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors duration-200"
+          >
+            <i class="fas fa-save mr-2"></i> Guardar Plantilla
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Preview Survey Tab -->
+  <div *ngIf="activeTab() === 'preview' && previewingSurvey" class="mt-4">
+    <div
+      class="bg-white p-8 rounded-xl shadow-lg border"
+      [ngClass]="{
+        'border-blue-200 bg-blue-50': previewingSurvey.theme === 'blue',
+        'border-green-200 bg-green-50': previewingSurvey.theme === 'green',
+        'border-purple-200 bg-purple-50': previewingSurvey.theme === 'purple',
+        'border-gray-800 bg-gray-900 text-white': previewingSurvey.theme === 'dark'
+      }"
+    >
+      <h2 class="text-3xl font-bold mb-3" [class.text-white]="previewingSurvey.theme === 'dark'">{{ previewingSurvey.title }}</h2>
+      <p class="text-gray-700 mb-5" [class.text-gray-300]="previewingSurvey.theme === 'dark'">
+        {{ previewingSurvey.description }}
+      </p>
+
+      <div *ngIf="previewingSurvey.expirationDate" class="text-sm text-gray-600 mb-4" [class.text-gray-400]="previewingSurvey.theme === 'dark'">
+        <i class="far fa-calendar-alt mr-2"></i> Expira el: {{ previewingSurvey.expirationDate | date : 'dd/MM/yyyy' }}
+      </div>
+
+      <h3 class="text-2xl font-bold mt-8 mb-5" [class.text-white]="previewingSurvey.theme === 'dark'">Preguntas:</h3>
+      <div *ngIf="previewingSurvey.questions?.length === 0" class="text-gray-500 italic p-4 bg-amber-50 rounded-lg border border-amber-200 text-center text-lg">
+        <i class="fas fa-exclamation-circle mr-2"></i> No hay preguntas en esta encuesta para previsualizar.
+      </div>
+
+      <div *ngFor="let question of previewingSurvey.questions; let i = index" class="mb-8">
+        <!-- shouldShowQuestion ya no es relevante, siempre devuelve true -->
+        <div *ngIf="shouldShowQuestion(question, previewResponses)" class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+          <p class="font-bold text-xl mb-3 text-gray-800">
+            {{ i + 1 }}. {{ question.text }} <span *ngIf="question.required" class="text-rose-600">*</span>
+          </p>
+          <p *ngIf="question.description" class="text-sm text-gray-600 mb-4">{{ question.description }}</p>
+
+          <div [ngSwitch]="question.type">
+            <div *ngSwitchCase="'text'">
+              <input
+                type="text"
+                [(ngModel)]="previewResponses[question.id]"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                placeholder="Tu respuesta"
+              />
+            </div>
+            <div *ngSwitchCase="'checkbox'">
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  [id]="'preview_q_' + question.id"
+                  [(ngModel)]="previewResponses[question.id]"
+                  class="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                />
+                <label [for]="'preview_q_' + question.id" class="ml-2 text-base text-gray-700">Sí</label>
+              </div>
+            </div>
+            <div *ngSwitchCase="'radio'">
+              <div *ngFor="let option of question.options">
+                <input
+                  type="radio"
+                  [id]="'preview_radio_' + question.id + '_' + option"
+                  [name]="'preview_q_' + question.id"
+                  [value]="option"
+                  [(ngModel)]="previewResponses[question.id]"
+                  class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2"
+                />
+                <label [for]="'preview_radio_' + question.id + '_' + option" class="text-base text-gray-700">{{ option }}</label>
+              </div>
+            </div>
+            <div *ngSwitchCase="'select'">
+              <select [(ngModel)]="previewResponses[question.id]"
+                      class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                <option [ngValue]="null" disabled selected>Selecciona una opción</option>
+                <option *ngFor="let option of question.options" [value]="option">{{ option }}</option>
+              </select>
+            </div>
+            <div *ngSwitchCase="'rating'">
+              <div class="flex items-center gap-2">
+                <span *ngFor="let star of [1, 2, 3, 4, 5]" (click)="previewResponses[question.id] = star" class="cursor-pointer text-4xl"
+                  [ngClass]="{'text-amber-400': previewResponses[question.id] >= star, 'text-gray-300': previewResponses[question.id] < star}">
+                  ★
+                </span>
+                <span class="text-xl font-semibold text-gray-700 ml-2" *ngIf="previewResponses[question.id]">{{ previewResponses[question.id] }} / 5</span>
+              </div>
+            </div>
+            <div *ngSwitchCase="'date'">
+              <input type="date" [(ngModel)]="previewResponses[question.id]"
+                      class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-gray-200 flex justify-between items-center">
+        <!-- Lógica para el botón "Volver" dinámico -->
+        <button
+          (click)="setActiveTab(sourceTabForPreview === 'edit' ? 'edit' : (sourceTabForPreview === 'add' ? 'add' : 'list'))"
+          class="inline-flex items-center justify-content-center px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow-md
+                 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors duration-200"
+        >
+          <i class="fas fa-arrow-left mr-2"></i>
+          Volver a
+          {{ sourceTabForPreview === 'edit' ? 'editar' : (sourceTabForPreview === 'add' ? 'añadir' : 'la lista de encuestas') }}
+        </button>
+        <button
+          class="inline-flex items-center justify-content-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md
+                 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200"
+        >
+          <i class="fas fa-paper-plane mr-2"></i> Simular Envío
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <app-modal
+    *ngIf="showDeleteConfirmationModal"
+    [title]="'Confirmar Eliminación'"
+    [message]="deleteConfirmationMessage"
+    [confirmButtonText]="'Eliminar'"
+    [cancelButtonText]="'Cancelar'"
+    (confirm)="confirmDeleteSurvey()"
+    (cancel)="showDeleteConfirmationModal = false">
+  </app-modal>
+
+  <app-modal
+    *ngIf="showMessageModal"
+    [title]="modalMessageTitle"
+    [message]="modalMessage"
+    [showCancelButton]="false"
+    [confirmButtonText]="'Aceptar'"
+    (confirm)="showMessageModal = false">
+  </app-modal>
+
+  
+
+  <!-- Modal para input genérico (ej. para confirmación de plantilla) -->
+  <app-modal
+    *ngIf="showModalInput"
+    [title]="modalInputTitle"
+    [message]="modalInputMessage"
+    [confirmButtonText]="'Confirmar'"
+    [cancelButtonText]="'Cancelar'"
+    (confirm)="handleModalInputConfirm()"
+    (cancel)="handleModalInputCancel()"
+  >
+   
+  </app-modal>
+
 </div>
+
+<!-- Font Awesome for Icons (Make sure this is in your index.html head or similar for global use) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">

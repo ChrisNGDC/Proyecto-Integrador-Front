@@ -13,9 +13,10 @@ import { EgresadosComponent } from './components/egresados/egresados.component';
 import { AdminSurveysComponent } from './components/admin-surveys-component/admin-surveys-component.component';
 import { AdminOpportunitiesComponent } from './components/admin-opportunities-component/admin-opportunities-component.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
+import { SurveyResultsComponent } from './components/survey-results/survey-results.component'; // <-- NUEVA IMPORTACIÓN
 
 export const routes: Routes = [
-  
+
   { path: '', component: LoginComponent, outlet: 'primary' },
   {
     path: 'admin-dashboard',
@@ -36,10 +37,13 @@ export const routes: Routes = [
         component: AdminSurveysComponent,
       },
       {
+        path: 'encuestas/results/:id', 
+        component: SurveyResultsComponent,
+      },
+      {
         path: 'oportunidades',
         component: AdminOpportunitiesComponent,
       },
-      
     ]
   },
   {
@@ -61,6 +65,10 @@ export const routes: Routes = [
         component: SurveysComponent,
       },
       {
+        path: 'encuestas/:id',
+        component: SurveysComponent,
+      },
+      {
         path: 'oportunidades',
         component: OpportunitiesComponent,
       },
@@ -71,5 +79,7 @@ export const routes: Routes = [
     path: 'login',
     component: LoginComponent,
   },
+  
+
   { path: '**', redirectTo: '/login', outlet: 'primary' },
 ];

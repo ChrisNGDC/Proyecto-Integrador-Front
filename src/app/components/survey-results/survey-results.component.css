@@ -1,0 +1,47 @@
+
+/* Animación para el loader */
+.loader {
+  border-top-color: #3498db; 
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+
+.inline-flex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inline-flex svg {
+  color: white;
+}
+
+
+@media (max-width: 768px) {
+  .flex-col {
+    padding: 1rem;
+  }
+  .w-full.max-w-7xl {
+    padding: 1.5rem; 
+  }
+  .text-4xl {
+    font-size: 2.5rem; 
+  }
+  .text-xl {
+    font-size: 1.25rem; 
+  }
+  .grid-cols-1.md:grid-cols-2.lg:grid-cols-3 {
+    grid-template-columns: 1fr; 
+  }
+}

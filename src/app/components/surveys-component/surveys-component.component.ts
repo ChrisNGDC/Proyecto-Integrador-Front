@@ -1,417 +1,358 @@
-import { Component, signal, type OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
-import { FormsModule } from "@angular/forms"
-import { SurveyService } from "../../services/survey.service"
-import type { Survey, SurveyQuestion } from "../../models/survey"
+// src/app/components/user-survey/surveys-component.component.ts
+
+import { Component, OnInit, signal, effect } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { SurveyService } from '../../services/survey.service';
+import { ISurvey, IQuestion } from '../../models/survey';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule, DatePipe } from '@angular/common';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { v4 as uuidv4 } from 'uuid';
+import { forkJoin, of, Observable } from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
 @Component({
-  selector: "app-surveys",
+  selector: 'app-user-survey',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: "./surveys-component.component.html",
-  styleUrls: ["./surveys-component.component.css"],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    DragDropModule,
+    DatePipe
+  ],
+  templateUrl: './surveys-component.component.html',
+  styleUrls: ['./surveys-component.component.css'],
 })
 export class SurveysComponent implements OnInit {
-  // Encuestas disponibles para el egresado
-  availableSurveys = signal<Survey[]>([])
+  availableSurveys = signal<ISurvey[]>([]);
+  currentSurvey = signal<ISurvey | null>(null);
+  activeSurveyId = signal<string | null>(null);
 
-  // Estado de la encuesta actual
-  currentSurvey = signal<Survey | null>(null)
-  currentStep = signal<number>(0)
-  responses: { [key: number]: any } = {}
-  progress = signal<number>(0)
+  surveyResponseForm!: FormGroup;
 
-  // Historial de encuestas completadas
-  completedSurveys = signal<number[]>([])
+  loading = signal<boolean>(false);
+  error = signal<string | null>(null);
+  showSuccessMessage = signal<boolean>(false);
+  hasResponded = signal<boolean>(false);
+  isLoadingCheck = signal<boolean>(true); 
 
-  // Notificaciones
-  notifications = signal<{ id: number; message: string; type: string; date: Date }[]>([
-    {
-      id: 1,
-      message: "Nueva encuesta disponible: Empleabilidad",
-      type: "info",
-      date: new Date(),
-    },
-  ])
+  private anonymousUserId!: string;
 
-  constructor(private surveyService: SurveyService) {}
-
-  ngOnInit() {
-    // Cargar encuestas disponibles
-    this.availableSurveys.set(
-      this.surveyService
-        .getSurveys()()
-        .filter((survey) => survey.active),
-    )
-
-    // Cargar encuestas completadas
-    this.completedSurveys.set(this.surveyService.getCompletedSurveys()())
-
-    // Comprobar si hay una encuesta en progreso al cargar
-    const currentSurveyId = localStorage.getItem("currentSurvey")
-    if (currentSurveyId) {
-      const surveyId = Number.parseInt(currentSurveyId, 10)
-      const survey = this.surveyService.getSurveyById(surveyId)
-
-      if (survey) {
-        this.currentSurvey.set(survey)
-        this.currentStep.set(Number.parseInt(localStorage.getItem("currentStep") || "0", 10))
-
-        // Cargar respuestas guardadas
-        const savedResponses = this.surveyService.loadPartialResponse(surveyId)
-        if (savedResponses) {
-          this.responses = savedResponses
-
-        this.updateProgress()
+  constructor(
+    private fb: FormBuilder,
+    private surveyService: SurveyService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {
+   
+    effect(() => {
+      const currentId = this.activeSurveyId();
+      console.log('[EFFECT] activeSurveyId changed to:', currentId);
+      // Cuando activeSurveyId cambia a null (volviendo a la lista), cargamos las encuestas disponibles.
+      // Cuando cambia a un ID, se encarga loadSurveyDetails.
+      if (currentId === null) {
+        this.loadAvailableSurveys();
       }
-    }
+    });
   }
 
+  ngOnInit(): void {
+    console.log('ngOnInit: Iniciando componente. showSuccessMessage:', this.showSuccessMessage());
+    this.showSuccessMessage.set(false);
 
-   // CAMBIO: Verificar si hay una encuesta de prueba desde la vista de administrador
-   const testSurveyJson = localStorage.getItem("testSurvey")
-   if (testSurveyJson) {
-     try {
-       const testSurvey = JSON.parse(testSurveyJson)
-       // Agregar la encuesta a las disponibles si no existe ya
-       const exists = this.availableSurveys().some((s) => s.id === testSurvey.id)
-       if (!exists) {
-         this.availableSurveys.update((surveys) => [...surveys, testSurvey])
+    this.ensureAnonymousUserId();
 
-         // Mostrar notificación
-         this.notifications.update((notifications) => [
-           ...notifications,
-           {
-             id: Date.now(),
-             message: `Encuesta de prueba "${testSurvey.title}" disponible`,
-             type: "info",
-             date: new Date(),
-           },
-         ])
-
-         // Iniciar la encuesta de prueba automáticamente
-         setTimeout(() => {
-           this.startSurvey(testSurvey)
-           // Limpiar localStorage después de iniciar
-           localStorage.removeItem("testSurvey")
-         }, 500)
-       }
-     } catch (e) {
-       console.error("Error al cargar encuesta de prueba:", e)
-     }
-   }
- }
-
-  startSurvey(survey: Survey) {
-    this.currentSurvey.set({ ...survey })
-    this.currentStep.set(0)
-    this.responses = {}
-
-    // Cargar respuestas guardadas si existen
-    const savedResponses = this.surveyService.loadPartialResponse(survey.id)
-    if (savedResponses) {
-      this.responses = { ...savedResponses }
-    }
-
-    this.updateProgress()
-
-    // Guardar estado actual en localStorage
-    this.saveCurrentState()
-
-    // Registrar evento de analítica
-    this.logAnalyticsEvent("survey_started", { surveyId: survey.id, surveyTitle: survey.title })
-  }
-
-  nextStep() {
-    if (!this.currentSurvey()) return
-
-    // Validar respuestas requeridas en el paso actual
-    const currentQuestions = this.getCurrentQuestions()
-    for (const question of currentQuestions) {
-      if (question.required && this.responses[question.id] === undefined) {
-        this.showNotification("Por favor responde todas las preguntas obligatorias antes de continuar.", "error")
-        return
+    // Solo suscribirse a paramMap. Se encarga de llamar a loadSurveyDetails o actualizar activeSurveyId
+    this.route.paramMap.subscribe((params) => {
+      const surveyId = params.get('id');
+      console.log('ngOnInit paramMap.subscribe: surveyId:', surveyId);
+      if (surveyId) {
+        this.activeSurveyId.set(surveyId); 
+        this.loadSurveyDetails(surveyId);
+      } else {
+        this.activeSurveyId.set(null); 
       }
+    });
+  }
+
+  ensureAnonymousUserId(): void {
+    let storedUserId = localStorage.getItem('anonSurveyUserId');
+    if (!storedUserId) {
+      storedUserId = uuidv4();
+      localStorage.setItem('anonSurveyUserId', storedUserId);
     }
+    this.anonymousUserId = storedUserId;
+    console.log('Using anonymous user ID:', this.anonymousUserId);
+  }
 
-    // Guardar progreso
-    this.saveProgress()
+  loadAvailableSurveys(): void {
+    console.log('[FLOW] loadAvailableSurveys: Iniciando carga de lista de encuestas.');
+    this.loading.set(true);
+    this.error.set(null);
+    this.showSuccessMessage.set(false);
+    this.isLoadingCheck.set(true);
 
-    // Avanzar al siguiente paso
-    if (this.currentStep() < this.getTotalSteps() - 1) {
-      this.currentStep.set(this.currentStep() + 1)
+    this.surveyService.getAvailableSurveys().pipe(
+      tap(surveys => console.log('[DEBUG FE] Encuestas brutas recibidas:', surveys)),
+      switchMap((surveys: ISurvey[]) => {
+        if (surveys.length === 0) {
+          this.isLoadingCheck.set(false);
+          console.log('[DEBUG FE] No hay encuestas disponibles. Devolviendo array vacío.');
+          return of([]);
+        }
 
-      // Registrar evento de analítica
-      this.logAnalyticsEvent("survey_step_completed", {
-        surveyId: this.currentSurvey()!.id,
-        step: this.currentStep(),
+        const surveyChecks: Observable<ISurvey>[] = surveys.map(survey => {
+          if (!survey.id) {
+            console.warn(`[WARNING FE] Encuesta sin ID encontrada, saltando verificación de respuesta:`, survey);
+            return of({ ...survey, hasRespondedForCurrentUser: false });
+          }
+          return this.surveyService.checkIfUserResponded(survey.id, this.anonymousUserId).pipe(
+            map(response => {
+              console.log(`[DEBUG FE] CheckIfUserResponded para encuesta ${survey.id} (${survey.title}): hasResponded = ${response.hasResponded}`);
+              return { ...survey, hasRespondedForCurrentUser: response.hasResponded };
+            }),
+            catchError(err => {
+              console.error(`[ERROR FE] al verificar respuesta para encuesta ${survey.id} (${survey.title}):`, err);
+              return of({ ...survey, hasRespondedForCurrentUser: false });
+            })
+          );
+        });
+        return forkJoin(surveyChecks).pipe(
+          tap(results => {
+            this.isLoadingCheck.set(false);
+            console.log('[DEBUG FE] Todas las verificaciones de forkJoin completadas. isLoadingCheck: false');
+          })
+        );
+      }),
+      catchError((err) => {
+        console.error('[ERROR FE] en loadAvailableSurveys (principal): Error al cargar encuestas disponibles:', err);
+        this.error.set('Error al cargar encuestas disponibles. Por favor, inténtalo de nuevo.');
+        this.loading.set(false);
+        this.isLoadingCheck.set(false);
+        return of([]);
       })
-    } else {
-      // Encuesta completada
-      this.submitSurvey()
-    }
-
-    this.updateProgress()
-    this.saveCurrentState()
+    ).subscribe({
+      next: (data: ISurvey[]) => {
+        this.availableSurveys.set(data);
+        this.loading.set(false);
+        console.log('[FLOW] loadAvailableSurveys: Encuestas cargadas con estado de respuesta. Cantidad:', data.length);
+        data.forEach(s => console.log(`[DEBUG FE] Estado final de Survey en lista: ${s.id} (${s.title}): hasRespondedForCurrentUser = ${s.hasRespondedForCurrentUser}`));
+      },
+      error: (err) => {
+        console.error('ERROR final de suscripción en loadAvailableSurveys:', err);
+      },
+    });
   }
 
-  prevStep() {
-    if (this.currentStep() > 0) {
-      this.currentStep.set(this.currentStep() - 1)
-      this.updateProgress()
-      this.saveCurrentState()
-    }
+  startSurvey(surveyId: string): void {
+    console.log('[FLOW] startSurvey: Navegando a encuesta:', surveyId);
+    this.showSuccessMessage.set(false);
+    this.error.set(null);
+    this.hasResponded.set(false);
+    this.isLoadingCheck.set(true);
+    this.router.navigate(['/user-dashboard/encuestas', surveyId]);
   }
 
-  saveProgress() {
-    if (!this.currentSurvey()) return
+  loadSurveyDetails(surveyId: string): void {
+    console.log('[FLOW] loadSurveyDetails: Cargando detalles para ID:', surveyId);
+    this.loading.set(true);
+    this.error.set(null);
+    this.isLoadingCheck.set(true);
 
-    // Guardar respuestas actuales
-    this.surveyService.savePartialResponse(this.currentSurvey()!.id, this.responses)
+    this.surveyService.checkIfUserResponded(surveyId, this.anonymousUserId).pipe(
+      tap(response => console.log(`[DEBUG FE] loadSurveyDetails: Respuesta de verificación para ${surveyId}: ${JSON.stringify(response)}`)),
+      switchMap(response => {
+        this.hasResponded.set(response.hasResponded);
+        this.isLoadingCheck.set(false);
 
-    // Mostrar notificación
-    this.showNotification("Progreso guardado", "success")
+        console.log(`[DEBUG FE] loadSurveyDetails: Survey ${surveyId} - user hasResponded: ${response.hasResponded}`);
 
-    // Registrar evento de analítica
-    this.logAnalyticsEvent("survey_progress_saved", {
-      surveyId: this.currentSurvey()!.id,
-      progress: this.progress(),
-    })
-  }
-
-  submitSurvey() {
-    if (!this.currentSurvey()) return
-
-    // Simular envío al servidor con un pequeño retraso
-    setTimeout(() => {
-      // Agregar la respuesta
-      this.surveyService.addSurveyResponse({
-        surveyId: this.currentSurvey()!.id,
-        respondentId: "current_user", // En una implementación real, se usaría el ID del usuario actual
-        completedAt: new Date(),
-        answers: this.responses,
-        partiallyCompleted: false,
+        if (this.hasResponded()) {
+          console.log('[FLOW] loadSurveyDetails: Usuario ya ha respondido. Deshabilitando formulario.');
+          this.error.set('Ya has respondido a esta encuesta desde este dispositivo. ¡Gracias por tu participación!');
+          this.currentSurvey.set(null);
+          this.loading.set(false);
+          return of(null); // No cargar la encuesta si ya respondió
+        } else {
+          console.log('[FLOW] loadSurveyDetails: Usuario NO ha respondido. Cargando encuesta...');
+          return this.surveyService.getPublicSurveyById(surveyId).pipe(
+            tap(survey => console.log('[DEBUG FE] Encuesta pública cargada:', survey)),
+            catchError(err => {
+              console.error('[ERROR FE] en loadSurveyDetails: Error al cargar detalles de la encuesta:', err);
+              const errorMessageDetail = err instanceof Error ? err.message : JSON.stringify(err);
+              this.error.set('Encuesta no encontrada o no disponible. Detalles: ' + errorMessageDetail);
+              this.currentSurvey.set(null);
+              this.activeSurveyId.set(null);
+              this.loading.set(false);
+              return of(null);
+            })
+          );
+        }
       })
-
-      // Eliminar respuestas guardadas para esta encuesta
-      this.surveyService.clearPartialResponse(this.currentSurvey()!.id)
-
-      // Eliminar estado actual
-      localStorage.removeItem("currentSurvey")
-      localStorage.removeItem("currentStep")
-
-      // Actualizar encuestas completadas
-      this.completedSurveys.set(this.surveyService.getCompletedSurveys()())
-
-      // Mostrar mensaje de éxito
-      this.showThankYouMessage()
-
-      // Registrar evento de analítica
-      this.logAnalyticsEvent("survey_completed", {
-        surveyId: this.currentSurvey()!.id,
-        timeSpent: this.calculateTimeSpent(),
-      })
-
-      // Volver a la lista de encuestas
-      this.currentSurvey.set(null)
-
-      // Actualizar la lista de encuestas disponibles
-      this.availableSurveys.set(
-        this.surveyService
-          .getSurveys()()
-          .filter((survey) => survey.active),
-      )
-    }, 1500)
-  }
-
-  showThankYouMessage() {
-    const modal = document.createElement("div")
-    modal.className = "fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
-    modal.innerHTML = `
-      <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-        <div class="text-center">
-          <div class="text-green-500 text-5xl mb-4">✓</div>
-          <h3 class="text-xl font-bold mb-2">¡Gracias por completar la encuesta!</h3>
-          <p class="text-gray-600 mb-4">Tus respuestas son muy valiosas para nosotros y nos ayudarán a mejorar.</p>
-          <button id="closeThankYouModal" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-            Volver a la lista
-          </button>
-        </div>
-      </div>
-    `
-    document.body.appendChild(modal)
-
-    document.getElementById("closeThankYouModal")?.addEventListener("click", () => {
-      document.body.removeChild(modal)
-    })
-
-    // Animación de confeti (simulada)
-    this.showConfetti()
-  }
-
-  showConfetti() {
-    // Simulación simple de confeti con elementos DOM
-    const confettiContainer = document.createElement("div")
-    confettiContainer.className = "fixed inset-0 pointer-events-none z-40"
-    document.body.appendChild(confettiContainer)
-
-    const colors = ["#f44336", "#2196f3", "#ffeb3b", "#4caf50", "#9c27b0"]
-
-    for (let i = 0; i < 100; i++) {
-      const confetti = document.createElement("div")
-      confetti.className = "absolute w-2 h-6 opacity-80 confetti"
-      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]
-      confetti.style.left = Math.random() * 100 + "vw"
-      confetti.style.top = -20 + "px"
-      confetti.style.transform = `rotate(${Math.random() * 360}deg)`
-      confetti.style.animationDuration = Math.random() * 3 + 2 + "s"
-      confetti.style.animationDelay = Math.random() * 2 + "s"
-      confettiContainer.appendChild(confetti)
-    }
-
-    // Eliminar después de la animación
-    setTimeout(() => {
-      document.body.removeChild(confettiContainer)
-    }, 5000)
-  }
-
-  updateProgress() {
-    if (!this.currentSurvey()) return
-
-    const totalQuestions = this.currentSurvey()!.questions.length
-    const answeredQuestions = Object.keys(this.responses).length
-
-    this.progress.set(Math.round((answeredQuestions / totalQuestions) * 100))
-  }
-
-  saveCurrentState() {
-    if (!this.currentSurvey()) return
-
-    localStorage.setItem("currentSurvey", this.currentSurvey()!.id.toString())
-    localStorage.setItem("currentStep", this.currentStep().toString())
-  }
-
-  // Obtener preguntas para el paso actual (simulando paginación)
-  getCurrentQuestions(): SurveyQuestion[] {
-    if (!this.currentSurvey()) return []
-
-    const questionsPerStep = 3
-    const startIndex = this.currentStep() * questionsPerStep
-
-    // Filtrar preguntas basadas en lógica condicional
-    return this.currentSurvey()!
-      .questions.slice(startIndex, startIndex + questionsPerStep)
-      .filter((question) => this.shouldShowQuestion(question))
-  }
-
-  // Obtener el número total de pasos
-  getTotalSteps(): number {
-    if (!this.currentSurvey()) return 0
-
-    const questionsPerStep = 3
-    return Math.ceil(this.currentSurvey()!.questions.length / questionsPerStep)
-  }
-
-  // Verificar si hay respuestas guardadas para una encuesta
-  hasSavedResponses(surveyId: number): boolean {
-    return !!this.surveyService.loadPartialResponse(surveyId)
-  }
-
-  // Calcular el progreso de una encuesta guardada
-  getSavedProgress(surveyId: number): number {
-    const saved = this.surveyService.loadPartialResponse(surveyId)
-    if (!saved) return 0
-
-    const survey = this.surveyService.getSurveyById(surveyId)
-    if (!survey) return 0
-
-    const totalQuestions = survey.questions.length
-    const answeredQuestions = Object.keys(saved).length
-
-    return Math.round((answeredQuestions / totalQuestions) * 100)
-  }
-
-  // Verificar si una encuesta ya fue completada
-  isCompleted(surveyId: number): boolean {
-    return this.surveyService.isSurveyCompleted(surveyId)
-  }
-
-  // Verificar si una pregunta condicional debe mostrarse
-  shouldShowQuestion(question: SurveyQuestion): boolean {
-    if (!question.conditionalLogic) return true
-
-    const { parentQuestionId, showOnValue } = question.conditionalLogic
-
-    // Si la pregunta padre no tiene respuesta, no mostrar
-    if (this.responses[parentQuestionId] === undefined) return false
-
-    // Comparar con el valor esperado
-    return this.responses[parentQuestionId] === showOnValue
-  }
-
-  // Calcular tiempo estimado para completar la encuesta
-  getEstimatedTime(survey: Survey): number {
-    // Estimación simple: 30 segundos por pregunta
-    return Math.ceil((survey.questions.length * 30) / 60)
-  }
-
-  // Calcular tiempo transcurrido en la encuesta actual
-  calculateTimeSpent(): number {
-    // En una implementación real, se guardaría el tiempo de inicio
-    return 3 // Minutos (simulado)
-  }
-
-  // Registrar eventos de analítica
-  logAnalyticsEvent(eventName: string, eventData: any) {
-    // En una implementación real, esto enviaría datos a un servicio de analítica
-    console.log("Analytics Event:", eventName, eventData)
-  }
-
-  // Método para mostrar notificaciones
-  showNotification(message: string, type: "success" | "warning" | "error" = "success") {
-    const notification = document.createElement("div")
-    notification.textContent = message
-    notification.setAttribute("role", "alert") // Para accesibilidad
-    notification.className = `fixed bottom-4 left-4 py-2 px-4 rounded shadow-lg z-50 notification-fade`
-
-    // Aplicar color según tipo
-    if (type === "success") {
-      notification.classList.add("bg-green-500", "text-white")
-    } else if (type === "warning") {
-      notification.classList.add("bg-yellow-500", "text-white")
-    } else if (type === "error") {
-      notification.classList.add("bg-red-500", "text-white")
-    }
-
-    document.body.appendChild(notification)
-
-    // Eliminar después de 3 segundos
-    setTimeout(() => {
-      notification.classList.add("opacity-0")
-      setTimeout(() => {
-        document.body.removeChild(notification)
-      }, 500)
-    }, 3000)
-  }
-
-  // Método para manejar atajos de teclado
-  handleKeyboardNavigation(event: KeyboardEvent) {
-    if (!this.currentSurvey()) return
-
-    if (event.key === "ArrowRight" || event.key === "Enter") {
-      this.nextStep()
-    } else if (event.key === "ArrowLeft") {
-      this.prevStep()
-    } else if (event.key === "Escape") {
-      if (confirm("¿Desea salir de la encuesta? El progreso se guardará automáticamente.")) {
-        this.saveProgress()
-        this.currentSurvey.set(null)
+    ).subscribe({
+      next: (survey) => {
+        if (survey) { // Solo if survey no es null (si el usuario no había respondido)
+          console.log('[FLOW] loadSurveyDetails: Encuesta cargada exitosamente. Título:', survey.title);
+          this.currentSurvey.set(survey);
+          this.initResponseForm(survey);
+          this.surveyResponseForm.enable();
+          this.loading.set(false);
+        }
+      },
+      error: (err) => {
+        console.error('[ERROR FE] final de suscripción en loadSurveyDetails:', err);
+      
       }
+    });
+  }
+
+  initResponseForm(survey: ISurvey): void {
+    console.log('[FLOW] initResponseForm: Inicializando formulario para', survey.title);
+    const formControls: { [key: string]: any } = {};
+    survey.questions.forEach((question) => {
+      formControls[question.id] = [
+        this.getInitialValueForQuestionType(question.type),
+        question.required ? Validators.required : null,
+      ];
+    });
+    this.surveyResponseForm = this.fb.group(formControls);
+    this.surveyResponseForm.disable();
+  }
+
+  getInitialValueForQuestionType(type: IQuestion['type']): any {
+    switch (type) {
+      case 'checkbox':
+        return false;
+      case 'rating':
+        return 0;
+      case 'select':
+        return null;
+      default:
+        return null;
     }
   }
 
-  // Método para eliminar notificaciones
-  dismissNotification(id: number) {
-    this.notifications.update((notifications) => notifications.filter((n) => n.id !== id))
+  // shouldShowQuestion eliminado por completo
+  // ya que no hay lógica condicional
+  shouldShowQuestion(question: IQuestion, currentResponses: { [key: string]: any }): boolean {
+    return true;
+  }
+
+  submitResponse(): void {
+    console.log('[FLOW] submitResponse: Intentando enviar respuestas.');
+    this.surveyResponseForm.markAllAsTouched();
+
+    // Revalidar el formulario después de marcar todo como tocado para que los errores se muestren correctamente
+    if (this.surveyResponseForm.invalid) {
+      console.log('[DEBUG FE] submitResponse: Formulario inválido. Mostrando errores.');
+      this.error.set('Por favor, completa todas las preguntas obligatorias.');
+      return;
+    }
+
+    if (this.hasResponded()) {
+      console.log('[DEBUG FE] submitResponse: hasResponded es TRUE. Ya se ha respondido. Deteniendo envío.');
+      this.error.set('Ya has respondido a esta encuesta desde este dispositivo. ¡Gracias por tu participación!');
+      this.surveyResponseForm.disable();
+      return;
+    }
+
+    const filteredResponses: { [key: string]: any } = {};
+    this.currentSurvey()?.questions.forEach(question => {
+      
+      const control = this.surveyResponseForm.get(question.id);
+      if (control) { 
+        if (control.value !== null && control.value !== undefined && control.value !== '' && !(Array.isArray(control.value) && control.value.length === 0)) {
+          filteredResponses[question.id] = control.value;
+        } else if (question.type === 'checkbox' && control.value === false) {
+      
+          filteredResponses[question.id] = false;
+        }
+       
+      }
+    });
+    console.log('[DEBUG FE] submitResponse: Respuestas filtradas:', filteredResponses);
+
+   
+    let allRequiredQuestionsAnswered = true;
+    this.currentSurvey()?.questions.forEach(question => {
+      if (question.required) { 
+        const responseValue = filteredResponses[question.id];
+        if (responseValue === null || responseValue === undefined || responseValue === '' || (Array.isArray(responseValue) && responseValue.length === 0)) {
+          allRequiredQuestionsAnswered = false;
+          this.surveyResponseForm.get(question.id)?.markAsTouched();
+          this.surveyResponseForm.get(question.id)?.setErrors({ 'required': true });
+        }
+      }
+    });
+
+    if (!allRequiredQuestionsAnswered) {
+      this.error.set('Por favor, completa todas las preguntas obligatorias.');
+      return;
+    }
+
+    this.loading.set(true);
+    this.error.set(null);
+
+    const responsePayload = {
+      userId: this.anonymousUserId,
+      answers: filteredResponses,
+    };
+
+    this.surveyService.submitSurveyResponse(this.activeSurveyId()!, responsePayload).subscribe({
+      next: (response) => {
+        console.log('[FLOW] Respuestas enviadas exitosamente:', response);
+        this.loading.set(false);
+        this.showSuccessMessage.set(true);
+        this.hasResponded.set(true);
+        this.surveyResponseForm.disable();
+        this.surveyResponseForm.reset();
+        // Al enviar con éxito, actualizamos el estado de la encuesta en la lista para que se marque como respondida
+        this.updateSurveyStatusInList(this.activeSurveyId()!, true);
+      },
+      error: (err) => {
+        console.error('[ERROR FE] en submitResponse: Error al enviar respuestas:', err);
+        this.loading.set(false);
+        if (err.status === 409) {
+          console.log(`[DEBUG FE] submitResponse: Recibido 409 Conflict. Asumiendo que la encuesta ya fue respondida por este usuario.`);
+          this.error.set('Ya has respondido a esta encuesta desde este dispositivo. ¡Gracias por tu participación!');
+          this.hasResponded.set(true);
+          this.surveyResponseForm.disable();
+          this.updateSurveyStatusInList(this.activeSurveyId()!, true);
+        } else {
+          this.error.set('Error al enviar tu respuesta. Por favor, inténtalo de nuevo. Detalles: ' + (err.message || 'Error desconocido del servidor.'));
+        }
+      },
+    });
+  }
+
+  setRating(questionId: string, rating: number): void {
+    if (this.surveyResponseForm.enabled) {
+      this.surveyResponseForm.get(questionId)?.setValue(rating);
+    }
+  }
+
+  private updateSurveyStatusInList(surveyId: string, responded: boolean): void {
+    console.log(`[DEBUG FE] Actualizando estado de encuesta ${surveyId} en la lista: hasRespondedForCurrentUser: ${responded}`);
+    this.availableSurveys.update(surveys => {
+      const updatedSurveys = surveys.map(survey =>
+        survey.id === surveyId ? { ...survey, hasRespondedForCurrentUser: responded } : survey
+      );
+      console.log('[DEBUG FE] Nuevo array availableSurveys después de la actualización (antes de devolver):', updatedSurveys);
+      return updatedSurveys;
+    });
+  }
+
+  goBackToList(): void {
+    console.log('[FLOW] goBackToList: Volviendo a la lista de encuestas.');
+    this.router.navigate(['/user-dashboard/encuestas']);
+    this.activeSurveyId.set(null); 
+    this.currentSurvey.set(null);
+    this.showSuccessMessage.set(false);
+    this.error.set(null);
+    this.hasResponded.set(false);
+    this.isLoadingCheck.set(false);
+    
+    console.log('[FLOW] goBackToList: showSuccessMessage después de volver:', this.showSuccessMessage());
   }
 }
