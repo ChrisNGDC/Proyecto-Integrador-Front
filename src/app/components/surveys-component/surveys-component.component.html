@@ -21,6 +21,29 @@
 
     <div *ngIf="availableSurveys().length === 0 && !loading() && !error()" class="text-center py-10 bg-gray-50 rounded-xl shadow-inner">
       <p class="text-gray-600 text-lg">No hay encuestas activas disponibles en este momento. ¡Vuelve pronto!</p>
+
+<!-- src/app/components/user-survey/surveys-component.component.html -->
+
+<div class="py-6 container mx-auto px-4 font-inter">
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-extrabold text-gray-800 tracking-tight">¡Participa en nuestras Encuestas!</h1>
+    <p class="text-lg text-gray-600 mt-2">Tu opinión es importante. Descubre las encuestas disponibles y comparte tus ideas.</p>
+  </div>
+
+  <!-- Vista de lista de encuestas disponibles -->
+  <!-- Se muestra si no hay una encuesta activa seleccionada Y no hay mensaje de éxito visible -->
+  <div *ngIf="activeSurveyId() === null && !showSuccessMessage()">
+    <h2 class="text-3xl font-bold mb-8 text-center text-gray-800">
+      Encuestas Disponibles
+    </h2>
+
+    <div *ngIf="loading()" class="text-center py-8 text-xl text-blue-600">
+      <i class="fas fa-spinner fa-spin mr-2"></i> Cargando encuestas...
+    </div>
+    <div *ngIf="error()" class="text-center py-4 text-red-600 font-semibold bg-red-100 rounded-lg border border-red-200 shadow-sm">{{ error() }}</div>
+
+    <div *ngIf="availableSurveys().length === 0 && !loading() && !error()" class="text-center py-10 bg-gray-50 rounded-xl shadow-inner">
+      <p class="text-gray-600 text-lg">No hay encuestas activas disponibles en este momento. ¡Vuelve pronto!</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -56,8 +79,43 @@
             </span>
             <span *ngIf="survey.expirationDate" class="flex items-center">
               <i class="fas fa-calendar-alt mr-1"></i> Expira: {{ survey.expirationDate | date : 'dd/MM/yyyy' }}
+            <span *ngIf="survey.expirationDate" class="flex items-center">
+              <i class="fas fa-calendar-alt mr-1"></i> Expira: {{ survey.expirationDate | date : 'dd/MM/yyyy' }}
             </span>
           </div>
+
+          <!-- Botón condicional: "Comenzar Encuesta" o "Encuesta Completada" -->
+          <button
+            *ngIf="!survey.hasRespondedForCurrentUser"
+            (click)="startSurvey(survey.id!)"
+            class="mt-4 w-full bg-blue-600 text-white py-3 px-4 rounded-lg shadow-md hover:bg-blue-700
+                   transition-all duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center
+                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75"
+          >
+            <i class="fas fa-play-circle mr-2"></i> Comenzar Encuesta
+          </button>
+
+          <button
+            *ngIf="survey.hasRespondedForCurrentUser"
+            class="mt-4 w-full bg-green-600 text-white py-3 px-4 rounded-lg shadow-md cursor-not-allowed opacity-75 flex items-center justify-center"
+            disabled
+          >
+            <i class="fas fa-check-circle mr-2"></i> Encuesta Completada
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista de formulario de encuesta activa (o mensaje de ya respondido) -->
+  <!-- Se muestra si hay una encuesta activa seleccionada Y no hay mensaje de éxito visible -->
+  <div *ngIf="activeSurveyId() !== null && !showSuccessMessage()">
+
+    <!-- Mensaje de carga de verificación de respuesta previa -->
+    <div *ngIf="isLoadingCheck()" class="text-center py-4 bg-blue-50 rounded-lg border border-blue-200 text-blue-700 mb-6 shadow-sm">
+      <p class="text-lg">
+        <i class="fas fa-sync-alt fa-spin mr-2"></i> Verificando si ya has respondido a esta encuesta...
+      </p>
 
           <!-- Botón condicional: "Comenzar Encuesta" o "Encuesta Completada" -->
           <button
@@ -101,8 +159,113 @@
         <button (click)="goBackToList()" class="bg-blue-600 text-white py-2 px-5 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
           <i class="fas fa-arrow-left mr-2"></i> Volver a las encuestas
         </button>
+
+    <!-- Mensaje si el usuario ya respondió (y la verificación ya terminó) -->
+    <div *ngIf="hasResponded() && !isLoadingCheck()" class="bg-blue-100 border border-blue-400 text-blue-700 px-6 py-5 rounded-xl relative mb-6 shadow-md" role="alert">
+      <strong class="font-bold text-2xl block mb-2">¡Encuesta completada!</strong>
+      <span class="block text-lg">Ya has respondido a esta encuesta desde este dispositivo. Gracias por tu participación.</span>
+      <div class="mt-4 flex justify-center">
+        <button (click)="goBackToList()" class="bg-blue-600 text-white py-2 px-5 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+          <i class="fas fa-arrow-left mr-2"></i> Volver a las encuestas
+        </button>
       </div>
     </div>
+
+    <!-- Formulario de la encuesta: solo se muestra si NO ha respondido Y la verificación ya terminó Y la encuesta está cargada -->
+    <div *ngIf="!hasResponded() && !isLoadingCheck() && currentSurvey()"
+      class="bg-white p-8 rounded-xl shadow-2xl border-2"
+      [ngClass]="{
+        'border-blue-300 bg-blue-50': currentSurvey()?.theme === 'blue',
+        'border-green-300 bg-green-50': currentSurvey()?.theme === 'green',
+        'border-purple-300 bg-purple-50': currentSurvey()?.theme === 'purple',
+        'border-gray-800 bg-gray-900 text-white': currentSurvey()?.theme === 'dark'
+      }"
+    >
+      <h1 class="text-4xl font-extrabold mb-4 text-center" [class.text-white]="currentSurvey()?.theme === 'dark'">
+        {{ currentSurvey()?.title }}
+      </h1>
+      <p class="text-xl text-gray-700 mb-8 text-center" [class.text-gray-300]="currentSurvey()?.theme === 'dark'">
+        {{ currentSurvey()?.description }}
+      </p>
+
+      <!-- Mensaje de error general del componente (ej. al cargar la encuesta o al enviar) -->
+      <div *ngIf="error()" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 shadow-sm" role="alert">
+        <strong class="font-bold">Error:</strong>
+        <span class="block sm:inline">{{ error() }}</span>
+      </div>
+
+      <form [formGroup]="surveyResponseForm" (ngSubmit)="submitResponse()">
+        <div *ngFor="let question of currentSurvey()?.questions; let i = index" class="mb-10">
+          <div *ngIf="shouldShowQuestion(question, surveyResponseForm.value)" class="bg-white p-7 rounded-xl shadow-lg border border-gray-200">
+            <p class="font-bold text-2xl mb-3 text-gray-800">
+              <span class="text-blue-600">{{ i + 1 }}.</span> {{ question.text }}
+              <span *ngIf="question.required" class="text-red-500 text-lg ml-1">*</span>
+            </p>
+            <p *ngIf="question.description" class="text-base text-gray-600 mb-5">{{ question.description }}</p>
+
+            <div [ngSwitch]="question.type" class="space-y-4">
+              <div *ngSwitchCase="'text'">
+                <input
+                  type="text"
+                  [formControlName]="question.id"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-800"
+                  placeholder="Escribe tu respuesta aquí"
+                />
+              </div>
+              <div *ngSwitchCase="'checkbox'">
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    [id]="'q_' + question.id"
+                    [formControlName]="question.id"
+                    class="mr-3 h-5 w-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
+                  />
+                  <label [for]="'q_' + question.id" class="text-gray-700 text-lg select-none">Sí</label>
+                </div>
+              </div>
+              <div *ngSwitchCase="'radio'">
+                <div *ngFor="let option of question.options" class="flex items-center mb-2">
+                  <input
+                    type="radio"
+                    [id]="'q_' + question.id + '_' + option"
+                    [value]="option"
+                    [formControlName]="question.id"
+                    class="mr-3 h-5 w-5 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <label [for]="'q_' + question.id + '_' + option" class="text-gray-700 text-lg select-none">{{ option }}</label>
+                </div>
+              </div>
+              <div *ngSwitchCase="'select'">
+                <select
+                  [formControlName]="question.id"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-800"
+                >
+                  <option [ngValue]="null" disabled selected>Selecciona una opción</option>
+                  <option *ngFor="let option of question.options" [value]="option">{{ option }}</option>
+                </select>
+              </div>
+              <div *ngSwitchCase="'rating'">
+                <div class="flex items-center gap-3">
+                  <span
+                    *ngFor="let star of [1, 2, 3, 4, 5]"
+                    (click)="setRating(question.id, star)"
+                    class="cursor-pointer text-5xl transition-colors duration-200"
+                    [ngClass]="{
+                      'text-yellow-400 hover:text-yellow-500': surveyResponseForm.get(question.id)?.value >= star,
+                      'text-gray-300 hover:text-gray-400': surveyResponseForm.get(question.id)?.value < star
+                    }"
+                  >
+                    ★
+                  </span>
+                </div>
+              </div>
+              <div *ngSwitchCase="'date'">
+                <input
+                  type="date"
+                  [formControlName]="question.id"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-800"
+                />
+              </div>
 
     <!-- Formulario de la encuesta: solo se muestra si NO ha respondido Y la verificación ya terminó Y la encuesta está cargada -->
     <div *ngIf="!hasResponded() && !isLoadingCheck() && currentSurvey()"
@@ -222,6 +385,26 @@
           >
             <i class="fas fa-paper-plane mr-2"></i> Enviar Respuestas
           </button>
+
+        <div class="mt-10 pt-6 border-t border-gray-200 flex justify-between items-center">
+          <button
+            type="button"
+            (click)="goBackToList()"
+            class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-gray-700 bg-gray-200
+                   hover:bg-gray-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 shadow-sm"
+          >
+            <i class="fas fa-arrow-left mr-2"></i> Volver
+          </button>
+          <button
+            type="submit"
+            [disabled]="surveyResponseForm.invalid || loading() || hasResponded()"
+            [class.opacity-50]="surveyResponseForm.invalid || loading() || hasResponded()"
+            [class.cursor-not-allowed]="surveyResponseForm.invalid || loading() || hasResponded()"
+            class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md shadow-md text-white bg-blue-600
+                   hover:bg-blue-700 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <i class="fas fa-paper-plane mr-2"></i> Enviar Respuestas
+          </button>
         </div>
       </form>
     </div>
@@ -236,7 +419,25 @@
       <button (click)="goBackToList()" class="bg-green-600 text-white py-3 px-6 rounded-lg shadow-md hover:bg-green-700
                                               transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
         <i class="fas fa-list-alt mr-2"></i> Volver a las encuestas
+      </form>
+    </div>
+  </div>
+
+  <!-- Mensaje de éxito después de enviar la encuesta -->
+  <div *ngIf="showSuccessMessage()" class="mt-8 text-center bg-green-100 border border-green-400 text-green-700 px-6 py-8 rounded-xl shadow-xl" role="alert">
+    <div class="flex flex-col items-center justify-center">
+      <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+      <strong class="font-bold text-3xl mb-2">¡Gracias por tu participación!</strong>
+      <span class="block text-xl sm:inline mb-6">Tu respuesta ha sido enviada exitosamente.</span>
+      <button (click)="goBackToList()" class="bg-green-600 text-white py-3 px-6 rounded-lg shadow-md hover:bg-green-700
+                                              transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+        <i class="fas fa-list-alt mr-2"></i> Volver a las encuestas
       </button>
+    </div>
+  </div>
+
+</div>
+
     </div>
   </div>
 
