@@ -26,7 +26,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       <div
         *ngFor="let survey of availableSurveys()"
-        class="relative bg-white rounded-xl shadow-lg border-2 overflow-hidden z-10
+        class="relative bg-white rounded-xl shadow-lg border-2 overflow-hidden 
                transform transition-all duration-300 hover:scale-105 hover:shadow-xl group"
         [ngClass]="{
           'border-blue-300': survey.theme === 'blue',
@@ -44,7 +44,7 @@
              }">
         </div>
 
-        <div class="p-6 relative z-10">
+        <div class="p-6 relative">
           <h3 class="text-2xl font-bold mb-2" [class.text-white]="survey.theme === 'dark'">{{ survey.title }}</h3>
           <p class="text-gray-600 text-base mb-4" [class.text-gray-300]="survey.theme === 'dark'">
             {{ survey.description }}

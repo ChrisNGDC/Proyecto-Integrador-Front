@@ -40,8 +40,8 @@
   <div *ngIf="activeTab() === 'list'" class="mt-4">
     <div class="bg-white p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
       <h2 class="text-2xl font-bold text-gray-800 mb-6">Listado de Encuestas</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
-        <div class="col-span-full lg:col-span-1">
+      <div class="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-6 items-end">
+        <div class="col-span-1 lg:col-span-1">
           <label for="searchTerm" class="block text-sm font-semibold text-gray-700 mb-1">Buscar</label>
           <input
             type="text"
@@ -87,7 +87,7 @@
         <button
           (click)="setActiveTab('add')"
           class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md
-                hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200"
+                hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200 btn-primary"
         >
           <i class="fas fa-plus"></i> Nueva Encuesta
         </button>
@@ -126,26 +126,26 @@
           </div>
 
 
-          <div class="flex flex-wrap gap-3 mt-4 border-t border-gray-100 pt-4">
+          <div class="flex flex-wrap gap-3 mt-4 border-t border-gray-100 pt-4 align-items-start">
             <button
               (click)="startEdit(survey)"
               class="inline-flex items-center px-4 py-2 bg-indigo-500 text-white font-semibold rounded-lg text-sm
-                     hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition-colors duration-200"
+                     hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition-colors duration-200 btn-primary btn-xs"
             >
               <i class="fas fa-edit mr-2"></i> Editar
             </button>
             <button
               (click)="toggleActive(survey)"
-              [class]="survey.active ? 'bg-rose-600 hover:bg-rose-700 focus:ring-rose-500' : 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500'"
+              [class]="survey.active ? 'bg-rose-600 hover:bg-rose-700 focus:ring-rose-500 btn-warning' : 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 btn-success'"
               class="inline-flex items-center px-4 py-2 text-white font-semibold rounded-lg text-sm
-                     focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200"
+                     focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 btn-xs"
             >
               <i class="fas fa-power-off mr-2"></i> {{ survey.active ? 'Desactivar' : 'Activar' }}
             </button>
             <button
               (click)="previewSurvey(survey)"
               class="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg text-sm
-                     hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-200"
+                     hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-200 btn-outline btn-xs"
             >
               <i class="fas fa-eye mr-2"></i> Previsualizar
 
@@ -153,7 +153,7 @@
             <button
               (click)="showDeleteConfirm(survey)"
               class="inline-flex items-center px-4 py-2 bg-rose-700 text-white font-semibold rounded-lg text-sm
-                     hover:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2 transition-colors duration-200"
+                     hover:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2 transition-colors duration-200 btn-danger btn-xs"
             >
               <i class="fas fa-trash-alt mr-2"></i> Eliminar
             </button>
@@ -441,7 +441,7 @@
             [disabled]="!surveyForm.value.title || !surveyForm.value.description || !questionsFormArray.length"
             [class.opacity-50]="!surveyForm.value.title || !surveyForm.value.description || !questionsFormArray.length"
             class="inline-flex items-center justify-content-center px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg shadow-md
-                   hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-200"
+                   hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-200 btn-outline"
           >
             <i class="fas fa-eye mr-2"></i> Previsualizar
 
@@ -736,7 +736,7 @@
             [disabled]="!editForm.value.title || !editForm.value.description || !editQuestionsFormArray.length"
             [class.opacity-50]="!editForm.value.title || !editForm.value.description || !editQuestionsFormArray.length"
             class="inline-flex items-center justify-content-center px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg shadow-md
-                   hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-200"
+                   hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-200 btn-outline"
           >
             <i class="fas fa-eye mr-2"></i> Previsualizar
 
@@ -777,7 +777,7 @@
       <button
         (click)="startAddTemplate()"
         class="inline-flex items-center justify-content-center gap-2 px-5 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md
-               hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200 mb-6"
+               hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200 mb-6  btn-primary"
       >
         <i class="fas fa-plus"></i> Crear Nueva Plantilla
       </button>
@@ -804,14 +804,14 @@
               <button
                 (click)="startEditTemplate(template)"
                 class="inline-flex items-center px-4 py-2 bg-indigo-500 text-white font-semibold rounded-lg text-sm
-                       hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition-colors duration-200"
+                       hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition-colors duration-200 btn-primary"
               >
                 <i class="fas fa-edit mr-2"></i> Editar
               </button>
               <button
                 (click)="showDeleteTemplateConfirm(template)"
                 class="inline-flex items-center px-4 py-2 bg-rose-700 text-white font-semibold rounded-lg text-sm
-                       hover:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2 transition-colors duration-200"
+                       hover:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2 transition-colors duration-200 btn-danger"
               >
                 <i class="fas fa-trash-alt mr-2"></i> Eliminar
               </button>
