@@ -3,7 +3,6 @@
 import { Component, OnInit, signal, effect } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SurveyService } from '../../services/survey.service';
-// ConditionalLogic ha sido removido del modelo y ya no se importa aquí
 import { ISurvey, IQuestion } from '../../models/survey';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
@@ -36,7 +35,7 @@ export class SurveysComponent implements OnInit {
   error = signal<string | null>(null);
   showSuccessMessage = signal<boolean>(false);
   hasResponded = signal<boolean>(false);
-  isLoadingCheck = signal<boolean>(true); // Para controlar el spinner/mensaje de verificación inicial
+  isLoadingCheck = signal<boolean>(true); 
 
   private anonymousUserId!: string;
 
@@ -46,7 +45,7 @@ export class SurveysComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router
   ) {
-    // Usar un efecto para reaccionar a los cambios de activeSurveyId
+   
     effect(() => {
       const currentId = this.activeSurveyId();
       console.log('[EFFECT] activeSurveyId changed to:', currentId);
@@ -69,10 +68,10 @@ export class SurveysComponent implements OnInit {
       const surveyId = params.get('id');
       console.log('ngOnInit paramMap.subscribe: surveyId:', surveyId);
       if (surveyId) {
-        this.activeSurveyId.set(surveyId); // Esto disparará el efecto si el ID cambia
+        this.activeSurveyId.set(surveyId); 
         this.loadSurveyDetails(surveyId);
       } else {
-        this.activeSurveyId.set(null); // Esto disparará el efecto para cargar la lista
+        this.activeSurveyId.set(null); 
       }
     });
   }
@@ -152,7 +151,7 @@ export class SurveysComponent implements OnInit {
     this.error.set(null);
     this.hasResponded.set(false);
     this.isLoadingCheck.set(true);
-    this.router.navigate(['/encuestas', surveyId]);
+    this.router.navigate(['/user-dashboard/encuestas', surveyId]);
   }
 
   loadSurveyDetails(surveyId: string): void {
@@ -203,7 +202,7 @@ export class SurveysComponent implements OnInit {
       },
       error: (err) => {
         console.error('[ERROR FE] final de suscripción en loadSurveyDetails:', err);
-        // Este error se maneja en el catchError del pipe superior, aquí solo para un log final
+      
       }
     });
   }
@@ -260,28 +259,27 @@ export class SurveysComponent implements OnInit {
 
     const filteredResponses: { [key: string]: any } = {};
     this.currentSurvey()?.questions.forEach(question => {
-      // Como shouldShowQuestion ahora siempre es true, simplemente incluimos todas las preguntas
+      
       const control = this.surveyResponseForm.get(question.id);
-      if (control) { // Siempre debería existir el control si la pregunta está en el formulario
+      if (control) { 
         if (control.value !== null && control.value !== undefined && control.value !== '' && !(Array.isArray(control.value) && control.value.length === 0)) {
           filteredResponses[question.id] = control.value;
         } else if (question.type === 'checkbox' && control.value === false) {
-          // Si es un checkbox y su valor es false (desmarcado), inclúyelo
+      
           filteredResponses[question.id] = false;
         }
-        // No necesitamos manejar control.pristine aquí si no usamos lógica condicional para el envío
+       
       }
     });
     console.log('[DEBUG FE] submitResponse: Respuestas filtradas:', filteredResponses);
 
-    // Re-validación de preguntas obligatorias visible (ahora todas son visibles)
+   
     let allRequiredQuestionsAnswered = true;
     this.currentSurvey()?.questions.forEach(question => {
-      if (question.required) { // Ya no necesitamos shouldShowQuestion aquí
+      if (question.required) { 
         const responseValue = filteredResponses[question.id];
         if (responseValue === null || responseValue === undefined || responseValue === '' || (Array.isArray(responseValue) && responseValue.length === 0)) {
           allRequiredQuestionsAnswered = false;
-          // Marcar el control específico con error para visualización
           this.surveyResponseForm.get(question.id)?.markAsTouched();
           this.surveyResponseForm.get(question.id)?.setErrors({ 'required': true });
         }
@@ -347,14 +345,14 @@ export class SurveysComponent implements OnInit {
 
   goBackToList(): void {
     console.log('[FLOW] goBackToList: Volviendo a la lista de encuestas.');
-    this.router.navigate(['/encuestas']);
-    this.activeSurveyId.set(null); // Esto disparará el efecto para recargar la lista
+    this.router.navigate(['/user-dashboard/encuestas']);
+    this.activeSurveyId.set(null); 
     this.currentSurvey.set(null);
     this.showSuccessMessage.set(false);
     this.error.set(null);
     this.hasResponded.set(false);
     this.isLoadingCheck.set(false);
-    // Ya no llamamos a loadAvailableSurveys() aquí, el 'effect' lo hará cuando activeSurveyId cambie a null
+    
     console.log('[FLOW] goBackToList: showSuccessMessage después de volver:', this.showSuccessMessage());
   }
 }

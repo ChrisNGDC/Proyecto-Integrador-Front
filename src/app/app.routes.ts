@@ -33,11 +33,11 @@ export const routes: Routes = [
         component: EgresadosComponent,
       },
       {
-        path: 'admin/encuestas',
+        path: 'encuestas',
         component: AdminSurveysComponent,
       },
       {
-        path: 'admin/encuestas/results/:id', // <-- NUEVA RUTA DE RESULTADOS DENTRO DE ADMIN
+        path: 'encuestas/results/:id', 
         component: SurveyResultsComponent,
       },
       {
@@ -65,7 +65,7 @@ export const routes: Routes = [
         component: SurveysComponent,
       },
       {
-        path: 'encuestas/:id', // <-- RUTA PARA DETALLE DE ENCUESTA PÚBLICA
+        path: 'encuestas/:id',
         component: SurveysComponent,
       },
       {
@@ -79,10 +79,7 @@ export const routes: Routes = [
     path: 'login',
     component: LoginComponent,
   },
-  // Rutas públicas que no están anidadas en dashboards (si las necesitas, como el login)
-  // Las rutas de encuestas públicas ya están manejadas dentro de user-dashboard
-  // { path: "encuestas", component: SurveysComponent }, // Ya está en user-dashboard
-  // { path: "encuestas/:id", component: SurveysComponent }, // Ya está en user-dashboard
+  
 
   { path: '**', redirectTo: '/login', outlet: 'primary' },
 ];
