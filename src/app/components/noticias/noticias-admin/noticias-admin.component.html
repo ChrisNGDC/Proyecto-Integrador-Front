@@ -35,7 +35,7 @@
       </div>
     </div>
   </div>
-  
+
 </div>
 @if (loading) {
 <h1 id="loading"><span class="loader"></span></h1>
@@ -67,7 +67,7 @@
   @for (evento of eventosFiltrados; track $index) {
     <div class="col">
       <div class="card text-center">
-        <div class="card-content-wrapper" (click)="editarEvento(evento)">
+        <div class="card-content-wrapper" (click)="editarEvento(evento)" (mouseenter)="actualizarAltura($event)">
           <div class="card-img">
             <img [src]="evento.s3keyvalue" class="card-img-top"/>
           </div>
@@ -75,10 +75,10 @@
             <h5 class="card-title">{{ evento.titulo }}</h5>
             <p class="card-text">{{ evento.resumen }}</p>
           </div>
-          <div class="img-overlay">Editar</div>
+          <div class="img-overlay"><span>Editar</span></div>
         </div>
         <div class="card-footer">
-          <small class="text-muted">Publicado {{ evento.fecha }}</small>
+          <small class="text-muted">Publicado el <br> {{ evento.fecha }}</small>
           <div id="btns">
             @if (evento.active) {
               <button id="btn-desactivar"  class="btn btn-xs" (click)="desactivarEvento(evento)">Desactivar</button>
